@@ -10,13 +10,14 @@ using AionMeter.Core.Updates;
 namespace AionMeter.App.Windows;
 
 /// <summary>
-/// "A new version is out": what changed, then Update / Later / Skip this version. An installed copy downloads the
-/// installer here (with progress), starts it and exits; a portable copy opens the release page instead.
+/// "A new version is out": what changed, then Update / Later / Skip this version. Installed and portable copies
+/// download their matching package and restart themselves after applying it.
 /// </summary>
 public partial class UpdateWindow : Window
 {
     private readonly Updater _updater;
     private bool _canInstall;
+    private bool _useInstaller;
     private CancellationTokenSource? _download;
 
     public UpdateWindow(Updater updater, ReleaseInfo release, bool installed)
@@ -33,9 +34,10 @@ public partial class UpdateWindow : Window
             ? string.Format(t.UpdateReleased, current, FormatDate(at))
             : string.Format(t.UpdateYouHave, current);
         ShowNotes(release.Notes);
-        _canInstall = installed && release.Installer is not null;
+        _useInstaller = installed && release.Installer is not null;
+        _canInstall = _useInstaller || release.Portable is not null;
         UpdateButton.Content = _canInstall ? t.UpdateNow : t.UpdateOpenPage;
-        Hint.Text = _canInstall ? t.UpdateInstalledHint : t.UpdatePortableHint;
+        Hint.Text = _useInstaller ? t.UpdateInstalledHint : _canInstall ? t.UpdatePortableHint : t.UpdatePortableManualHint;
     }
 
     public ReleaseInfo Release { get; }
@@ -64,11 +66,21 @@ public partial class UpdateWindow : Window
         });
         try
         {
-            var installer = await _updater.DownloadInstallerAsync(Release, progress, _download.Token);
-            State.Text = t.UpdateStarting;
-            Log.Info($"Updating to {Release.Tag} with {installer}");
-            Updater.LaunchInstaller(installer);
-            Application.Current.Shutdown(); // the installer replaces our files and starts the new version
+            if (_useInstaller)
+            {
+                var installer = await _updater.DownloadInstallerAsync(Release, progress, _download.Token);
+                State.Text = t.UpdateStarting;
+                Log.Info($"Updating to {Release.Tag} with {installer}");
+                Updater.LaunchInstaller(installer);
+            }
+            else
+            {
+                var archive = await _updater.DownloadPortableAsync(Release, progress, _download.Token);
+                State.Text = t.UpdateStartingPortable;
+                Log.Info($"Updating portable copy to {Release.Tag} with {archive}");
+                Updater.LaunchPortableUpdate(archive);
+            }
+            Application.Current.Shutdown();
         }
         catch (OperationCanceledException) when (_download.IsCancellationRequested)
         {
@@ -81,6 +93,7 @@ public partial class UpdateWindow : Window
             State.Text = string.Format(t.UpdateFailed, ex is OperationCanceledException ? "timeout" : ex.Message);
             DownloadBar.Visibility = Visibility.Collapsed;
             _canInstall = false;
+            _useInstaller = false;
             UpdateButton.Content = t.UpdateOpenPage;
             UpdateButton.IsEnabled = SkipButton.IsEnabled = true;
         }

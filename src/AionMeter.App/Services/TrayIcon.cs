@@ -14,6 +14,7 @@ public sealed class TrayIcon : IDisposable
     private readonly ToolStripMenuItem _history;
     private readonly ToolStripMenuItem _timers;
     private readonly ToolStripMenuItem _eventTimers;
+    private readonly ToolStripMenuItem _map;
     private readonly ToolStripMenuItem _settings;
     private readonly ToolStripMenuItem _language;
     private readonly ToolStripMenuItem _demo;
@@ -41,6 +42,7 @@ public sealed class TrayIcon : IDisposable
         _history = new ToolStripMenuItem("", null, (_, _) => actions.History());
         _timers = new ToolStripMenuItem("", null, (_, _) => actions.BossTimers());
         _eventTimers = new ToolStripMenuItem("", null, (_, _) => actions.EventTimers());
+        _map = new ToolStripMenuItem("AION2 Map (Questlog)", null, (_, _) => actions.Map());
         _settings = new ToolStripMenuItem("", null, (_, _) => actions.Settings());
         _language = new ToolStripMenuItem("", null, (_, _) => actions.ToggleLanguage());
         _demo = new ToolStripMenuItem("", null, (_, _) => actions.Demo());
@@ -49,7 +51,7 @@ public sealed class TrayIcon : IDisposable
         menu.Items.AddRange([
             _update, _updateSeparator,
             _toggle, _clickThrough, _reset, new ToolStripSeparator(),
-            _history, _timers, _eventTimers, _settings, _language, _demo, _replay, _checkUpdates, new ToolStripSeparator(),
+            _history, _timers, _eventTimers, _map, _settings, _language, _demo, _replay, _checkUpdates, new ToolStripSeparator(),
             _exit,
         ]);
         ApplyTexts();
@@ -152,6 +154,7 @@ public sealed record TrayActions(
     Action History,
     Action BossTimers,
     Action EventTimers,
+    Action Map,
     Action Settings,
     Action Demo,
     Action Replay,

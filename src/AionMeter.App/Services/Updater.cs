@@ -134,6 +134,41 @@ public sealed class Updater : IDisposable
             ? _feed.DownloadAsync(installer, DownloadFolder, progress, ct)
             : throw new InvalidOperationException($"Release {release.Tag} has no installer");
 
+    /// <summary>Downloads and validates the portable update archive for one-click updates of ZIP copies.</summary>
+    public Task<string> DownloadPortableAsync(ReleaseInfo release, IProgress<double>? progress, CancellationToken ct) =>
+        release.Portable is { } portable
+            ? _feed.DownloadAsync(portable, DownloadFolder, progress, ct)
+            : throw new InvalidOperationException($"Release {release.Tag} has no portable archive");
+
+    /// <summary>Runs a small Windows helper that waits for this process, replaces the portable files, and restarts it.</summary>
+    public static void LaunchPortableUpdate(string archivePath)
+    {
+        var exe = Environment.ProcessPath ?? throw new InvalidOperationException("Could not locate the running executable");
+        var payload = JsonSerializer.Serialize(new { Archive = Path.GetFullPath(archivePath), Target = AppContext.BaseDirectory, Exe = Path.GetFullPath(exe), Pid = Environment.ProcessId });
+        var payload64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(payload));
+        var script = "$ErrorActionPreference='Stop'; $j=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('" + payload64 + "')) | ConvertFrom-Json; " +
+                     "while (Get-Process -Id $j.Pid -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 300 }; " +
+                     "$stage=Join-Path $env:TEMP ('Aetherion-update-' + [guid]::NewGuid().ToString('N')); " +
+                     "New-Item -ItemType Directory -Path $stage | Out-Null; " +
+                     "try { Expand-Archive -LiteralPath $j.Archive -DestinationPath $stage -Force; " +
+                     "Copy-Item -LiteralPath (Join-Path $stage 'AION2DpsMeter.exe') -Destination (Join-Path $j.Target 'AION2DpsMeter.exe') -Force; " +
+                     "foreach ($doc in @('LICENSE','INSTALL.txt')) { $source=Join-Path $stage $doc; if (Test-Path $source) { Copy-Item -LiteralPath $source -Destination $j.Target -Force } }; " +
+                     "Start-Process -FilePath $j.Exe -ArgumentList '--updated' } catch { " +
+                     "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show(('Aetherion konnte das Update nicht einspielen: ' + $_.Exception.Message),'Aetherion Update') | Out-Null " +
+                     "} finally { " +
+                     "Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue; " +
+                     "Remove-Item -LiteralPath $j.Archive -Force -ErrorAction SilentlyContinue }";
+        var encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
+        var start = new ProcessStartInfo("powershell.exe") { UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
+        start.ArgumentList.Add("-NoProfile");
+        start.ArgumentList.Add("-NonInteractive");
+        start.ArgumentList.Add("-ExecutionPolicy");
+        start.ArgumentList.Add("Bypass");
+        start.ArgumentList.Add("-EncodedCommand");
+        start.ArgumentList.Add(encoded);
+        _ = Process.Start(start) ?? throw new InvalidOperationException("Could not start the portable update helper");
+    }
+
     /// <summary>Fetches the update in the background, so it can go in at the next quiet moment.</summary>
     private async Task PrepareAsync(ReleaseInfo release)
     {
