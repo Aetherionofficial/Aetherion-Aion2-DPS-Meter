@@ -8,6 +8,7 @@ public sealed class PlayerInfo
     public string Name { get; set; } = "";
     public int ServerId { get; set; }
     public GameClass Class { get; set; }
+    public int Level { get; set; }
     /// <summary>Restored from the name cache of a previous run rather than announced in this one.</summary>
     public bool FromCache { get; set; }
     /// <summary>Equipment item level ("GS") from the party roster; 0 = not known.</summary>
@@ -16,7 +17,7 @@ public sealed class PlayerInfo
     public long CombatPower { get; set; }
 }
 
-public sealed record CachedPlayer(uint Id, string Name, GameClass Class, int ServerId, int GearScore = 0, long CombatPower = 0);
+public sealed record CachedPlayer(uint Id, string Name, GameClass Class, int ServerId, int GearScore = 0, long CombatPower = 0, int Level = 0);
 
 /// <summary>A boss as the server announced it: its template (0 = unknown) and max HP (0 = unknown).</summary>
 public sealed record CachedNpc(uint Id, int Code, long MaxHp);
@@ -65,7 +66,7 @@ public sealed class EntityRegistry
     private readonly HashSet<uint> _classSkillUsers = new();
     // Gear score and combat power by character name: the roster names its members, the world knows them by entity id.
     // Kept across zones (names do not change on a loading screen).
-    private readonly Dictionary<string, (int Gear, long Power)> _gearByName = new();
+    private readonly Dictionary<string, (int Gear, long Power, int Level)> _gearByName = new();
     private readonly GameData _data;
 
     public EntityRegistry(GameData data) => _data = data;
@@ -81,7 +82,7 @@ public sealed class EntityRegistry
     /// <summary>Bumped whenever a player's identity or a boss's changes, so the cache knows when to save.</summary>
     public int CacheVersion { get; private set; }
 
-    public void SetSelf(uint actorId, string name, int serverId, GameClass cls)
+    public void SetSelf(uint actorId, string name, int serverId, GameClass cls, int level = 0)
     {
         if (SelfId is { } old && old != actorId)
         {
@@ -91,10 +92,10 @@ public sealed class EntityRegistry
             DropCached();
         }
         SelfId = actorId;
-        UpsertPlayer(actorId, name, serverId, cls);
+        UpsertPlayer(actorId, name, serverId, cls, level);
     }
 
-    public PlayerInfo UpsertPlayer(uint actorId, string name, int serverId, GameClass cls)
+    public PlayerInfo UpsertPlayer(uint actorId, string name, int serverId, GameClass cls, int level = 0)
     {
         if (!_players.TryGetValue(actorId, out var p))
         {
@@ -114,6 +115,7 @@ public sealed class EntityRegistry
         }
         if (serverId != 0) p.ServerId = serverId;
         if (cls != GameClass.Unknown) p.Class = cls;
+        if (level > 0) p.Level = level;
         _npcs.Remove(actorId);
         _summonOwner.Remove(actorId);
         _unowned.Remove(actorId);
@@ -218,14 +220,15 @@ public sealed class EntityRegistry
     /// A character's gear score and combat power (0 = leave as it is), by name: from the party roster or the own record.
     /// Every player with that name gets them, now and whenever they are announced later.
     /// </summary>
-    public void SetGear(string name, int gearScore, long combatPower)
+    public void SetGear(string name, int gearScore, long combatPower, int level = 0)
     {
-        if (string.IsNullOrEmpty(name) || (gearScore <= 0 && combatPower <= 0)) return;
-        var (gear, power) = _gearByName.GetValueOrDefault(name);
+        if (string.IsNullOrEmpty(name) || (gearScore <= 0 && combatPower <= 0 && level <= 0)) return;
+        var (gear, power, knownLevel) = _gearByName.GetValueOrDefault(name);
         if (gearScore > 0) gear = gearScore;
         if (combatPower > 0) power = combatPower;
-        if (_gearByName.TryGetValue(name, out var known) && known == (gear, power)) return;
-        _gearByName[name] = (gear, power);
+        if (level > 0) knownLevel = level;
+        if (_gearByName.TryGetValue(name, out var known) && known == (gear, power, knownLevel)) return;
+        _gearByName[name] = (gear, power, knownLevel);
         foreach (var p in _players.Values)
             if (p.Name == name) ApplyGear(p);
         CacheVersion++;
@@ -236,6 +239,7 @@ public sealed class EntityRegistry
         if (!_gearByName.TryGetValue(p.Name, out var g)) return;
         if (g.Gear > 0) p.GearScore = g.Gear;
         if (g.Power > 0) p.CombatPower = g.Power;
+        if (g.Level > 0) p.Level = g.Level;
     }
 
     public uint? FindPlayerByName(string name)
@@ -300,7 +304,7 @@ public sealed class EntityRegistry
     public SessionState Export() => new(
         SelfId, MapId,
         _players.Values.Where(p => p.Name.Length > 0)
-            .Select(p => new CachedPlayer(p.ActorId, p.Name, p.Class, p.ServerId, p.GearScore, p.CombatPower)).ToList(),
+            .Select(p => new CachedPlayer(p.ActorId, p.Name, p.Class, p.ServerId, p.GearScore, p.CombatPower, p.Level)).ToList(),
         // Living bosses the server described; a max HP only guessed from current HP is no better than nothing.
         _npcs.Values.Where(n => n.IsBoss && n.Hp != 0 && (n.NpcCode != 0 || n.MaxHpKnown))
             .Take(64)
@@ -314,12 +318,12 @@ public sealed class EntityRegistry
         if (state.MapId != 0) ZoneName ??= _data.MapName(state.MapId);
         foreach (var c in state.Players)
         {
-            if (c.GearScore > 0 || c.CombatPower > 0) _gearByName.TryAdd(c.Name, (c.GearScore, c.CombatPower));
+            if (c.GearScore > 0 || c.CombatPower > 0 || c.Level > 0) _gearByName.TryAdd(c.Name, (c.GearScore, c.CombatPower, c.Level));
             if (_players.ContainsKey(c.Id)) continue;
             _players[c.Id] = new PlayerInfo
             {
                 ActorId = c.Id, Name = c.Name, Class = c.Class, ServerId = c.ServerId, FromCache = true,
-                GearScore = c.GearScore, CombatPower = c.CombatPower,
+                GearScore = c.GearScore, CombatPower = c.CombatPower, Level = c.Level,
             };
         }
         foreach (var c in state.Npcs)

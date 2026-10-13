@@ -206,6 +206,21 @@
                     </Border>
 
                     <!-- Updates -->
+                    <!-- Aetherion account and license -->
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="AETHERION • LIZENZ" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <TextBlock x:Name="LicenseStatusText" Text="Lizenzstatus wird geladen …" TextWrapping="Wrap" Foreground="{StaticResource TextDim}" Margin="0,0,0,8" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="LicenseKeyBox" Width="230" ToolTip="AETH-…" />
+                                <Button x:Name="RedeemLicenseButton" Style="{StaticResource GhostButton}" Content="Key einlösen" Click="RedeemLicense_Click" Margin="8,0,8,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Abmelden" Click="Logout_Click" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource Hint}" Margin="0,6,0,0" Text="Keys erhältst du nach dem Kauf über ein Discord-Ticket. Verlängerungs-Keys werden zur Restlaufzeit addiert." />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Updates -->
                     <Border Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecUpdates, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />

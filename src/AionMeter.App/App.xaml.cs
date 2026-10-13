@@ -44,6 +44,8 @@ public partial class App : Application
     private TrayIcon? _tray;
     private HotkeyManager? _hotkeys;
     private DispatcherTimer? _timer;
+    private DispatcherTimer? _licenseTimer;
+    private bool _licenseCheckInProgress;
     private HistoryWindow? _history;
     private SettingsWindow? _settingsWindow;
     private BossTimersWindow? _timersWindow;
@@ -111,18 +113,27 @@ public partial class App : Application
         {
             Log.Error("License revocation refresh failed; continuing with cached license data", ex);
         }
-        if (LicenseService.LoadValid() is null)
+        AccountLicenseStatus? savedAccess = null;
+        try
         {
-            Log.Info("No valid local license; showing activation window.");
-            var activation = new ActivationWindow();
+            savedAccess = await SupabaseAccessService.CheckSavedSessionAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Could not check saved Discord access", ex);
+        }
+        if (savedAccess?.HasActiveLicense != true)
+        {
+            Log.Info("No active Discord license; showing sign-in and key activation window.");
+            var activation = new ActivationWindow(savedAccess);
             if (activation.ShowDialog() != true)
             {
-                Log.Info("Activation window closed without a valid license.");
+                Log.Info("Sign-in window closed without an active license.");
                 Shutdown();
                 return;
             }
-            Log.Info("License activated successfully.");
         }
+        Log.Info("Discord account has an active license.");
 
         DispatcherUnhandledException += (_, ex) =>
         {
@@ -197,6 +208,10 @@ public partial class App : Application
         _timer.Tick += (_, _) => OnTick();
         _timer.Start();
 
+        _licenseTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMinutes(1) };
+        _licenseTimer.Tick += async (_, _) => await RecheckLicenseAsync();
+        _licenseTimer.Start();
+
         // Developer switches: --demo, --replay <file.pcap> (instant), --open-last (breakdown of the newest fight).
         if (e.Args.Contains("--demo")) _meter.StartDemo();
         if (ArgValue(e.Args, "--replay") is { } replay) _meter.Replay(replay);
@@ -228,6 +243,27 @@ public partial class App : Application
         {
             Log.Error("Could not open the Npcap page", ex);
         }
+    }
+
+    private async Task RecheckLicenseAsync()
+    {
+        if (_licenseCheckInProgress || _meter is null) return;
+        _licenseCheckInProgress = true;
+        try
+        {
+            var status = await SupabaseAccessService.CheckSavedSessionAsync();
+            if (status?.HasActiveLicense == true) return;
+            _licenseTimer?.Stop();
+            MessageBox.Show("Dein Aetherion-Zugang ist abgelaufen oder wurde gesperrt. Bitte prüfe deinen Key oder eröffne ein Ticket im Discord.",
+                "Aetherion-Zugang beendet", MessageBoxButton.OK, MessageBoxImage.Information);
+            Shutdown();
+        }
+        catch (Exception ex)
+        {
+            // A temporary network problem must not immediately terminate a valid session.
+            Log.Error("Could not refresh the Aetherion entitlement; will retry later", ex);
+        }
+        finally { _licenseCheckInProgress = false; }
     }
 
     private static string? ArgValue(string[] args, string name)
@@ -451,7 +487,7 @@ public partial class App : Application
         _eventTimersWindow.Show();
     }
 
-    private void ShowAionMap()
+    public void ShowAionMap()
     {
         if (_mapWindow is { IsLoaded: true })
         {
@@ -642,6 +678,7 @@ public partial class App : Application
     {
         if (_meter is not null) Log.Info("Exiting");
         _timer?.Stop();
+        _licenseTimer?.Stop();
         _showWait?.Unregister(null);
         _showRequest?.Dispose();
         _hotkeys?.Dispose();

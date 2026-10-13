@@ -7,12 +7,12 @@ namespace AionMeter.App.Services;
 /// </summary>
 public sealed class UiText
 {
-    public static readonly string[] Languages = ["en", "ru", "de", "tr", "pl", "bs", "fr", "ko", "zh-Hant", "ar", "zh-Hans", "it"];
+    // Only offer languages with a complete interface translation. Name tables may support more languages,
+    // but showing those here made the UI silently fall back to English after the user selected them.
+    public static readonly string[] Languages = ["en", "de", "ru"];
     public static readonly (string Code, string Name)[] LanguageOptions =
     [
-        ("en", "English"), ("ru", "Русский"), ("de", "Deutsch"), ("tr", "Türkçe"),
-        ("pl", "Polski"), ("bs", "Bosanski"), ("fr", "Français"), ("ko", "한국어"),
-        ("zh-Hant", "繁體中文（台灣）"), ("ar", "العربية"), ("zh-Hans", "简体中文"), ("it", "Italiano"),
+        ("en", "English"), ("de", "Deutsch"), ("ru", "Русский"),
     ];
 
     public static UiText Current { get; private set; } = new();
@@ -28,6 +28,7 @@ public sealed class UiText
 
     public string Code { get; init; } = "en";
     public string LanguageName { get; init; } = "English";
+    public string MapLabel { get; init; } = "Map";
 
     /// <summary>Dates in the interface language ("06 Oct"), not in the Windows one.</summary>
     public System.Globalization.CultureInfo Culture => System.Globalization.CultureInfo.GetCultureInfo(Code switch
@@ -444,6 +445,7 @@ public sealed class UiText
     private static readonly UiText De = new()
     {
         Code = "de", LanguageName = "Deutsch",
+        MapLabel = "Karte",
         ClassNames = new Dictionary<Core.Events.GameClass, string>
         {
             [Core.Events.GameClass.Gladiator] = "Gladiator", [Core.Events.GameClass.Templar] = "Templer",
@@ -555,6 +557,7 @@ public sealed class UiText
     {
         Code = "ru",
         LanguageName = "Русский",
+        MapLabel = "Карта",
         ClassNames = new Dictionary<Core.Events.GameClass, string>
         {
             [Core.Events.GameClass.Gladiator] = "Гладиатор",

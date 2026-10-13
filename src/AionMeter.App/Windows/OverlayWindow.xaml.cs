@@ -35,11 +35,6 @@ public partial class OverlayWindow : Window
         _settings = meter.Settings;
         var opacity = _settings.BackgroundOpacity; // the slider's coercion during InitializeComponent would overwrite it
         InitializeComponent();
-        if (LicenseService.LoadValid() is { PartnerName.Length: > 0 } partner)
-        {
-            PartnerBadge.Visibility = Visibility.Visible;
-            PartnerBadge.ToolTip = $"Aetherion Partner: {partner.PartnerName}" + (string.IsNullOrWhiteSpace(partner.ReferralCode) ? "" : $" · Code {partner.ReferralCode}");
-        }
         _settings.BackgroundOpacity = opacity;
         DataContext = _vm;
 
@@ -93,6 +88,13 @@ public partial class OverlayWindow : Window
     public void Refresh()
     {
         _vm.ShowGear = _settings.ShowGear;
+        var licenseLabel = SupabaseAccessService.FormatOverlayLicense(SupabaseAccessService.CurrentStatus);
+        PartnerBadge.Text = licenseLabel;
+        PartnerBadge.Visibility = string.IsNullOrEmpty(licenseLabel) ? Visibility.Collapsed : Visibility.Visible;
+        PartnerBadge.Foreground = SupabaseAccessService.CurrentStatus?.IsPartner == true
+            ? (Brush)FindResource("Gold") : (Brush)FindResource("TextDim");
+        PartnerBadge.ToolTip = SupabaseAccessService.CurrentStatus?.IsPartner == true
+            ? "Aetherion-Partner" : "Verbleibende Lizenzlaufzeit";
         // Looking at an old fight when a new pull starts: jump back to live so the fight is never missed.
         if ((_saved is not null || _segment is not null) &&
             _meter.Tracker.Segments() is [{ IsActive: true } running, ..] && running.StartedAt > _selectedAt)
@@ -606,6 +608,11 @@ public partial class OverlayWindow : Window
     private void Timers_Click(object sender, RoutedEventArgs e)
     {
         if (!_drag.JustDragged) AppHost.Current.ShowBossTimers();
+    }
+
+    private void Map_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_drag.JustDragged) AppHost.Current.ShowAionMap();
     }
 
     private void Events_Click(object sender, RoutedEventArgs e)

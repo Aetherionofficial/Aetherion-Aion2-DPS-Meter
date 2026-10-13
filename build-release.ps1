@@ -1,8 +1,8 @@
 # Builds the downloads for players:
-#   dist\AION2DpsMeter-Setup-v<version>.exe    - installer: shortcuts, uninstall, Npcap check (needs Inno Setup 7)
-#   dist\AION2DpsMeter-v<version>-win-x64.zip  - the same program without installation (no .NET install needed)
-#   dist\AION2DpsMeter-v<version>-source.zip   - the source code (GPL-3.0: hand it out alongside the program)
-#   dist\AION2DpsMeter-Setup.exe, dist\AION2DpsMeter-win-x64.zip - copies under names that never change, for links
+#   dist\Aetherion-DPS-Meter-Setup-v<version>.exe - installer: shortcuts, uninstall, Npcap check (needs Inno Setup 7)
+#   dist\Aetherion-DPS-Meter-v<version>-win-x64.zip - portable app (no .NET install needed)
+#   dist\Aetherion-DPS-Meter-v<version>-source.zip - the source code (GPL-3.0: hand it out alongside the program)
+#   dist\Aetherion-DPS-Meter-Setup.exe, dist\Aetherion-DPS-Meter-win-x64.zip - stable names for latest links
 #   that always give the newest version (releases/latest/download/<name>)
 # Packet recordings (captures\) and build output never go into any of them.
 param([string]$Version = "")
@@ -71,13 +71,13 @@ if (-not $Version) {
     $Version = (Select-Xml -Path $project -XPath "//Version").Node.InnerText | Select-Object -First 1
 }
 $dist = Join-Path $root "dist"
-$name = "AION2DpsMeter-v$Version-win-x64"
+$name = "Aetherion-DPS-Meter-v$Version-win-x64"
 $stage = Join-Path $dist $name
 New-Item -ItemType Directory -Force $dist | Out-Null
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 
 # Self-contained, no symbols; .NET's own messages only in English and Russian (%3B is MSBuild's escaped ";").
-$publish = @("-c", "Release", "-r", "win-x64", "--self-contained", "true",
+$publish = @("-c", "Release", "-r", "win-x64", "--self-contained", "true", "--no-restore",
     "-p:DebugType=none", "-p:DebugSymbols=false", "-p:SatelliteResourceLanguages=en%3Bru")
 
 # Portable: one exe + docs. Game lookup tables are embedded and unpacked to %AppData% on first launch.
@@ -91,7 +91,7 @@ if (-not (Test-Path (Join-Path $stage "AION2DpsMeter.exe"))) { throw "portable e
 
 $programZip = Join-Path $dist "$name.zip"
 New-Zip $stage $programZip
-$stableZip = Join-Path $dist "AION2DpsMeter-win-x64.zip" # the never-changing name, as for the installer below
+$stableZip = Join-Path $dist "Aetherion-DPS-Meter-win-x64.zip" # the never-changing name, as for the installer below
 Copy-Item $programZip $stableZip -Force
 $outputs = @($programZip, $stableZip)
 
@@ -109,11 +109,11 @@ if ($iscc) {
     & $iscc /Qp "/DAppVer=$Version" "/DPayloadDir=$setupStage" "/O$dist" (Join-Path $root "installer\AION2DpsMeter.iss")
     if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
     Remove-Item $setupStage -Recurse -Force
-    $setupExe = Join-Path $dist "AION2DpsMeter-Setup-v$Version.exe"
+    $setupExe = Join-Path $dist "Aetherion-DPS-Meter-Setup-v$Version.exe"
     Repair-VersionStrings $setupExe "Aetherion"
     # Same file under a name that never changes: the download page links to
-    # releases/latest/download/AION2DpsMeter-Setup.exe and always gets the newest version.
-    $stableSetup = Join-Path $dist "AION2DpsMeter-Setup.exe"
+    # releases/latest/download/Aetherion-DPS-Meter-Setup.exe and always gets the newest version.
+    $stableSetup = Join-Path $dist "Aetherion-DPS-Meter-Setup.exe"
     Copy-Item $setupExe $stableSetup -Force
     $outputs = @($setupExe, $stableSetup) + $outputs
 }
@@ -122,16 +122,20 @@ else {
 }
 
 # Source: everything tracked by the project, without recordings, build output or local tooling.
-$sourceStage = Join-Path $dist "AION2DpsMeter-v$Version-source"
+$sourceStage = Join-Path $dist "Aetherion-DPS-Meter-v$Version-source"
 if (Test-Path $sourceStage) { Remove-Item $sourceStage -Recurse -Force }
-$skip = '\\(bin|obj|captures|dist|site-kit|\.git|\.vs|\.claude|TestResults)(\\|$)'
-Get-ChildItem $root -Recurse -File |
-    Where-Object { $_.FullName.Substring($root.Length) -notmatch $skip -and $_.Extension -notin '.pcap', '.pcapng' } |
-    ForEach-Object {
-        $target = Join-Path $sourceStage $_.FullName.Substring($root.Length + 1)
-        New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
-        Copy-Item $_.FullName $target
-    }
+$skip = '(^|/)(bin|obj|captures|dist|site-kit|artifacts|output|\.appdata|\.dotnet-home|\.local-nuget|\.tmp|\.git|\.vs|\.claude|TestResults)(/|$)|(^|/)\.nuget\.org\.config$'
+$sourceFiles = & git -C $root ls-files --cached --others --exclude-standard
+if ($LASTEXITCODE -ne 0) { throw "Could not enumerate source files with git" }
+foreach ($relative in $sourceFiles) {
+    $normalized = $relative.Replace('\\', '/')
+    if ($normalized -match $skip -or [IO.Path]::GetExtension($normalized) -in '.pcap', '.pcapng') { continue }
+    $sourceFile = Join-Path $root $relative
+    if (-not (Test-Path -LiteralPath $sourceFile -PathType Leaf)) { continue }
+    $target = Join-Path $sourceStage $relative
+    New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
+    Copy-Item -LiteralPath $sourceFile -Destination $target
+}
 $sourceZip = "$sourceStage.zip"
 New-Zip $sourceStage $sourceZip
 Remove-Item $sourceStage -Recurse -Force

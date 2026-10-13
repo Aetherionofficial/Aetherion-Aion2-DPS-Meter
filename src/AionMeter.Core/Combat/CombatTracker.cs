@@ -38,6 +38,16 @@ public sealed class CombatTracker
         get { lock (_gate) return _entities.Self?.Name; }
     }
 
+    /// <summary>The local character's detected class and level for optional integrations such as Discord Rich Presence.</summary>
+    public (GameClass Class, int Level)? SelfProfile
+    {
+        get
+        {
+            lock (_gate)
+                return _entities.Self is { } self ? (self.Class, self.Level) : null;
+        }
+    }
+
     public string? ZoneName
     {
         get { lock (_gate) return _entities.ZoneName; }
@@ -87,13 +97,13 @@ public sealed class CombatTracker
                     OnHeal(h);
                     break;
                 case SelfIdentifiedEvent s:
-                    _entities.SetSelf(s.ActorId, s.Name, s.ServerId, s.Class);
-                    _entities.SetGear(s.Name, 0, s.CombatPower);
+                    _entities.SetSelf(s.ActorId, s.Name, s.ServerId, s.Class, s.Level);
+                    _entities.SetGear(s.Name, 0, s.CombatPower, s.Level);
                     LinkSummonsCastBy(s.ActorId, s.Name);
                     selfName = s.Name;
                     break;
                 case PartyRosterEvent roster:
-                    foreach (var m in roster.Members) _entities.SetGear(m.Name, m.GearScore, m.CombatPower);
+                    foreach (var m in roster.Members) _entities.SetGear(m.Name, m.GearScore, m.CombatPower, m.Level);
                     _pendingRosters.Add(roster);
                     break;
                 case PlayerSeenEvent p:

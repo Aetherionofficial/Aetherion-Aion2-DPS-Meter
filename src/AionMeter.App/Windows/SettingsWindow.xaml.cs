@@ -19,6 +19,7 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         Controls.DragAnywhere.Attach(this);
         Load();
+        _ = RefreshLicenseStatusAsync();
         // The row size slider previews on the overlay; closing without saving puts the saved size back.
         Closed += (_, _) => AppHost.Current.PreviewRowSize(_meter.Settings.RowSize);
     }
@@ -80,6 +81,46 @@ public partial class SettingsWindow : Window
     private static UiText T => UiText.Current;
 
     private void FarmGuide_Click(object sender, RoutedEventArgs e) => new FarmGuideWindow { Owner = this }.ShowDialog();
+
+    private async Task RefreshLicenseStatusAsync()
+    {
+        try
+        {
+            var status = await SupabaseAccessService.CheckSavedSessionAsync();
+            LicenseStatusText.Text = SupabaseAccessService.FormatAccountLicense(status);
+            RedeemLicenseButton.IsEnabled = status?.HasActiveLicense != true || (status.IsPartner == false && status.ExpiresAt is not null);
+        }
+        catch (Exception ex)
+        {
+            LicenseStatusText.Text = "Lizenzstatus konnte nicht geladen werden: " + ex.Message;
+        }
+    }
+
+    private async void RedeemLicense_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            LicenseStatusText.Text = "Key wird geprüft …";
+            var status = await SupabaseAccessService.RedeemLicenseKeyAsync(LicenseKeyBox.Text);
+            LicenseKeyBox.Clear();
+            LicenseStatusText.Text = SupabaseAccessService.FormatAccountLicense(status);
+            RedeemLicenseButton.IsEnabled = status.HasActiveLicense && !status.IsPartner && status.ExpiresAt is not null;
+        }
+        catch (Exception ex)
+        {
+            LicenseStatusText.Text = ex.Message;
+        }
+    }
+
+    private void Logout_Click(object sender, RoutedEventArgs e)
+    {
+        var answer = MessageBox.Show(this,
+            "Möchtest du dich abmelden? Aetherion wird geschlossen. Beim nächsten Start kannst du dich erneut mit Discord anmelden.",
+            "Von Aetherion abmelden", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer != MessageBoxResult.Yes) return;
+        SupabaseAccessService.SignOut();
+        Application.Current.Shutdown();
+    }
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {

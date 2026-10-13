@@ -33,7 +33,7 @@ Customer downloads belong on the Aetherion owner's release page. Do not publish 
   `AION2DpsMeter.exe`.
 
 Neither needs .NET installed: it is built in. You also need [Npcap](https://npcap.com/#download), the free capture
-driver — see [Installation](#installation).
+driver. The embedded map uses the Microsoft Edge WebView2 Runtime; see [Installation](#installation).
 
 ## Features
 
@@ -53,6 +53,7 @@ driver — see [Installation](#installation).
   overlay or browse the history window.
 - **Field boss timers from the game** — open the field boss list on the in-game map once and the meter keeps every
   respawn counting down, per server, with a tray alert before a boss you watch returns.
+- **AION 2 world map** — open Questlog's interactive map from the overlay or tray menu. It is embedded with WebView2 and needs an internet connection.
 - **Event schedule** — live local countdowns for Spacetime Rifts, Shugo Festival, Dimensional Invasion, Arena of
   Tactics and selected scheduled Abyss bosses. These recurring times are community-observed; field-boss times still
   come directly from the game's map list.
@@ -60,9 +61,9 @@ driver — see [Installation](#installation).
 - **Gear score and combat power** — GS and CP columns right after the names in the overlay (set apart from the fight's numbers by a rule) for you and your party members, in the breakdown header and in the chat lines as `(GS 1859 / CP 82.1K)` (the party roster is the only place the game sends them; *Settings → Overlay* turns them off). The overlay's value columns are only as wide as their numbers, so names get the rest.
 - **12 selectable languages** — the interface is fully translated into German, English and Russian. Turkish, Polish, Bosnian, French, Korean, Traditional Chinese (Taiwan), Arabic, Simplified Chinese and Italian are also selectable; their interface text currently falls back to English. Skill, NPC and dungeon names use localized data where available and otherwise fall back to English.
 - **Farm guide** — faction-specific Kinah and pet routes, with links to current spot maps.
-- **Paid access** — signed, per-installation keys expire after 1 day, 1 week, 30 days or 365 days. The owner key tool issues customer keys and partner keys.
-- **Partner program** — approved partners receive a badge, lifetime access and a unique 15% referral code. Without a checkout provider, the owner applies discounts manually before issuing a customer's key.
-- **Key blocking** — the owner signs `revoked-licenses.txt`; upload it to the root of the public MostWanted-DPS repository. Apps apply it on the next successful online check.
+- **Discord access** — sign in with Discord and redeem a one-time key purchased through an Aetherion Discord ticket. Keys grant 1 day, 1 week, 30 days, 90 days or lifetime access; timed keys can extend an existing timed subscription.
+- **Partner access** — partner keys grant lifetime access and show the Partner badge. Regular users see their remaining days in the overlay. Lifetime and Partner accounts cannot redeem additional keys.
+- **Key blocking** — the owner can revoke a key in Supabase. Revoking a redeemed key also ends the linked account's access; the app rechecks access periodically.
 - **Updates** — Aetherion checks the MostWanted-DPS GitHub releases. Installed copies can download and install a new setup file; portable copies show the release page.
 - **Passive** — reads only your own game's network traffic; never touches game memory or sends anything to the game.
 
@@ -310,6 +311,6 @@ data and art are © NCSOFT; this project is not affiliated with NCSOFT.
 
 ## Owner licensing
 
-The owner starts the owner-only copy with `Aetherion.exe --owner-key-issuer`. It expects `owner-private.pem` beside the executable. Keep that file offline or backed up privately; it is never part of customer packages or source archives. A customer provides the 24-character Installation ID shown at activation; the owner selects a term and sends back the signed key. Keys start at issuance, not first activation. Approved partners receive a badge, a referral code and a lifetime key. Partner approval and 15% discount application are manual. There is no payment processor or online renewal in this release. Revocations are only applied after the signed revocation list is hosted at the configured public URL and a user's app reaches it.
+Access requests and payments are handled manually through Discord tickets. The owner creates one-time keys in the Supabase SQL Editor and sends them privately to buyers. The database stores only key hashes. To issue or revoke keys, see [`supabase/README.md`](supabase/README.md). Configure Discord OAuth and run the SQL migration before distributing this build. The Supabase publishable key in the client is intended for public use; never distribute database passwords, service-role keys or OAuth client secrets.
 
 This project remains GPL-3.0. The license gate is a convenience for paid distribution, not tamper-proof DRM: recipients can modify and rebuild GPL source. Distribute the corresponding source and license with customer builds.
