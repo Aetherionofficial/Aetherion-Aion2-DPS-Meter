@@ -14,8 +14,11 @@ public sealed class ActivationWindow : Window
     {
         Title = "Aetherion — Lizenz aktivieren";
         Width = 540;
-        Height = 370;
+        // Leave enough room for the activation button at the bottom of the window.
+        Height = 450;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        Topmost = true;
+        ShowActivated = true;
         ResizeMode = ResizeMode.NoResize;
         Background = new SolidColorBrush(Color.FromRgb(18, 21, 30));
         Foreground = Brushes.White;
@@ -34,7 +37,7 @@ public sealed class ActivationWindow : Window
         idRow.Children.Add(copy);
         panel.Children.Add(idRow);
         panel.Children.Add(new TextBlock { Text = "Lizenz-Key", Margin = new Thickness(0, 0, 0, 6) });
-        _key.AcceptsReturn = true;
+        _key.AcceptsReturn = false;
         _key.TextWrapping = TextWrapping.Wrap;
         _key.Height = 86;
         _key.Padding = new Thickness(8);
@@ -42,6 +45,7 @@ public sealed class ActivationWindow : Window
         panel.Children.Add(_key);
         panel.Children.Add(new TextBlock { Text = "Abo-Laufzeit startet bei Ausstellung des Keys. Freigegebene Partner können eine Lifetime-Lizenz erhalten.", Foreground = Brushes.LightGray, Margin = new Thickness(0, 8, 0, 16), TextWrapping = TextWrapping.Wrap });
         var activate = new Button { Content = "Key aktivieren", Padding = new Thickness(12, 8, 12, 8), HorizontalAlignment = HorizontalAlignment.Right, MinWidth = 130 };
+        activate.IsDefault = true;
         activate.Click += (_, _) =>
         {
             License = LicenseService.Activate(_key.Text);

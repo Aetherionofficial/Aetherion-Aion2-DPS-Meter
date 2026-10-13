@@ -189,7 +189,7 @@ public sealed class UiText
     public string ColShare { get; init; } = "SHARE";
     public string HealShort { get; init; } = "Heal";
     public string TipPlace { get; init; } = "Place in this fight by damage dealt";
-    public string TipDps { get; init; } = "Damage per second over the fight";
+    public string TipDps { get; init; } = "Fight-average DPS: total damage divided by time from the first to the latest hit";
     public string TipDamage { get; init; } = "Total damage dealt in this fight";
     public string TipShare { get; init; } = "Share of the whole group's damage";
     public string TipGs { get; init; } = "Gear score (equipment item level), from the party roster";
@@ -494,7 +494,7 @@ public sealed class UiText
         AutoShow = "Bei Kampfbeginn automatisch anzeigen", AutoShowHint = "Wenn in der Nähe ein Boss bekämpft wird oder du ein Monster triffst. Während des Kampfes bleibt das Meter sichtbar.",
         AutoHide = "Nach dem Kampf ausblenden (Sek., 0 = nie)", ShowOnStart = "Overlay beim Start des Meters oder Spiels anzeigen",
         ColPlayer = "SPIELER", ColDps = "DPS", ColDamage = "SCHADEN", ColShare = "ANTEIL", HealShort = "Heilung", TipPlace = "Rang in diesem Kampf nach verursachtem Schaden",
-        TipDps = "Schaden pro Sekunde im Kampf", TipDamage = "Gesamter verursachter Schaden in diesem Kampf", TipShare = "Anteil am Gruppenschaden",
+        TipDps = "Kampfdurchschnitt: Gesamtschaden geteilt durch die Zeit vom ersten bis zum letzten Treffer", TipDamage = "Gesamter verursachter Schaden in diesem Kampf", TipShare = "Anteil am Gruppenschaden",
         TipGs = "Ausrüstungsstufe aus der Gruppenliste", TipCp = "Kampfkraft aus der Gruppenliste",
         LiveFight = "laufender Kampf", LastFight = "letzter Kampf", SavedFight = "gespeicherter Kampf", ThisSession = "diese Sitzung",
         WaitingLabel = "warte auf Kampf", WaitingTitle = "Warte auf einen Kampf", WaitingDetail = "Triff ein Ziel — das Meter startet automatisch",
@@ -648,7 +648,7 @@ public sealed class UiText
         ColShare = "ДОЛЯ",
         HealShort = "Леч.",
         TipPlace = "Место в бою по нанесённому урону",
-        TipDps = "Урон в секунду за время боя (DPS)",
+        TipDps = "Средний DPS за бой: весь урон, делённый на время от первого до последнего удара",
         TipDamage = "Весь урон, нанесённый за бой",
         TipShare = "Доля от урона всей группы",
         TipGs = "Уровень экипировки (GS), из состава группы",

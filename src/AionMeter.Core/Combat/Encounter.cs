@@ -172,6 +172,8 @@ public sealed class Encounter
 
     /// <summary>Damage dealt to each NPC actor, used to pick the most relevant target as the encounter title.</summary>
     public Dictionary<uint, long> DamageByTarget { get; } = new();
+    /// <summary>The NPC hit most recently; used for a responsive live target title/HP panel.</summary>
+    public uint LastTargetId { get; set; }
     public Dictionary<uint, Combatant> Combatants { get; } = new();
 
     /// <summary>Players seen landing hits on the fight's targets (hit notices), whether or not their damage arrived.</summary>

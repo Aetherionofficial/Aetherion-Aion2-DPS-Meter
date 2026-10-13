@@ -213,8 +213,10 @@
                     <TextBlock Grid.Column="4" Style="{StaticResource GearText}" Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}"
                                ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="CP " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#8FDBFF" /></TextBlock>
 
-                    <TextBlock Grid.Column="6" Text="{Binding Dps}" Style="{StaticResource RowNumber}" />
-                    <TextBlock Grid.Column="7" Text="{Binding Damage}" Style="{StaticResource RowSub}" />
+                    <TextBlock Grid.Column="6" Text="{Binding Dps}" Style="{StaticResource RowNumber}"
+                               ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}" />
+                    <TextBlock Grid.Column="7" Text="{Binding Damage}" Style="{StaticResource RowSub}"
+                               ToolTip="{Binding DataContext.T.TipDamage, RelativeSource={RelativeSource AncestorType=Window}}" />
                     <TextBlock Grid.Column="8" Text="{Binding Share}" Style="{StaticResource RowSub}" />
                 </Grid>
             </Grid>

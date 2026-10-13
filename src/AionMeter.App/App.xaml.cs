@@ -34,7 +34,8 @@ public static class AppHost
 
 public partial class App : Application
 {
-    private const string ShowRequestName = "AionMeter.ShowOverlay"; // set by a second start of the app
+    private static string InstanceSuffix => typeof(App).Assembly.GetName().Version?.ToString(3) ?? "current";
+    private string ShowRequestName => $"AionMeter.ShowOverlay.{InstanceSuffix}"; // per-version so an old hidden build cannot swallow a new launch
     private Mutex? _singleInstance;
     private EventWaitHandle? _showRequest;
     private RegisteredWaitHandle? _showWait;
@@ -50,9 +51,10 @@ public partial class App : Application
     private readonly Dictionary<object, BreakdownWindow> _breakdowns = new();
     private int _ticks;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        Log.Info($"Startup requested. Version {InstanceSuffix}; executable {Environment.ProcessPath}.");
         if (e.Args.Contains("--owner-key-issuer"))
         {
             if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "owner-private.pem")))
@@ -85,7 +87,7 @@ public partial class App : Application
             Shutdown();
             return;
         }
-        _singleInstance = new Mutex(true, "AionMeter.SingleInstance", out var first);
+        _singleInstance = new Mutex(true, $"AionMeter.SingleInstance.{InstanceSuffix}", out var first);
         if (!first)
         {
             // Started again (the shortcut clicked twice): the running meter shows its overlay, this copy leaves quietly.
@@ -97,15 +99,28 @@ public partial class App : Application
             return;
         }
 
-        LicenseService.RefreshRevocationsAsync().GetAwaiter().GetResult();
+        Log.Info("Checking license and revocation status.");
+        try
+        {
+            // Do not synchronously wait on the WPF dispatcher thread. The network request needs
+            // that same dispatcher to resume after await, which otherwise leaves only a background process.
+            await LicenseService.RefreshRevocationsAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("License revocation refresh failed; continuing with cached license data", ex);
+        }
         if (LicenseService.LoadValid() is null)
         {
+            Log.Info("No valid local license; showing activation window.");
             var activation = new ActivationWindow();
             if (activation.ShowDialog() != true)
             {
+                Log.Info("Activation window closed without a valid license.");
                 Shutdown();
                 return;
             }
+            Log.Info("License activated successfully.");
         }
 
         DispatcherUnhandledException += (_, ex) =>
@@ -129,13 +144,9 @@ public partial class App : Application
         _meter.StartCapture();
 
         _overlay = new OverlayWindow(_meter);
-        if (settings.OverlayVisible || e.Args.Contains("--show")) _overlay.Show(); // --show: this run only, not saved
-        else
-        {
-            new WindowInteropHelper(_overlay).EnsureHandle();
-            // Hidden by choice: still up for a moment, so it is plain that the meter started.
-            if (settings.ShowOnStart) ShowByItself();
-        }
+        // Always show the main overlay on an explicit app launch. This avoids a silent background
+        // start when an older settings file has OverlayVisible=false; users can still hide it afterward.
+        _overlay.Show();
 
         _hotkeys = new HotkeyManager(new WindowInteropHelper(_overlay).Handle);
         RegisterHotkeys();
@@ -165,7 +176,7 @@ public partial class App : Application
 
         // A new player's first start: without Npcap nothing can be measured — say so and offer the download.
         if (!LiveCapture.IsNpcapInstalled())
-            Dispatcher.BeginInvoke(ShowNpcapHelp, DispatcherPriority.ApplicationIdle);
+            _ = Dispatcher.BeginInvoke(ShowNpcapHelp, DispatcherPriority.ApplicationIdle);
 
         // Another start of the app asks this one to show the overlay.
         _showRequest = new EventWaitHandle(false, EventResetMode.AutoReset, ShowRequestName);
@@ -177,7 +188,7 @@ public partial class App : Application
         _meter.Updates.Start();
         Updater.CleanDownloads();
         if (e.Args.Contains("--updated")) // started by the installer after an in-app update
-            Dispatcher.BeginInvoke(() => _tray?.ShowBalloon(AppInfo.Name,
+            _ = Dispatcher.BeginInvoke(() => _tray?.ShowBalloon(AppInfo.Name,
                 string.Format(UiText.Current.UpdatedBalloon, _meter.Updates.Current.ToString(3))), DispatcherPriority.ApplicationIdle);
 
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(200) };

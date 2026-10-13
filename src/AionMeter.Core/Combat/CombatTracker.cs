@@ -102,12 +102,18 @@ public sealed class CombatTracker
                     break;
                 case NpcSeenEvent n:
                     if (_entities.IsKnownPlayer(n.ActorId)) break;
-                    // The server's own announcement replaces whatever the cache of a previous run said about this id.
-                    if (_entities.TryGetNpc(n.ActorId, out var cached) && cached.FromCache) _entities.ForgetNpc(n.ActorId);
+                    // A fresh spawn announcement replaces cached state and stale dead state when the server reuses an id.
+                    if (_entities.TryGetNpc(n.ActorId, out var cached) && (cached.FromCache || cached.Hp == 0))
+                        _entities.ForgetNpc(n.ActorId);
                     var npc = _entities.UpsertNpc(n.ActorId, n.NpcCode);
                     if (n.Name is not null) npc.Name = n.Name;
                     _entities.SetMaxHp(npc, n.MaxHp, known: true);
-                    if (_current is { IsActive: true } running && running.BossId == n.ActorId) RefreshBoss(running, npc);
+                    if (_current is { IsActive: true } running)
+                    {
+                        if (running.BossId == n.ActorId) RefreshBoss(running, npc);
+                        else if (running.BossId is null && (npc.IsBoss || npc.IsDummy) && running.DamageByTarget.ContainsKey(n.ActorId))
+                            SetBoss(running, npc, n.TimeMs); // entity identity can arrive after its first damage packet
+                    }
                     NoticeBoss(npc, BossNoticeKind.Alive, n.TimeMs, n.X, n.Y, n.Z);
                     break;
                 case SummonSeenEvent s:
@@ -233,15 +239,15 @@ public sealed class CombatTracker
 
         if (Options.TargetMode == TargetMode.BossOnly)
         {
-            if (_current is { IsActive: true, BossId: not null } && !npc.IsBoss) return; // adds during a boss fight
-            if (_current is { IsActive: true, BossId: null } && npc.IsBoss && _current.TotalDamage > 0)
+            if (_current is { IsActive: true, BossId: not null } && !npc.IsBoss && !npc.IsDummy) return; // adds during a boss fight
+            if (_current is { IsActive: true, BossId: null } && (npc.IsBoss || npc.IsDummy) && _current.TotalDamage > 0)
                 Finish(EncounterEndReason.Idle, _current.LastDamageMs); // trash segment ends when the boss is pulled
         }
 
         if (_current is not { IsActive: true }) StartEncounter(d.TimeMs);
         var enc = _current!;
 
-        if (npc.IsBoss && (enc.BossId is null || !IsAlive(enc.BossId.Value))) SetBoss(enc, npc, d.TimeMs);
+        if ((npc.IsBoss || npc.IsDummy) && (enc.BossId is null || !IsAlive(enc.BossId.Value))) SetBoss(enc, npc, d.TimeMs);
 
         var c = GetCombatant(enc, source);
         if (c.Class == GameClass.Unknown && (d.Flags & HitFlags.Dot) == 0)
@@ -256,6 +262,9 @@ public sealed class CombatTracker
 
         enc.TotalDamage += d.Damage;
         enc.DamageByTarget[target] = enc.DamageByTarget.GetValueOrDefault(target) + d.Damage;
+        // The live HP panel follows this installation's player (including owned summons), never whichever
+        // party member happened to hit a different mob most recently.
+        if (_entities.SelfId == source) enc.LastTargetId = target;
         if (d.TimeMs > enc.LastDamageMs) enc.LastDamageMs = d.TimeMs;
     }
 
@@ -290,6 +299,10 @@ public sealed class CombatTracker
         // A cached boss is only an assumption: an HP pool that does not fit it means the id now belongs to another NPC.
         if (npc.FromCache && npc.MaxHp > 0 && (e.CurrentHp > npc.MaxHp || (e.MaxHp > 0 && e.MaxHp != npc.MaxHp)))
             npc = _entities.ForgetNpc(e.ActorId);
+        // Some NPCs reuse their actor id on respawn. A positive HP update after a death is a new life,
+        // so clear the corpse state before later damage packets are checked against it.
+        else if (npc.Hp == 0 && e.CurrentHp > 0)
+            npc = _entities.ForgetNpc(e.ActorId);
         if (e.CurrentHp <= 0 && npc.Hp > 0)
         {
             EndBossLimit(e.ActorId);
@@ -301,13 +314,23 @@ public sealed class CombatTracker
         var max = Math.Max(e.MaxHp, Math.Max(npc.MaxHp, e.CurrentHp));
         _entities.SetMaxHp(npc, max, known: npc.MaxHpKnown || e.MaxHp >= max);
 
+        // HP updates are shared by the whole area. If another player kills this mob, clear our target panel too.
+        // This applies to secondary mobs during a boss fight as well as the main target.
+        if (e.CurrentHp <= 0 && _current is { } targetEncounter && targetEncounter.LastTargetId == e.ActorId)
+            targetEncounter.LastTargetId = 0;
+
         if (_current is not { IsActive: true } enc) return;
 
-        if (enc.BossId is null && npc.IsBoss && enc.DamageByTarget.ContainsKey(e.ActorId)) SetBoss(enc, npc, e.TimeMs);
-        if (enc.BossId != e.ActorId) return;
+        if (enc.BossId is null && (npc.IsBoss || npc.IsDummy) && enc.DamageByTarget.ContainsKey(e.ActorId)) SetBoss(enc, npc, e.TimeMs);
+        // The primary target can have live HP without being classified as a boss (common for ordinary mobs).
+        // Track its death too, but ignore deaths of secondary AoE targets during a boss fight.
+        if (enc.BossId != e.ActorId && (enc.BossId is not null || !IsPrimaryTarget(enc, e.ActorId))) return;
 
-        RefreshBoss(enc, npc);
-        if (enc.BossRefHp < 0 && e.CurrentHp > 0) SetBossReference(enc, e.CurrentHp);
+        if (enc.BossId == e.ActorId)
+        {
+            RefreshBoss(enc, npc);
+            if (enc.BossRefHp < 0 && e.CurrentHp > 0) SetBossReference(enc, e.CurrentHp);
+        }
         enc.BossHp = e.CurrentHp;
         if (e.CurrentHp < enc.BossLowestHp) enc.BossLowestHp = e.CurrentHp;
 
@@ -324,6 +347,7 @@ public sealed class CombatTracker
     private void OnDeath(DeathEvent e)
     {
         EndBossLimit(e.ActorId);
+        if (_current is { } current && current.LastTargetId == e.ActorId) current.LastTargetId = 0;
         if (!_entities.TryGetNpc(e.ActorId, out var npc)) return;
         if (npc.Hp != 0)
         {
@@ -332,12 +356,17 @@ public sealed class CombatTracker
         }
         npc.Hp = 0;
         npc.HpAtMs = e.TimeMs;
-        if (_current is { IsActive: true } enc && enc.BossId == e.ActorId)
+        if (_current is { IsActive: true } enc &&
+            (enc.BossId == e.ActorId || (enc.BossId is null && IsPrimaryTarget(enc, e.ActorId))))
         {
             enc.BossHp = 0;
             Finish(EncounterEndReason.Kill, Math.Max(e.TimeMs, enc.LastDamageMs));
         }
     }
+
+    private static bool IsPrimaryTarget(Encounter enc, uint actorId) =>
+        enc.DamageByTarget.ContainsKey(actorId) &&
+        (enc.LastTargetId != 0 ? enc.LastTargetId == actorId : enc.DamageByTarget.MaxBy(kv => kv.Value).Key == actorId);
 
     private void OnBattleState(BattleStateEvent e)
     {
@@ -448,6 +477,11 @@ public sealed class CombatTracker
     /// </summary>
     private void OnCast(CastEvent c)
     {
+        // A targeted cast is the closest server-side signal for selecting a target. Self-buffs are excluded.
+        if (_entities.SelfId == c.ActorId && c.TargetId != c.ActorId && _entities.IsKnownNpc(c.TargetId) &&
+            _current is { IsActive: true } currentTargetFight)
+            currentTargetFight.LastTargetId = c.TargetId;
+
         if (_entities.TryGetUnowned(c.ActorId, out var entity))
         {
             if (c.TargetId != c.ActorId || !_castLinkTried.Add(c.ActorId)) return;
@@ -722,11 +756,13 @@ public sealed class CombatTracker
 
     private string Title(Encounter e)
     {
+        // In a shared boss fight the group boss is not necessarily this player's current target.
+        if (e.LastTargetId != 0) return _entities.NpcName(e.LastTargetId);
         if (!string.IsNullOrEmpty(e.BossName)) return e.BossName!;
         if (e.DamageByTarget.Count > 0)
         {
-            var top = e.DamageByTarget.MaxBy(kv => kv.Value).Key;
-            var name = _entities.NpcName(top);
+            var target = e.LastTargetId != 0 ? e.LastTargetId : e.DamageByTarget.MaxBy(kv => kv.Value).Key;
+            var name = _entities.NpcName(target);
             return e.DamageByTarget.Count > 1 ? $"{name} +{e.DamageByTarget.Count - 1}" : name;
         }
         return e.Zone ?? "Combat";
@@ -737,8 +773,8 @@ public sealed class CombatTracker
     {
         if (e.BossCode != 0) return e.BossCode;
         if (e.DamageByTarget.Count == 0) return 0;
-        var top = e.DamageByTarget.MaxBy(kv => kv.Value).Key;
-        return _entities.TryGetNpc(top, out var npc) ? npc.NpcCode : 0;
+        var target = e.LastTargetId != 0 ? e.LastTargetId : e.DamageByTarget.MaxBy(kv => kv.Value).Key;
+        return _entities.TryGetNpc(target, out var npc) ? npc.NpcCode : 0;
     }
 
     private static DateTimeOffset ToTime(long unixMs) => DateTimeOffset.FromUnixTimeMilliseconds(unixMs).ToLocalTime();
@@ -753,11 +789,23 @@ public sealed class CombatTracker
         {
             RefreshIdentity(c);
             var t = c.Total;
+            // Keep the same cumulative rate while the fight is live and after it ends. A rolling window
+            // makes DPS jump when attacks pause, then jump again when the encounter is finalized.
+            var dps = t.Damage / seconds;
             rows.Add(new CombatantSnapshot(
                 c.ActorId, c.Name, c.Class, c.IsSelf,
-                t.Damage, t.Damage / seconds, (double)t.Damage / total,
+                t.Damage, dps, (double)t.Damage / total,
                 t.Hits, t.Hits > 0 ? (double)t.Crits / t.Hits : 0,
                 t.Max, c.DamageTaken, c.ServerId, c.GearScore, c.CombatPower, c.Healing));
+        }
+        // Keep the local player's row visible during an active group fight even before their first hit lands.
+        // A zero row is explicit; it prevents the overlay from looking as if another player's damage were theirs.
+        if (enc.IsActive && _entities.SelfId is { } selfId && rows.All(r => r.ActorId != selfId))
+        {
+            var self = _entities.TryGetPlayer(selfId, out var player) ? player : null;
+            rows.Add(new CombatantSnapshot(selfId, self?.Name is { Length: > 0 } name ? name : $"#{selfId}",
+                self?.Class ?? GameClass.Unknown, true, 0, 0, 0, 0, 0, 0, 0,
+                self?.ServerId ?? 0, self?.GearScore ?? 0, self?.CombatPower ?? 0, 0));
         }
         rows.Sort((a, b) => b.Damage.CompareTo(a.Damage));
         // Pets without a known owner are not a player: list them last so they never take a place in the ranking.
@@ -769,15 +817,27 @@ public sealed class CombatTracker
         }
 
         BossSnapshot? boss = null;
-        if (enc.BossId is { } bossId)
+        // Only show HP for an NPC this local player has targeted through their own cast/hit stream.
+        // Other players' damage and NPC HP updates may update that same NPC, but cannot make it appear here.
+        if (enc.LastTargetId is { } targetId and > 0 &&
+            _entities.TryGetNpc(targetId, out var primaryTarget) && primaryTarget.Hp >= 0 && primaryTarget.MaxHp > 0)
         {
+            if (enc.BossId == targetId)
+            {
             // HP the boss lost before the meter began watching it (beyond the hits it had counted by then): a fight
             // joined late, or a meter (re)started mid-fight.
             var uncounted = enc.BossMaxHpKnown && enc.BossMaxHp > 0 && enc.BossRefHp > 0
                 ? Math.Max(0, enc.BossMaxHp - enc.BossRefHp - enc.BossRefCounted)
                 : 0;
-            boss = new BossSnapshot(bossId, enc.BossCode, enc.BossName ?? _entities.NpcName(bossId), BossHpNow(enc), enc.BossMaxHp,
-                enc.BossMaxHpKnown, uncounted);
+                boss = new BossSnapshot(targetId, enc.BossCode, enc.BossName ?? _entities.NpcName(targetId), BossHpNow(enc), enc.BossMaxHp,
+                    enc.BossMaxHpKnown, uncounted);
+            }
+            else
+            {
+                boss = new BossSnapshot(primaryTarget.ActorId, primaryTarget.NpcCode,
+                    _entities.NpcName(primaryTarget.ActorId), primaryTarget.Hp, primaryTarget.MaxHp,
+                    primaryTarget.MaxHpKnown);
+            }
         }
 
         return new EncounterSnapshot(
