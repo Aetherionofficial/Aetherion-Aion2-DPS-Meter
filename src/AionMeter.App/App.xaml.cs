@@ -48,6 +48,7 @@ public partial class App : Application
     private SettingsWindow? _settingsWindow;
     private BossTimersWindow? _timersWindow;
     private EventTimersWindow? _eventTimersWindow;
+    private MapWindow? _mapWindow;
     private readonly Dictionary<object, BreakdownWindow> _breakdowns = new();
     private int _ticks;
 
@@ -158,7 +159,7 @@ public partial class App : Application
             History: ShowHistory,
             BossTimers: ShowBossTimers,
             EventTimers: ShowEventTimers,
-            Map: OpenAionMap,
+            Map: ShowAionMap,
             Settings: ShowSettings,
             Demo: () => _meter.StartDemo(),
             Replay: PickReplay,
@@ -450,16 +451,16 @@ public partial class App : Application
         _eventTimersWindow.Show();
     }
 
-    private static void OpenAionMap()
+    private void ShowAionMap()
     {
-        try
+        if (_mapWindow is { IsLoaded: true })
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://questlog.gg/aion-2/de/map") { UseShellExecute = true });
+            Activate(_mapWindow);
+            return;
         }
-        catch (System.ComponentModel.Win32Exception ex)
-        {
-            Log.Error("Could not open the AION2 map", ex);
-        }
+        _mapWindow = new MapWindow();
+        _mapWindow.Closed += (_, _) => _mapWindow = null;
+        _mapWindow.Show();
     }
 
     /// <summary>Tray notification (and a chime) shortly before a tracked boss respawns.</summary>
