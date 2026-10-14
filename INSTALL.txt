@@ -42,7 +42,7 @@ AION2 DPS Meter — установка / installation
 Метр только слушает сетевой трафик вашей игры. Он не читает память игры, ничего в неё не внедряет и не
 отправляет. Тем не менее сторонние программы могут нарушать правила игры — используйте на свой риск.
 Лицензия GPL-3.0 (файл LICENSE). Исходный код распространяется вместе с программой (архив «-source»).
-Новые версии и исходный код: https://github.com/destrxyer97hd-crypto/MostWanted-DPS/releases
+Новые версии и исходный код: https://github.com/Aetherion/MostWanted-DPS/releases
 
 
 ENGLISH
@@ -85,4 +85,4 @@ whether to delete them too.
 The meter only listens to your own game's network traffic. It never reads game memory, injects anything or
 sends anything to the game. Third-party tools may still be against the game's terms — use at your own risk.
 Licence GPL-3.0 (LICENSE file). The source code is handed out with the program (the "-source" archive).
-New versions and source code: https://github.com/destrxyer97hd-crypto/MostWanted-DPS/releases
+New versions and source code: https://github.com/Aetherion/MostWanted-DPS/releases

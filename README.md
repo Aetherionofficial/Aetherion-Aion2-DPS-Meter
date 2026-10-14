@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/destrxyer97hd-crypto/MostWanted-DPS/releases/latest"><img alt="Download the latest release" src="https://img.shields.io/github/v/release/destrxyer97hd-crypto/MostWanted-DPS?label=download&color=c9a45c&style=for-the-badge"></a>
+  <a href="https://github.com/Aetherion/MostWanted-DPS/releases/latest"><img alt="Download the latest release" src="https://img.shields.io/github/v/release/Aetherion/MostWanted-DPS?label=download&color=c9a45c&style=for-the-badge"></a>
   <img alt="Windows 10 / 11, 64-bit" src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-2b3a67?style=for-the-badge">
   <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-3dd68c?style=for-the-badge"></a>
 </p>
