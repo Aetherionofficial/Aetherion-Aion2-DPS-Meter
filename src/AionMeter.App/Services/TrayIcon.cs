@@ -16,6 +16,7 @@ public sealed class TrayIcon : IDisposable
     private readonly ToolStripMenuItem _eventTimers;
     private readonly ToolStripMenuItem _map;
     private readonly ToolStripMenuItem _settings;
+    private readonly ToolStripMenuItem _discordSupport;
     private readonly ToolStripMenuItem _language;
     private readonly ToolStripMenuItem _demo;
     private readonly ToolStripMenuItem _replay;
@@ -44,6 +45,7 @@ public sealed class TrayIcon : IDisposable
         _eventTimers = new ToolStripMenuItem("", null, (_, _) => actions.EventTimers());
         _map = new ToolStripMenuItem("AION2 Map (Questlog)", null, (_, _) => actions.Map());
         _settings = new ToolStripMenuItem("", null, (_, _) => actions.Settings());
+        _discordSupport = new ToolStripMenuItem("", null, (_, _) => actions.DiscordSupport());
         _language = new ToolStripMenuItem("", null, (_, _) => actions.ToggleLanguage());
         _demo = new ToolStripMenuItem("", null, (_, _) => actions.Demo());
         _replay = new ToolStripMenuItem("", null, (_, _) => actions.Replay());
@@ -51,7 +53,7 @@ public sealed class TrayIcon : IDisposable
         menu.Items.AddRange([
             _update, _updateSeparator,
             _toggle, _clickThrough, _reset, new ToolStripSeparator(),
-            _history, _timers, _eventTimers, _map, _settings, _language, _demo, _replay, _checkUpdates, new ToolStripSeparator(),
+            _history, _timers, _eventTimers, _map, _settings, _discordSupport, _language, _demo, _replay, _checkUpdates, new ToolStripSeparator(),
             _exit,
         ]);
         ApplyTexts();
@@ -87,6 +89,7 @@ public sealed class TrayIcon : IDisposable
         _timers.Text = t.TrayTimers;
         _eventTimers.Text = t.EventTimersTitle;
         _settings.Text = t.TraySettings;
+        _discordSupport.Text = t.TrayDiscordSupport;
         _language.Text = t.SwitchLanguage;
         _demo.Text = t.TrayDemo;
         _replay.Text = t.TrayReplay;
@@ -156,6 +159,7 @@ public sealed record TrayActions(
     Action EventTimers,
     Action Map,
     Action Settings,
+    Action DiscordSupport,
     Action Demo,
     Action Replay,
     Action ToggleLanguage,

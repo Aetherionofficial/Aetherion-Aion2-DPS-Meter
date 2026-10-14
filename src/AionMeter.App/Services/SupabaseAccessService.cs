@@ -260,4 +260,3 @@ public static class SupabaseAccessService
         [property: JsonPropertyName("is_revoked")] bool IsRevoked,
         [property: JsonPropertyName("license_type")] string LicenseType);
 }
-

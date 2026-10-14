@@ -271,4 +271,3 @@ public sealed class Updater : IDisposable
         _feed.Dispose();
     }
 }
-

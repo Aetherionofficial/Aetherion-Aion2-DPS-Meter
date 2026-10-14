@@ -74,6 +74,11 @@ public sealed class AppSettings
     /// <summary>Fetch skill icons from the official AION 2 game-data CDN (cached locally).</summary>
     public bool DownloadIcons { get; set; } = true;
 
+    // Discord Rich Presence (off by default; character data is shared only after explicit opt-in).
+    public bool DiscordPresenceEnabled { get; set; }
+    /// <summary>Faction is selected by the player because current capture data does not reliably contain it.</summary>
+    public string DiscordFaction { get; set; } = "";
+
     // Updates
     /// <summary>Ask GitHub for a newer version shortly after start and every few hours.</summary>
     public bool CheckUpdates { get; set; } = true;

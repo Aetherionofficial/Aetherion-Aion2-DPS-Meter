@@ -29,6 +29,23 @@ public sealed class UiText
     public string Code { get; init; } = "en";
     public string LanguageName { get; init; } = "English";
     public string MapLabel { get; init; } = "Map";
+    public string DiscordPresenceSection { get; init; } = "DISCORD PRESENCE";
+    public string DiscordPresenceEnabled { get; init; } = "Share class, level and faction on Discord";
+    public string DiscordPresenceHint { get; init; } = "Shown in your Discord activity according to your Discord privacy settings. Sent directly to the Discord desktop app. Select your faction below; AION capture does not reliably provide it.";
+    public string DiscordFactionLabel { get; init; } = "Your faction";
+    public string DiscordFactionUnknown { get; init; } = "Not set";
+    public string DiscordFactionElyos { get; init; } = "Elyos";
+    public string DiscordFactionAsmodian { get; init; } = "Asmodian";
+    public string CompareSelected { get; init; } = "Compare 2";
+    public string CompareTitle { get; init; } = "Fight comparison";
+    public string CompareSelectTwo { get; init; } = "Select exactly two saved fights to compare.";
+    public string CompareHint { get; init; } = "Select two fights in the list with Ctrl-click.";
+    public string CompareMetric { get; init; } = "METRIC";
+    public string CompareDamage { get; init; } = "TOTAL DAMAGE";
+    public string CompareDps { get; init; } = "PARTY DPS";
+    public string CompareDuration { get; init; } = "DURATION";
+    public string CompareHealing { get; init; } = "TOTAL HEALING";
+    public string CompareDelta { get; init; } = "CHANGE";
 
     /// <summary>Dates in the interface language ("06 Oct"), not in the Windows one.</summary>
     public System.Globalization.CultureInfo Culture => System.Globalization.CultureInfo.GetCultureInfo(Code switch
@@ -242,6 +259,7 @@ public sealed class UiText
     public string TrayShow { get; init; } = "Show overlay";
     public string TrayHistory { get; init; } = "Fight history…";
     public string TraySettings { get; init; } = "Settings…";
+    public string TrayDiscordSupport { get; init; } = "Aetherion Discord — Help & support";
     public string TrayDemo { get; init; } = "Run demo fight";
     public string TrayReplay { get; init; } = "Replay capture file…";
     public string TrayExit { get; init; } = "Exit";
@@ -299,6 +317,7 @@ public sealed class UiText
     public string ThDps { get; init; } = "DPS";
     public string ThAvg { get; init; } = "AVG";
     public string ThMax { get; init; } = "MAX";
+    public string IdleDpsHint { get; init; } = "Live DPS follows recent damage; during a pause, the highest DPS reached in this fight stays visible.";
     public string ThCrit { get; init; } = "CRIT";
     public string ThShare { get; init; } = "SHARE";
     public string ThBack { get; init; } = "BACK";
@@ -456,6 +475,12 @@ public sealed class UiText
     {
         Code = "de", LanguageName = "Deutsch",
         MapLabel = "Karte",
+        DiscordPresenceSection = "DISCORD-STATUS", DiscordPresenceEnabled = "Klasse, Level und Fraktion auf Discord anzeigen",
+        DiscordPresenceHint = "Wird gemäß deinen Discord-Datenschutzeinstellungen in deiner Aktivität angezeigt und direkt an die Discord-Desktop-App gesendet. Wähle deine Fraktion unten aus; der AION-Mitschnitt liefert sie nicht zuverlässig.",
+        DiscordFactionLabel = "Deine Fraktion", DiscordFactionUnknown = "Nicht festgelegt", DiscordFactionElyos = "Elyos", DiscordFactionAsmodian = "Asmodier",
+        CompareSelected = "2 vergleichen", CompareTitle = "Kampfvergleich", CompareSelectTwo = "Wähle genau zwei gespeicherte Kämpfe zum Vergleichen aus.",
+        CompareHint = "Wähle zwei Kämpfe mit Strg-Klick aus.", CompareMetric = "WERT", CompareDamage = "GESAMTSCHADEN", CompareDps = "GRUPPEN-DPS",
+        CompareDuration = "DAUER", CompareHealing = "GESAMTHEILUNG", CompareDelta = "ÄNDERUNG",
         ClassNames = new Dictionary<Core.Events.GameClass, string>
         {
             [Core.Events.GameClass.Gladiator] = "Gladiator", [Core.Events.GameClass.Templar] = "Templer",
@@ -519,7 +544,7 @@ public sealed class UiText
         DamageUnsentTip = "Bei Weltbossen mit vielen Spielern sendet das Spiel nur für wenige Spieler vollständige Schadenswerte. Für andere fehlen Zahlen oder DoT-Schaden. Daher sind deren Werte und Anteile hier niedriger als tatsächlich; dieses Meter kann die fehlenden Daten nicht sehen.",
         TipRestart = "Meter neu starten ({0}): bisherigen Kampf speichern und Zählung neu beginnen", InProgress = "Läuft", Kill = "Sieg", Wipe = "Niederlage", Ended = "Beendet",
         OpenWorld = "Offene Welt", OpenFight = "Kampf öffnen", Fights = "Kämpfe", NamesLater = "Namen nach dem nächsten Ladebildschirm", YourPlace = "Dein Rang in diesem Kampf", Party = "Gruppe", Seconds = "Sek.",
-        SwitchLanguage = "Sprache wechseln", TrayHide = "Overlay ausblenden", TrayShow = "Overlay anzeigen", TrayHistory = "Kampfverlauf…", TraySettings = "Einstellungen…",
+        SwitchLanguage = "Sprache wechseln", TrayHide = "Overlay ausblenden", TrayShow = "Overlay anzeigen", TrayHistory = "Kampfverlauf…", TraySettings = "Einstellungen…", TrayDiscordSupport = "Aetherion Discord — Hilfe & Support",
         TrayDemo = "Beispielkampf starten", TrayReplay = "Aufzeichnung wiedergeben…", TrayExit = "Beenden",
         ClickThroughOn = "Klickdurchlässig EIN — Overlay ignoriert die Maus. {0} schaltet es aus.", ClickThroughOff = "Klickdurchlässig AUS",
         Live = "Live", LiveHint = "zeigt den aktuellen Kampf", SessionSection = "DIESE SITZUNG", SavedToday = "GESPEICHERT · HEUTE", SavedYesterday = "GESPEICHERT · GESTERN",
@@ -529,7 +554,7 @@ public sealed class UiText
         TipChat = "Ergebnis für Chat oder Discord", RowDamage = "Schaden", RowHits = "Treffer", RowCrit = "Kritisch", RowMax = "Max.",
         Players = n => n == 1 ? "1 Spieler" : $"{n} Spieler",
         TabDps = "DPS", TabAccuracy = "Trefferquote", TabRotation = "Rotation", TabDefense = "Verteidigung", TabHealing = "Heilung", HealingTotal = "GESAMTHEILUNG", HealingSkill = "FERTIGKEIT", HealingEvents = "ANWENDUNGEN", HealingAmount = "GEHEILT", FightHighlights = "KAMPF-HIGHLIGHTS", HighlightTopSkill = "STÄRKSTE SCHADENSFERTIGKEIT", HighlightPeakSecond = "STÄRKSTE SEKUNDE", HighlightHealing = "GEHEILTE LP", HighlightNoHealing = "Keine Heilung erfasst", TilePlace = "RANG", TileDamage = "SCHADEN", TileDps = "DPS", TileContrib = "ANTEIL", TileTime = "ZEIT",
-        DpsTimeline = "DPS-VERLAUF", ThSkill = "FERTIGKEIT", ThHits = "TREFFER", ThDamage = "SCHADEN", ThDps = "DPS", ThAvg = "Ø", ThMax = "MAX.", ThCrit = "KRIT.", ThShare = "ANTEIL", ThBack = "RÜCKEN", ThFront = "FRONTAL", ThPerfect = "PERFEKT", ThSmite = "VERNICHTEND", ThMulti = "MEHRFACH",
+        DpsTimeline = "DPS-VERLAUF", ThSkill = "FERTIGKEIT", ThHits = "TREFFER", ThDamage = "SCHADEN", ThDps = "DPS", ThAvg = "Ø", ThMax = "MAX.", IdleDpsHint = "Live-DPS folgt dem aktuellen Schaden; bei einer Pause bleibt der höchste DPS-Wert dieses Kampfes stehen.", ThCrit = "KRIT.", ThShare = "ANTEIL", ThBack = "RÜCKEN", ThFront = "FRONTAL", ThPerfect = "PERFEKT", ThSmite = "VERNICHTEND", ThMulti = "MEHRFACH",
         SortTip = "Nach dieser Spalte sortieren · erneut klicken zum Umkehren", QHitsMeasured = "{0} Treffer gemessen", QPositional = "Positionstreffer", QExtraHits = "Zusatztreffer", QBiggestHit = "STÄRKSTER TREFFER",
         DefTaken = "ERLITTENER SCHADEN", DefTakenPerSec = "SCHADEN / SEK.", DefDotTicks = "DOT-TICKS", DefHits = "{0} Treffer", DefDot = "Schaden über Zeit",
         DefNote = "Erlittener Schaden umfasst NPC-Treffer während des Kampfes. Details zu Blocken, Parieren und Ausweichen hängen von den Serverdaten ab.",
@@ -568,6 +593,12 @@ public sealed class UiText
         Code = "ru",
         LanguageName = "Русский",
         MapLabel = "Карта",
+        DiscordPresenceSection = "СТАТУС DISCORD", DiscordPresenceEnabled = "Показывать класс, уровень и фракцию в Discord",
+        DiscordPresenceHint = "Отображается в вашей активности Discord согласно настройкам приватности и отправляется прямо в приложение Discord. Выберите фракцию ниже: захват AION не передаёт её надёжно.",
+        DiscordFactionLabel = "Ваша фракция", DiscordFactionUnknown = "Не выбрана", DiscordFactionElyos = "Элийцы", DiscordFactionAsmodian = "Асмодиане",
+        CompareSelected = "Сравнить 2", CompareTitle = "Сравнение боёв", CompareSelectTwo = "Выберите ровно два сохранённых боя для сравнения.",
+        CompareHint = "Выберите два боя, удерживая Ctrl.", CompareMetric = "ПОКАЗАТЕЛЬ", CompareDamage = "ОБЩИЙ УРОН", CompareDps = "DPS ГРУППЫ",
+        CompareDuration = "ДЛИТЕЛЬНОСТЬ", CompareHealing = "ОБЩЕЕ ЛЕЧЕНИЕ", CompareDelta = "ИЗМЕНЕНИЕ",
         ClassNames = new Dictionary<Core.Events.GameClass, string>
         {
             [Core.Events.GameClass.Gladiator] = "Гладиатор",
@@ -707,6 +738,7 @@ public sealed class UiText
         TrayShow = "Показать оверлей",
         TrayHistory = "История боёв…",
         TraySettings = "Настройки…",
+        TrayDiscordSupport = "Discord Aetherion — помощь и поддержка",
         TrayDemo = "Демо-бой",
         TrayReplay = "Воспроизвести запись…",
         TrayExit = "Выход",
@@ -778,6 +810,7 @@ public sealed class UiText
         ThDps = "DPS",
         ThAvg = "СРЕДН.",
         ThMax = "МАКС.",
+        IdleDpsHint = "Текущий DPS учитывает недавний урон; во время паузы отображается максимальный DPS за бой.",
         ThCrit = "КРИТ",
         ThShare = "ДОЛЯ",
         ThBack = "СПИНА",
@@ -933,4 +966,3 @@ public sealed class UiText
         return mod10 switch { 1 => one, >= 2 and <= 4 => few, _ => many };
     }
 }
-
