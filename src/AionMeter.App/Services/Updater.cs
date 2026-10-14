@@ -150,17 +150,20 @@ public sealed class Updater : IDisposable
                      "while (Get-Process -Id $j.Pid -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 300 }; " +
                      "$stage=Join-Path $env:TEMP ('Aetherion-update-' + [guid]::NewGuid().ToString('N')); " +
                      "New-Item -ItemType Directory -Path $stage | Out-Null; " +
-                     "try { Expand-Archive -LiteralPath $j.Archive -DestinationPath $stage -Force; " +
+                     "$success=$false; try { Expand-Archive -LiteralPath $j.Archive -DestinationPath $stage -Force; " +
                      "$newExe=Join-Path $stage 'AION2DpsMeter.exe'; if (-not (Test-Path -LiteralPath $newExe)) { throw 'The update archive does not contain AION2DpsMeter.exe' }; " +
                      // Keep the executable name the player launched: new direct downloads use Aetherion.exe,
                      // while existing portable installs continue to run as AION2DpsMeter.exe.
-                     "Copy-Item -LiteralPath $newExe -Destination $j.Exe -Force; " +
+                     // Windows can keep the executable image locked briefly after the process exits, or another
+                     // Aetherion instance may still be closing. Retry the replace instead of failing immediately.
+                     "for ($i=0; $i -lt 40; $i++) { try { Copy-Item -LiteralPath $newExe -Destination $j.Exe -Force -ErrorAction Stop; break } catch { if ($i -eq 39) { throw }; Start-Sleep -Milliseconds 750 } }; " +
                      "foreach ($doc in @('LICENSE','INSTALL.txt')) { $source=Join-Path $stage $doc; if (Test-Path $source) { Copy-Item -LiteralPath $source -Destination $j.Target -Force } }; " +
-                     "Start-Sleep -Milliseconds 500; $started=$false; for ($i=0; $i -lt 5 -and -not $started; $i++) { try { Start-Process -FilePath $j.Exe -ArgumentList '--updated' -ErrorAction Stop; $started=$true } catch { Start-Sleep -Milliseconds 700 } }; if (-not $started) { throw 'The updated app could not be restarted' } } catch { " +
-                     "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show(('Aetherion konnte das Update nicht einspielen: ' + $_.Exception.Message),'Aetherion Update') | Out-Null " +
+                     "Start-Sleep -Milliseconds 500; $started=$false; for ($i=0; $i -lt 5 -and -not $started; $i++) { try { Start-Process -FilePath $j.Exe -ArgumentList '--updated' -ErrorAction Stop; $started=$true } catch { Start-Sleep -Milliseconds 700 } }; if (-not $started) { throw 'The updated app could not be restarted' }; $success=$true } catch { " +
+                     "try { Start-Process -FilePath $j.Exe -ErrorAction SilentlyContinue | Out-Null } catch {}; " +
+                     "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show(('Aetherion konnte das Update nicht einspielen: ' + $_.Exception.Message + [Environment]::NewLine + 'Das Update-Archiv bleibt erhalten: ' + $j.Archive),'Aetherion Update') | Out-Null " +
                      "} finally { " +
                      "Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue; " +
-                     "Remove-Item -LiteralPath $j.Archive -Force -ErrorAction SilentlyContinue }";
+                     "if ($success) { Remove-Item -LiteralPath $j.Archive -Force -ErrorAction SilentlyContinue } }";
         var encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
         var start = new ProcessStartInfo("powershell.exe") { UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
         start.ArgumentList.Add("-NoProfile");
