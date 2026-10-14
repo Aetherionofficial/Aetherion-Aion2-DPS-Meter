@@ -216,17 +216,57 @@
                     <!-- DPS -->
                     <Grid x:Name="PageDps">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="170" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="158" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Border CornerRadius="8" Background="#0CFFFFFF" Padding="4,6,8,2">
+                        <Border Grid.Row="0" CornerRadius="10" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}"
+                                BorderThickness="1" Padding="15,11" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{Binding FightHighlights, Source={x:Static s:UiText.Current}}"
+                                           Style="{StaticResource SectionLabel}" Foreground="{StaticResource Gold}" />
+                                <Grid Grid.Row="1" Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding HighlightTopSkill, Source={x:Static s:UiText.Current}}" Style="{StaticResource TileLabel}" />
+                                        <TextBlock x:Name="HighlightSkillName" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Text}"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
+                                        <TextBlock x:Name="HighlightSkillDamage" FontFamily="{StaticResource NumberFont}" FontSize="11"
+                                                   Foreground="{StaticResource TextDim}" Margin="0,1,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="8,0,12,0">
+                                        <TextBlock Text="{Binding HighlightPeakSecond, Source={x:Static s:UiText.Current}}" Style="{StaticResource TileLabel}" />
+                                        <TextBlock x:Name="HighlightPeakValue" FontFamily="{StaticResource NumberFont}" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource Text}" Margin="0,3,0,0" />
+                                        <TextBlock x:Name="HighlightPeakTime" FontFamily="{StaticResource NumberFont}" FontSize="11"
+                                                   Foreground="{StaticResource TextDim}" Margin="0,1,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Margin="8,0,0,0">
+                                        <TextBlock Text="{Binding HighlightHealing, Source={x:Static s:UiText.Current}}" Style="{StaticResource TileLabel}" />
+                                        <TextBlock x:Name="HighlightHealingValue" FontFamily="{StaticResource NumberFont}" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource Text}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
+                                        <TextBlock x:Name="HighlightHealingSkill" FontSize="11" Foreground="{StaticResource TextDim}"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Border Grid.Row="1" CornerRadius="8" Background="#0CFFFFFF" Padding="4,6,8,2">
                             <Grid>
                                 <TextBlock Text="{Binding DpsTimeline, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="8,0,0,0" />
                                 <c:TimelineChart x:Name="Chart" Margin="0,14,0,0" />
                             </Grid>
                         </Border>
-                        <Grid x:Name="SkillHead" Grid.Row="1" Margin="8,12,14,4">
+                        <Grid x:Name="SkillHead" Grid.Row="2" Margin="8,10,14,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="54" />
@@ -246,7 +286,7 @@
                             <Button Grid.Column="6" Tag="Crit" Style="{StaticResource ThButton}" />
                             <Button Grid.Column="7" Tag="Share" Style="{StaticResource ThButton}" />
                         </Grid>
-                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
                             <ItemsControl x:Name="SkillList">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -434,3 +474,4 @@
         </Grid>
     </Border>
 </Window>
+

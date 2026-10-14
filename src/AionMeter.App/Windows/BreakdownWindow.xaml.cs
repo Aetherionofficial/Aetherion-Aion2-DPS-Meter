@@ -183,6 +183,19 @@ public partial class BreakdownWindow : Window
                     Format.Grouped(h.Amount), $"{h.Name} ({h.SkillCode})\n{T.HealingAmount}: {Format.Grouped(h.Amount)}\n{T.HealingEvents}: {h.Events}");
             }).ToList();
 
+        var topSkill = d.Skills.OrderByDescending(s => s.Damage).FirstOrDefault();
+        HighlightSkillName.Text = topSkill?.Name ?? "—";
+        HighlightSkillDamage.Text = topSkill is null ? "" : Format.Compact(topSkill.Damage);
+
+        var peakSecond = d.PerSecond.Select((damage, second) => (damage, second))
+            .OrderByDescending(x => x.damage).FirstOrDefault();
+        HighlightPeakValue.Text = $"{Format.Compact(peakSecond.damage)}/s";
+        HighlightPeakTime.Text = Format.Clock((long)peakSecond.second * 1000);
+
+        var topHeal = (d.HealingSkills ?? []).OrderByDescending(h => h.Amount).FirstOrDefault();
+        HighlightHealingValue.Text = Format.Grouped(d.HealingTotal);
+        HighlightHealingSkill.Text = topHeal is null || topHeal.Amount <= 0 ? T.HighlightNoHealing : topHeal.Name;
+
         var maxShare = d.Skills.Count > 0 ? d.Skills.Max(s => s.Share) : 1;
         SkillList.ItemsSource = _skillOrder.Apply(d.Skills, T.Culture).Select(s => ToItem(s, maxShare)).ToList();
         AccuracyList.ItemsSource = _accuracyOrder.Apply(d.Skills.Where(s => s.Hits > 0), T.Culture).Select(s => ToItem(s, maxShare)).ToList();
@@ -339,3 +352,4 @@ public partial class BreakdownWindow : Window
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 }
+

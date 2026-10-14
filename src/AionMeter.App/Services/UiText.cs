@@ -282,6 +282,11 @@ public sealed class UiText
     public string HealingSkill { get; init; } = "SKILL";
     public string HealingEvents { get; init; } = "CASTS";
     public string HealingAmount { get; init; } = "HEALING";
+    public string FightHighlights { get; init; } = "FIGHT HIGHLIGHTS";
+    public string HighlightTopSkill { get; init; } = "TOP DAMAGE SKILL";
+    public string HighlightPeakSecond { get; init; } = "STRONGEST SECOND";
+    public string HighlightHealing { get; init; } = "HEALING DONE";
+    public string HighlightNoHealing { get; init; } = "No healing recorded";
     public string TilePlace { get; init; } = "PLACE";
     public string TileDamage { get; init; } = "DMG";
     public string TileDps { get; init; } = "DPS";
@@ -523,7 +528,7 @@ public sealed class UiText
         CopyTable = "Gruppentabelle für Discord kopieren", Copied = "Kopiert — mit Strg+V in den Chat einfügen", CopyFailed = "Zwischenablage belegt — bitte erneut versuchen",
         TipChat = "Ergebnis für Chat oder Discord", RowDamage = "Schaden", RowHits = "Treffer", RowCrit = "Kritisch", RowMax = "Max.",
         Players = n => n == 1 ? "1 Spieler" : $"{n} Spieler",
-        TabDps = "DPS", TabAccuracy = "Trefferquote", TabRotation = "Rotation", TabDefense = "Verteidigung", TabHealing = "Heilung", HealingTotal = "GESAMTHEILUNG", HealingSkill = "FERTIGKEIT", HealingEvents = "ANWENDUNGEN", HealingAmount = "GEHEILT", TilePlace = "RANG", TileDamage = "SCHADEN", TileDps = "DPS", TileContrib = "ANTEIL", TileTime = "ZEIT",
+        TabDps = "DPS", TabAccuracy = "Trefferquote", TabRotation = "Rotation", TabDefense = "Verteidigung", TabHealing = "Heilung", HealingTotal = "GESAMTHEILUNG", HealingSkill = "FERTIGKEIT", HealingEvents = "ANWENDUNGEN", HealingAmount = "GEHEILT", FightHighlights = "KAMPF-HIGHLIGHTS", HighlightTopSkill = "STÄRKSTE SCHADENSFERTIGKEIT", HighlightPeakSecond = "STÄRKSTE SEKUNDE", HighlightHealing = "GEHEILTE LP", HighlightNoHealing = "Keine Heilung erfasst", TilePlace = "RANG", TileDamage = "SCHADEN", TileDps = "DPS", TileContrib = "ANTEIL", TileTime = "ZEIT",
         DpsTimeline = "DPS-VERLAUF", ThSkill = "FERTIGKEIT", ThHits = "TREFFER", ThDamage = "SCHADEN", ThDps = "DPS", ThAvg = "Ø", ThMax = "MAX.", ThCrit = "KRIT.", ThShare = "ANTEIL", ThBack = "RÜCKEN", ThFront = "FRONTAL", ThPerfect = "PERFEKT", ThSmite = "VERNICHTEND", ThMulti = "MEHRFACH",
         SortTip = "Nach dieser Spalte sortieren · erneut klicken zum Umkehren", QHitsMeasured = "{0} Treffer gemessen", QPositional = "Positionstreffer", QExtraHits = "Zusatztreffer", QBiggestHit = "STÄRKSTER TREFFER",
         DefTaken = "ERLITTENER SCHADEN", DefTakenPerSec = "SCHADEN / SEK.", DefDotTicks = "DOT-TICKS", DefHits = "{0} Treffer", DefDot = "Schaden über Zeit",
@@ -753,6 +758,11 @@ public sealed class UiText
         TabDefense = "Защита",
         TabHealing = "Лечение",
         HealingTotal = "ВСЕГО ЛЕЧЕНИЯ",
+        FightHighlights = "ИТОГИ БОЯ",
+        HighlightTopSkill = "СИЛЬНЕЙШИЙ НАВЫК УРОНА",
+        HighlightPeakSecond = "СИЛЬНЕЙШАЯ СЕКУНДА",
+        HighlightHealing = "ИСЦЕЛЕНО",
+        HighlightNoHealing = "Лечение не зарегистрировано",
         HealingSkill = "УМЕНИЕ",
         HealingEvents = "ПРИМЕНЕНИЯ",
         HealingAmount = "ЛЕЧЕНИЕ",
@@ -923,3 +933,4 @@ public sealed class UiText
         return mod10 switch { 1 => one, >= 2 and <= 4 => few, _ => many };
     }
 }
+

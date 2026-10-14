@@ -1,7 +1,7 @@
 # Builds the downloads for players:
 #   dist\Aetherion-DPS-Meter-Setup-v<version>.exe - installer: shortcuts, uninstall, Npcap check (needs Inno Setup 7)
+#   dist\Aetherion.exe - standalone app download (single-file, self-contained)
 #   dist\Aetherion-DPS-Meter-v<version>-win-x64.zip - portable app (no .NET install needed)
-#   dist\Aetherion-DPS-Meter-v<version>-source.zip - the source code (GPL-3.0: hand it out alongside the program)
 #   dist\Aetherion-DPS-Meter-Setup.exe, dist\Aetherion-DPS-Meter-win-x64.zip - stable names for latest links
 #   that always give the newest version (releases/latest/download/<name>)
 # Packet recordings (captures\) and build output never go into any of them.
@@ -94,7 +94,9 @@ $programZip = Join-Path $dist "$name.zip"
 New-Zip $stage $programZip
 $stableZip = Join-Path $dist "Aetherion-DPS-Meter-win-x64.zip" # the never-changing name, as for the installer below
 Copy-Item $programZip $stableZip -Force
-$outputs = @($programZip, $stableZip)
+$directExe = Join-Path $dist "Aetherion.exe"
+Copy-Item (Join-Path $stage "AION2DpsMeter.exe") $directExe -Force
+$outputs = @($directExe, $programZip, $stableZip)
 
 # Installer: a regular (not single-file) publish starts faster once installed, and Inno Setup's LZMA2 packs it
 # smaller than the single-file exe.
@@ -122,24 +124,5 @@ else {
     Write-Warning "Inno Setup 7 not found (https://jrsoftware.org/isdl.php): no installer this time, the zip is ready."
 }
 
-# Source: everything tracked by the project, without recordings, build output or local tooling.
-$sourceStage = Join-Path $dist "Aetherion-DPS-Meter-v$Version-source"
-if (Test-Path $sourceStage) { Remove-Item $sourceStage -Recurse -Force }
-$skip = '(^|/)(bin|obj|captures|dist|site-kit|artifacts|output|\.appdata|\.dotnet-home|\.local-nuget|\.nuget|\.temp|\.tmp|\.git|\.vs|\.claude|TestResults)(/|$)|(^|/)\.nuget\.org\.config$'
-$sourceFiles = & git -C $root ls-files --cached --others --exclude-standard
-if ($LASTEXITCODE -ne 0) { throw "Could not enumerate source files with git" }
-foreach ($relative in $sourceFiles) {
-    $normalized = $relative.Replace('\\', '/')
-    if ($normalized -match $skip -or [IO.Path]::GetExtension($normalized) -in '.pcap', '.pcapng') { continue }
-    $sourceFile = Join-Path $root $relative
-    if (-not (Test-Path -LiteralPath $sourceFile -PathType Leaf)) { continue }
-    $target = Join-Path $sourceStage $relative
-    New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
-    Copy-Item -LiteralPath $sourceFile -Destination $target
-}
-$sourceZip = "$sourceStage.zip"
-New-Zip $sourceStage $sourceZip
-Remove-Item $sourceStage -Recurse -Force
-$outputs += $sourceZip
-
 Get-Item $outputs | Select-Object Name, @{ n = "MB"; e = { [math]::Round($_.Length / 1MB, 1) } }
+
