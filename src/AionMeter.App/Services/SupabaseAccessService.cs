@@ -17,6 +17,8 @@ public sealed record AccountLicenseStatus(bool Authenticated, DateTimeOffset? Ex
     public bool HasActiveLicense => Authenticated && LicenseType != "none" && !IsRevoked && (ExpiresAt is null || ExpiresAt > DateTimeOffset.UtcNow);
 }
 
+public sealed class AccountAccessBlockedException(string message) : InvalidOperationException(message);
+
 /// <summary>Discord login and one-time Supabase license redemption.</summary>
 public static class SupabaseAccessService
 {
@@ -182,8 +184,28 @@ public static class SupabaseAccessService
         if (!response.IsSuccessStatusCode) throw new InvalidOperationException(ReadError(body));
         var rows = JsonSerializer.Deserialize<List<EntitlementRow>>(body, JsonOptions) ?? [];
         var row = rows.FirstOrDefault();
-        return CurrentStatus = new AccountLicenseStatus(true, row?.ExpiresAt, row?.IsPartner ?? false,
+        var status = new AccountLicenseStatus(true, row?.ExpiresAt, row?.IsPartner ?? false,
             row?.IsRevoked ?? false, row?.LicenseType ?? "none");
+        if (status.HasActiveLicense)
+            await CheckAccountInstallationAsync(accessToken, cancellationToken);
+        return CurrentStatus = status;
+    }
+
+    private static async Task CheckAccountInstallationAsync(string accessToken, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{ProjectUrl}/functions/v1/aetherion-license-check")
+        {
+            Content = JsonContent.Create(new { installationId = LicenseService.InstallationId }, options: JsonOptions),
+        };
+        request.Headers.Add("apikey", PublishableKey);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        using var response = await Http.SendAsync(request, cancellationToken);
+        if (response.IsSuccessStatusCode) return;
+
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response.StatusCode is HttpStatusCode.Forbidden)
+            throw new AccountAccessBlockedException("ACCOUNT_INSTALLATION_BLOCKED");
+        throw new InvalidOperationException(ReadError(body));
     }
 
     private static string? ReadRefreshToken()

@@ -1,5 +1,23 @@
 # Aetherion account access
 
+## Device sharing protection
+
+The Windows app calls the `aetherion-license-check` Edge Function when it checks an active Discord entitlement. The account is bound to its first installation. A later check from a different installation revokes that entitlement automatically. After confirming the account owner, an administrator can clear a false positive and require a new key redemption with:
+
+```sql
+delete from public.aetherion_account_installations
+where user_id = 'SUPABASE_AUTH_USER_UUID';
+```
+
+Deploy the migration and function from the repository root after linking the Supabase project:
+
+```powershell
+npx supabase db push
+npx supabase functions deploy aetherion-license-check
+```
+
+The Edge Function verifies the user's Supabase access token. Never put the service-role key in the desktop client.
+
 ## One-time project setup
 
 1. In the Supabase Dashboard, open **SQL Editor**, create a query, paste `aetherion-access.sql`, and run it. This was the initial account-login setup.

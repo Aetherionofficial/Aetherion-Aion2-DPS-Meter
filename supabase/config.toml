@@ -1,0 +1,4 @@
+project_id = "aafdjzdirqpanuueveng"
+
+[functions.aetherion-license-check]
+verify_jwt = true

@@ -260,6 +260,14 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
+            if (ex is AccountAccessBlockedException)
+            {
+                _licenseTimer?.Stop();
+                MessageBox.Show("Für dieses Discord-Konto wurde ein weiterer Gerätezugriff erkannt. Der Zugang wurde automatisch gesperrt. Bitte eröffne ein Ticket auf unserem Discord.",
+                    "Aetherion-Zugang gesperrt", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Shutdown();
+                return;
+            }
             // A temporary network problem must not immediately terminate a valid session.
             Log.Error("Could not refresh the Aetherion entitlement; will retry later", ex);
         }

@@ -434,3 +434,9 @@ captures/
 dist/
 site-kit/
 .claude/
+.appdata/
+.dotnet-home/
+.local-nuget/
+.nuget/
+.codex.NuGet.Config
+supabase/.temp/

@@ -124,7 +124,7 @@ else {
 # Source: everything tracked by the project, without recordings, build output or local tooling.
 $sourceStage = Join-Path $dist "Aetherion-DPS-Meter-v$Version-source"
 if (Test-Path $sourceStage) { Remove-Item $sourceStage -Recurse -Force }
-$skip = '(^|/)(bin|obj|captures|dist|site-kit|artifacts|output|\.appdata|\.dotnet-home|\.local-nuget|\.tmp|\.git|\.vs|\.claude|TestResults)(/|$)|(^|/)\.nuget\.org\.config$'
+$skip = '(^|/)(bin|obj|captures|dist|site-kit|artifacts|output|\.appdata|\.dotnet-home|\.local-nuget|\.nuget|\.temp|\.tmp|\.git|\.vs|\.claude|TestResults)(/|$)|(^|/)\.nuget\.org\.config$'
 $sourceFiles = & git -C $root ls-files --cached --others --exclude-standard
 if ($LASTEXITCODE -ne 0) { throw "Could not enumerate source files with git" }
 foreach ($relative in $sourceFiles) {

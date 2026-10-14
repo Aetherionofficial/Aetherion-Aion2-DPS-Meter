@@ -85,7 +85,9 @@ public sealed class ActivationWindow : Window
         }
         catch (Exception ex)
         {
-            _accountStatus.Text = "Anmeldung fehlgeschlagen: " + ex.Message;
+            _accountStatus.Text = ex is AccountAccessBlockedException
+                ? "Zugang gesperrt: Für dieses Discord-Konto wurde ein weiterer Gerätezugriff erkannt. Bitte eröffne ein Ticket auf unserem Discord."
+                : "Anmeldung fehlgeschlagen: " + ex.Message;
             _accountStatus.Foreground = Brushes.Orange;
         }
         finally { SetBusy(false); }
@@ -112,7 +114,9 @@ public sealed class ActivationWindow : Window
         }
         catch (Exception ex)
         {
-            _accountStatus.Text = ex.Message;
+            _accountStatus.Text = ex is AccountAccessBlockedException
+                ? "Zugang gesperrt: Für dieses Discord-Konto wurde ein weiterer Gerätezugriff erkannt. Bitte eröffne ein Ticket auf unserem Discord."
+                : ex.Message;
             _accountStatus.Foreground = Brushes.Orange;
         }
         finally { SetBusy(false); }
