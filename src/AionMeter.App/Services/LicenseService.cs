@@ -30,7 +30,7 @@ IQUfKoPokQOHnXTUAE/RQ2bJnNsz1/0qxNjOegr1QyIxAgMBAAE=
     private static readonly string LicensePath = Path.Combine(AppSettings.AppDataDir, "license.key");
     private static readonly string RevocationCachePath = Path.Combine(AppSettings.AppDataDir, "revocation-feed.txt");
     // Signed revocation feed hosted in the owner's GitHub repository.
-    public const string RevocationFeedUrl = "https://raw.githubusercontent.com/Aetherion/MostWanted-DPS/main/revoked-licenses.txt";
+    public const string RevocationFeedUrl = "https://raw.githubusercontent.com/Aetherionofficial/MostWanted-DPS/main/revoked-licenses.txt";
 
     public static string InstallationId
     {
