@@ -23,6 +23,14 @@
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>
 
+  <!-- The owner-only offline license signer must never be part of player builds. -->
+  <PropertyGroup Condition="'$(AetherionOwnerBuild)' == 'true'">
+    <DefineConstants>$(DefineConstants);AETHERION_OWNER_BUILD</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(AetherionOwnerBuild)' != 'true'">
+    <Compile Remove="Windows\KeyIssuerWindow.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- WPF and WinForms both define Application, MessageBox, Brush... keep WinForms explicit (tray icon only). -->
     <Using Remove="System.Windows.Forms" />
@@ -38,3 +46,4 @@
   </ItemGroup>
 
 </Project>
+

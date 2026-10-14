@@ -58,6 +58,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
         Log.Info($"Startup requested. Version {InstanceSuffix}; executable {Environment.ProcessPath}.");
+#if AETHERION_OWNER_BUILD
         if (e.Args.Contains("--owner-key-issuer"))
         {
             if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "owner-private.pem")))
@@ -67,6 +68,7 @@ public partial class App : Application
             Shutdown();
             return;
         }
+#endif
         if (ArgValue(e.Args, "--render-sample") is { } samplePath)
         {
             Log.Enabled = false;
@@ -700,3 +702,4 @@ public partial class App : Application
         base.OnExit(e);
     }
 }
+

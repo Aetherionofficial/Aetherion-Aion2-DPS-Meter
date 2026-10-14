@@ -78,7 +78,8 @@ if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 
 # Self-contained, no symbols; .NET's own messages only in English and Russian (%3B is MSBuild's escaped ";").
 $publish = @("-c", "Release", "-r", "win-x64", "--self-contained", "true", "--no-restore",
-    "-p:DebugType=none", "-p:DebugSymbols=false", "-p:SatelliteResourceLanguages=en%3Bru")
+    "-p:DebugType=none", "-p:DebugSymbols=false", "-p:SatelliteResourceLanguages=en%3Bru",
+    "-p:AetherionOwnerBuild=false")
 
 # Portable: one exe + docs. Game lookup tables are embedded and unpacked to %AppData% on first launch.
 dotnet publish $project @publish -o $stage `
@@ -142,3 +143,4 @@ Remove-Item $sourceStage -Recurse -Force
 $outputs += $sourceZip
 
 Get-Item $outputs | Select-Object Name, @{ n = "MB"; e = { [math]::Round($_.Length / 1MB, 1) } }
+
