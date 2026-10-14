@@ -125,4 +125,3 @@ else {
 }
 
 Get-Item $outputs | Select-Object Name, @{ n = "MB"; e = { [math]::Round($_.Length / 1MB, 1) } }
-

@@ -46,11 +46,11 @@ driver. The embedded map uses the Microsoft Edge WebView2 Runtime; see [Installa
 - **Shows up when you fight** — the overlay appears when a boss is fought nearby or you hit anything, and hides again
   60 s after the fight. Lock it in place, make it click-through, set the opacity. It never takes focus from the game.
 - **Full breakdown** — click a player for their fight: DPS timeline against the party, every skill with hits, damage,
-  DPS, average and biggest hit, crit rate and share.
+  DPS, average and biggest hit, crit rate and share. Healing has its own skill-by-skill tab with exact totals.
 - **Accuracy and rotation** — crit, back, front, perfect and smite rates per skill, and every cast in order with crits
   ringed in gold.
 - **Fight history** — boss fights (and longer regular ones) are saved automatically; scroll through them right in the
-  overlay or browse the history window.
+  overlay or browse the history window. Select two saved fights with Ctrl-click to compare damage, DPS, duration and healing.
 - **Field boss timers from the game** — open the field boss list on the in-game map once and the meter keeps every
   respawn counting down, per server, with a tray alert before a boss you watch returns.
 - **AION 2 world map** — open Questlog's interactive map from the overlay or tray menu. It is embedded with WebView2 and needs an internet connection.
@@ -62,6 +62,7 @@ driver. The embedded map uses the Microsoft Edge WebView2 Runtime; see [Installa
 - **12 selectable languages** — the interface is fully translated into German, English and Russian. Turkish, Polish, Bosnian, French, Korean, Traditional Chinese (Taiwan), Arabic, Simplified Chinese and Italian are also selectable; their interface text currently falls back to English. Skill, NPC and dungeon names use localized data where available and otherwise fall back to English.
 - **Farm guide** — faction-specific Kinah and pet routes, with links to current spot maps.
 - **Discord access** — sign in with Discord and redeem a one-time key purchased through an Aetherion Discord ticket. Keys grant 1 day, 1 week, 30 days, 90 days or lifetime access; timed keys can extend an existing timed subscription.
+- **Discord Rich Presence** — optionally show Aetherion DPS Meter, your detected class and level, and the faction you select in Settings. The feature is off by default and uses the Discord desktop app.
 - **Partner access** — partner keys grant lifetime access and show the Partner badge. Regular users see their remaining days in the overlay. Lifetime and Partner accounts cannot redeem additional keys.
 - **Key blocking** — the owner can revoke a key in Supabase. Revoking a redeemed key also ends the linked account's access; the app rechecks access periodically.
 - **Updates** — Aetherion checks the MostWanted-DPS GitHub releases. Installed copies can download and install a new setup file; portable copies show the release page.
