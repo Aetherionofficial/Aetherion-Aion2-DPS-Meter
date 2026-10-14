@@ -87,6 +87,8 @@ public sealed class Combatant
     public HitStats Total { get; } = new();
     public Dictionary<int, SkillStats> Skills { get; } = new();
     public Dictionary<int, HealingSkillStats> HealingSkills { get; } = new();
+    /// <summary>Highest recent-window DPS observed while the encounter is live; held during pauses between attacks.</summary>
+    public double PeakLiveDps { get; set; }
     /// <summary>Damage per whole second since encounter start.</summary>
     public List<long> PerSecond { get; } = new();
     public List<CastRecord> Casts { get; } = new();
@@ -195,6 +197,8 @@ public sealed class Encounter
     public HashSet<uint> Attackers { get; } = new();
 
     public long TotalDamage { get; set; }
+    /// <summary>Highest recent-window party DPS observed during this live encounter.</summary>
+    public double PeakPartyDps { get; set; }
 
     /// <summary>Fight length used for DPS: first hit to last hit, so idle tails never dilute the numbers.</summary>
     public long CombatMs => Math.Max(1_000, LastDamageMs - StartMs);

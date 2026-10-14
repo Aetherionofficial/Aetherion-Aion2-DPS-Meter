@@ -799,19 +799,27 @@ public sealed class CombatTracker
     {
         var combatMs = enc.CombatMs;
         var seconds = combatMs / 1000.0;
-        // Live DPS follows recent damage and falls to zero after three idle seconds. The full-fight
-        // average remains available in the saved breakdown once the encounter ends.
+        // Live DPS follows recent damage. While active, a short pause holds the best observed rate for readability.
         var liveWindowMs = Math.Min(3_000L, Math.Max(1_000L, nowMs - enc.StartMs));
         var liveWindowStart = Math.Max(0, nowMs - liveWindowMs - enc.StartMs);
+        var elapsedMs = Math.Max(0, nowMs - enc.StartMs);
         var total = Math.Max(1, enc.TotalDamage);
         var rows = new List<CombatantSnapshot>(enc.Combatants.Count);
         foreach (var c in enc.Combatants.Values)
         {
             RefreshIdentity(c);
             var t = c.Total;
-            var dps = enc.IsActive
-                ? c.Casts.Where(hit => hit.OffsetMs >= liveWindowStart).Sum(hit => hit.Damage) / (liveWindowMs / 1000.0)
-                : t.Damage / seconds;
+            var recentDamage = RecentDamage(c, liveWindowStart, elapsedMs);
+            double dps;
+            if (enc.IsActive)
+            {
+                var recentDps = recentDamage / (liveWindowMs / 1000.0);
+                if (recentDps > c.PeakLiveDps) c.PeakLiveDps = recentDps;
+                // Show the live rolling rate while the player is attacking. During a pause, keep the best rate
+                // reached in this encounter instead of making their DPS appear to drop to zero.
+                dps = recentDps > 0 ? recentDps : c.PeakLiveDps;
+            }
+            else dps = t.Damage / seconds;
             rows.Add(new CombatantSnapshot(
                 c.ActorId, c.Name, c.Class, c.IsSelf,
                 t.Damage, dps, (double)t.Damage / total,
@@ -860,15 +868,34 @@ public sealed class CombatTracker
             }
         }
 
-        var partyDps = enc.IsActive
-            ? enc.Combatants.Values.SelectMany(c => c.Casts)
-                .Where(hit => hit.OffsetMs >= liveWindowStart).Sum(hit => hit.Damage) / (liveWindowMs / 1000.0)
-            : enc.TotalDamage / seconds;
+        double partyDps;
+        if (enc.IsActive)
+        {
+            var recentPartyDamage = enc.Combatants.Values.Sum(c => RecentDamage(c, liveWindowStart, elapsedMs));
+            var recentPartyDps = recentPartyDamage / (liveWindowMs / 1000.0);
+            if (recentPartyDps > enc.PeakPartyDps) enc.PeakPartyDps = recentPartyDps;
+            partyDps = recentPartyDps > 0 ? recentPartyDps : enc.PeakPartyDps;
+        }
+        else partyDps = enc.TotalDamage / seconds;
 
         return new EncounterSnapshot(
             enc.Id, Title(enc), enc.Zone, ToTime(enc.StartMs), enc.ClockMs(nowMs), combatMs, enc.IsActive, enc.Reason,
             enc.TotalDamage, partyDps, boss, rows, MainTargetCode(enc),
             enc.Attackers.Count + rows.Count(r => !r.IsUnknownSummons && !enc.Attackers.Contains(r.ActorId)));
+    }
+
+    private static long RecentDamage(Combatant combatant, long fromMs, long throughMs)
+    {
+        // Cast history is capped for memory use. Per-second buckets continue tracking the entire fight, so live DPS
+        // stays correct even in encounters whose rotation history has reached its storage limit.
+        if (combatant.Casts.Count < Combatant.MaxCasts)
+            return combatant.Casts.Where(hit => hit.OffsetMs >= fromMs && hit.OffsetMs <= throughMs).Sum(hit => hit.Damage);
+
+        var first = Math.Max(0, (int)(fromMs / 1_000));
+        var last = Math.Min(combatant.PerSecond.Count - 1, Math.Max(0, (int)(throughMs / 1_000)));
+        long damage = 0;
+        for (var second = first; second <= last; second++) damage += combatant.PerSecond[second];
+        return damage;
     }
 
     private CombatantDetail BuildDetail(Encounter enc, Combatant c, int maxCasts)
