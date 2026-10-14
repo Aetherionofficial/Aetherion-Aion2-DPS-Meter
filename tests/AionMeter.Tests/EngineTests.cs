@@ -106,6 +106,28 @@ public class EngineTests
     }
 
     [Fact]
+    public void Healing_or_presence_alone_does_not_add_a_player_to_the_dps_rows()
+    {
+        var t = Tracker();
+        Setup(t);
+
+        // A group member starts the encounter; the local player is present and emits healing, but has not dealt damage.
+        t.Process(new DamageEvent(1_000, Mate, Boss, 11020000, 1_000, HitFlags.None));
+        t.Process(new HealEvent(1_100, Me, Me, 16040000, 244, HitFlags.None));
+        t.Process(new HealEvent(1_200, Mate, Mate, 11020000, 122, HitFlags.None));
+
+        var beforeOwnDamage = t.Snapshot(null, 2_000)!;
+        Assert.DoesNotContain(beforeOwnDamage.Combatants, c => c.ActorId == Me);
+        Assert.Equal(122, Assert.Single(beforeOwnDamage.Combatants).Healing);
+
+        t.Process(new DamageEvent(2_000, Me, Boss, 16040000, 500, HitFlags.None));
+
+        var afterOwnDamage = t.Snapshot(null, 3_000)!;
+        var self = Assert.Single(afterOwnDamage.Combatants, c => c.ActorId == Me);
+        Assert.Equal(500, self.Damage);
+    }
+
+    [Fact]
     public void Unnamed_player_using_item_skill_still_counts_on_boss()
     {
         // Players already in the zone when the meter started have no identity record. One of them fires a

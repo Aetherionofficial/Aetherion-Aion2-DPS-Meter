@@ -301,7 +301,10 @@ public sealed class CombatTracker
         if (_current is not { IsActive: true } enc) return;
         var source = _entities.ResolveOwner(h.SourceId);
         if (h.Amount <= 0 || !_entities.IsKnownPlayer(source)) return;
-        var c = GetCombatant(enc, source);
+        // The DPS overlay is built from encounter participants, not nearby group members. Do not
+        // create a combatant from a heal packet alone: passive/periodic heals otherwise add a row
+        // for someone who has not contributed any damage to this encounter.
+        if (!enc.Combatants.TryGetValue(source, out var c) || c.Total.Damage <= 0) return;
         c.Healing += h.Amount;
         if (!c.HealingSkills.TryGetValue(h.SkillCode, out var skill))
             c.HealingSkills[h.SkillCode] = skill = new HealingSkillStats { SkillCode = h.SkillCode };
@@ -819,6 +822,9 @@ public sealed class CombatTracker
         var rows = new List<CombatantSnapshot>(enc.Combatants.Count);
         foreach (var c in enc.Combatants.Values)
         {
+            // Healing-only entries are intentionally omitted from the DPS ranking. A row is shown
+            // only after this actor has actually dealt damage in the encounter.
+            if (c.Total.Damage <= 0) continue;
             RefreshIdentity(c);
             var t = c.Total;
             var recentDamage = RecentDamage(c, liveWindowStart, elapsedMs);
@@ -837,15 +843,6 @@ public sealed class CombatTracker
                 t.Damage, dps, (double)t.Damage / total,
                 t.Hits, t.Hits > 0 ? (double)t.Crits / t.Hits : 0,
                 t.Max, c.DamageTaken, c.ServerId, c.GearScore, c.CombatPower, c.Healing));
-        }
-        // Keep the local player's row visible during an active group fight even before their first hit lands.
-        // A zero row is explicit; it prevents the overlay from looking as if another player's damage were theirs.
-        if (enc.IsActive && _entities.SelfId is { } selfId && rows.All(r => r.ActorId != selfId))
-        {
-            var self = _entities.TryGetPlayer(selfId, out var player) ? player : null;
-            rows.Add(new CombatantSnapshot(selfId, self?.Name is { Length: > 0 } name ? name : $"#{selfId}",
-                self?.Class ?? GameClass.Unknown, true, 0, 0, 0, 0, 0, 0, 0,
-                self?.ServerId ?? 0, self?.GearScore ?? 0, self?.CombatPower ?? 0, 0));
         }
         rows.Sort((a, b) => b.Damage.CompareTo(a.Damage));
         // Pets without a known owner are not a player: list them last so they never take a place in the ranking.
