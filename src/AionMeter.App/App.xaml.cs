@@ -40,6 +40,7 @@ public partial class App : Application
     private EventWaitHandle? _showRequest;
     private RegisteredWaitHandle? _showWait;
     private MeterService _meter = null!;
+    private readonly DiscordPresenceService _discordPresence = new();
     private OverlayWindow _overlay = null!;
     private TrayIcon? _tray;
     private HotkeyManager? _hotkeys;
@@ -154,6 +155,7 @@ public partial class App : Application
         });
 
         _meter = new MeterService(settings, factory);
+        _ = UpdateDiscordPresenceAsync();
         Log.Info($"Started. Data: {_meter.Data.Skills.Count} skills, {_meter.Data.Npcs.Count} npcs.");
         _meter.StartCapture();
 
@@ -174,6 +176,7 @@ public partial class App : Application
             EventTimers: ShowEventTimers,
             Map: ShowAionMap,
             Settings: ShowSettings,
+            DiscordSupport: OpenDiscordSupport,
             Demo: () => _meter.StartDemo(),
             Replay: PickReplay,
             ToggleLanguage: ToggleLanguage,
@@ -301,6 +304,16 @@ public partial class App : Application
             CheckGameStart();
             CheckPendingUpdate();
         }
+        if (_ticks % 25 == 0) _ = UpdateDiscordPresenceAsync();
+    }
+
+    private Task UpdateDiscordPresenceAsync()
+    {
+        if (_meter is null) return Task.CompletedTask;
+        var profile = _meter.Tracker.SelfProfile;
+        var className = profile is { Class: not AionMeter.Core.Events.GameClass.Unknown } p ? p.Class.ToString() : null;
+        return _discordPresence.UpdateAsync(_meter.Settings.DiscordPresenceEnabled, className,
+            profile?.Level ?? 0, _meter.Settings.DiscordFaction);
     }
 
     // ------------------------------------------------------------ automatic show / hide
@@ -545,6 +558,14 @@ public partial class App : Application
         _settingsWindow.Show();
     }
 
+    private static void OpenDiscordSupport()
+    {
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://discord.gg/mostwantedde")
+        {
+            UseShellExecute = true,
+        });
+    }
+
     // ------------------------------------------------------------ updates
 
     private UpdateWindow? _updateWindow;
@@ -669,6 +690,7 @@ public partial class App : Application
         RegisterHotkeys();
         _overlay.ApplyAppearance();
         _overlay.Refresh();
+        _ = UpdateDiscordPresenceAsync();
     }
 
     /// <summary>The Settings window's row size slider, shown on the overlay before it is saved.</summary>
@@ -700,6 +722,7 @@ public partial class App : Application
         _showRequest?.Dispose();
         _hotkeys?.Dispose();
         _tray?.Dispose();
+        _discordPresence.Dispose();
         if (_meter is not null)
         {
             _meter.Settings.Save();
@@ -709,4 +732,3 @@ public partial class App : Application
         base.OnExit(e);
     }
 }
-
