@@ -254,6 +254,13 @@ public partial class App : Application
         try
         {
             var status = await SupabaseAccessService.CheckSavedSessionAsync();
+            if (status is null)
+            {
+                // A missing saved session is not evidence that the entitlement was revoked. Keep the
+                // current session alive and retry on the next timer tick instead of locking out a player.
+                Log.Info("Saved Discord session is temporarily unavailable; keeping the app open and retrying.");
+                return;
+            }
             if (status?.HasActiveLicense == true) return;
             _licenseTimer?.Stop();
             MessageBox.Show("Dein Aetherion-Zugang ist abgelaufen oder wurde gesperrt. Bitte prüfe deinen Key oder eröffne ein Ticket im Discord.",
@@ -702,3 +709,4 @@ public partial class App : Application
         base.OnExit(e);
     }
 }
+

@@ -69,17 +69,12 @@ public static class SupabaseAccessService
     {
         var refreshToken = ReadRefreshToken();
         if (refreshToken is null) return null;
-        try
-        {
-            var session = await RefreshSessionAsync(refreshToken, cancellationToken);
-            PersistRefreshToken(session.RefreshToken);
-            _accessToken = session.AccessToken;
-            return await GetLicenseStatusAsync(session.AccessToken, cancellationToken);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or CryptographicException)
-        {
-            return null;
-        }
+        // Let temporary network / storage errors reach the caller. A null result means there is no saved
+        // session; it must not be confused with a failed request and treated as an expired entitlement.
+        var session = await RefreshSessionAsync(refreshToken, cancellationToken);
+        PersistRefreshToken(session.RefreshToken);
+        _accessToken = session.AccessToken;
+        return await GetLicenseStatusAsync(session.AccessToken, cancellationToken);
     }
 
     public static async Task<AccountLicenseStatus> RedeemLicenseKeyAsync(string key, CancellationToken cancellationToken = default)
@@ -265,3 +260,4 @@ public static class SupabaseAccessService
         [property: JsonPropertyName("is_revoked")] bool IsRevoked,
         [property: JsonPropertyName("license_type")] string LicenseType);
 }
+

@@ -151,9 +151,10 @@ public sealed class Updater : IDisposable
                      "$stage=Join-Path $env:TEMP ('Aetherion-update-' + [guid]::NewGuid().ToString('N')); " +
                      "New-Item -ItemType Directory -Path $stage | Out-Null; " +
                      "try { Expand-Archive -LiteralPath $j.Archive -DestinationPath $stage -Force; " +
-                     "Copy-Item -LiteralPath (Join-Path $stage 'AION2DpsMeter.exe') -Destination (Join-Path $j.Target 'AION2DpsMeter.exe') -Force; " +
+                     "$newExe=Join-Path $stage 'AION2DpsMeter.exe'; if (-not (Test-Path -LiteralPath $newExe)) { throw 'The update archive does not contain AION2DpsMeter.exe' }; " +
+                     "Copy-Item -LiteralPath $newExe -Destination (Join-Path $j.Target 'AION2DpsMeter.exe') -Force; " +
                      "foreach ($doc in @('LICENSE','INSTALL.txt')) { $source=Join-Path $stage $doc; if (Test-Path $source) { Copy-Item -LiteralPath $source -Destination $j.Target -Force } }; " +
-                     "Start-Process -FilePath $j.Exe -ArgumentList '--updated' } catch { " +
+                     "Start-Sleep -Milliseconds 500; $started=$false; for ($i=0; $i -lt 5 -and -not $started; $i++) { try { Start-Process -FilePath $j.Exe -ArgumentList '--updated' -ErrorAction Stop; $started=$true } catch { Start-Sleep -Milliseconds 700 } }; if (-not $started) { throw 'The updated app could not be restarted' } } catch { " +
                      "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show(('Aetherion konnte das Update nicht einspielen: ' + $_.Exception.Message),'Aetherion Update') | Out-Null " +
                      "} finally { " +
                      "Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue; " +
@@ -268,3 +269,4 @@ public sealed class Updater : IDisposable
         _feed.Dispose();
     }
 }
+
