@@ -32,7 +32,8 @@ public sealed class RotationStrip : FrameworkElement
         ToolTipService.SetInitialShowDelay(this, 0);
     }
 
-    public int MaxTiles { get; set; } = 1500;
+    // Match the combat record limit so long fights are not silently cut off at the old 1,500-tile display limit.
+    public int MaxTiles { get; set; } = Combatant.MaxCasts;
 
     public void SetData(IReadOnlyList<CastRecord> casts, Func<int, string> skillName, Func<int, ImageSource?>? icon = null)
     {
