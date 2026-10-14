@@ -165,6 +165,26 @@ public partial class HistoryWindow : Window
         if (_entry is not null) AppHost.Current.ShowSavedInOverlay(_entry);
     }
 
+    private void Compare_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = Fights.SelectedItems.Cast<FightItem>().ToList();
+        if (selected.Count != 2)
+        {
+            MessageBox.Show(this, T.CompareSelectTwo, T.CompareTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        var first = selected[0];
+        var second = selected[1];
+        var firstFight = Store.Load(first.Entry.Path);
+        var secondFight = Store.Load(second.Entry.Path);
+        if (firstFight is null || secondFight is null)
+        {
+            MessageBox.Show(this, T.HistoryEmpty, T.CompareTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        new FightComparisonWindow(_meter, first.Entry, firstFight, second.Entry, secondFight) { Owner = this }.ShowDialog();
+    }
+
     private void Filter_Changed(object sender, RoutedEventArgs e)
     {
         if (IsLoaded) Reload();

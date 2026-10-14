@@ -352,4 +352,3 @@ public partial class BreakdownWindow : Window
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 }
-

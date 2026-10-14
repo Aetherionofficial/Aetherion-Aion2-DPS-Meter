@@ -33,6 +33,12 @@ public partial class SettingsWindow : Window
         AutoShow.IsChecked = s.AutoShow;
         AutoHideSeconds.Text = s.AutoHideSeconds.ToString();
         ShowOnStart.IsChecked = s.ShowOnStart;
+        DiscordPresence.IsChecked = s.DiscordPresenceEnabled;
+        DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionUnknown, Tag = "" });
+        DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionElyos, Tag = "Elyos" });
+        DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionAsmodian, Tag = "Asmodian" });
+        DiscordFactionBox.SelectedIndex = Math.Max(0, DiscordFactionBox.Items.Cast<ComboBoxItem>().ToList()
+            .FindIndex(i => string.Equals(i.Tag as string, s.DiscordFaction, StringComparison.OrdinalIgnoreCase)));
         foreach (var n in new[] { 5, 8, 10, 12, 15, 20 }) MaxRows.Items.Add(n);
         MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(n => Math.Abs(n - s.MaxRows)).First();
         OpacityValue.Value = s.BackgroundOpacity;
@@ -133,6 +139,8 @@ public partial class SettingsWindow : Window
         s.AutoShow = AutoShow.IsChecked == true;
         if (int.TryParse(AutoHideSeconds.Text, out var autoHide)) s.AutoHideSeconds = Math.Clamp(autoHide, 0, 3600);
         s.ShowOnStart = ShowOnStart.IsChecked == true;
+        s.DiscordPresenceEnabled = DiscordPresence.IsChecked == true;
+        s.DiscordFaction = (DiscordFactionBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "";
         s.MaxRows = MaxRows.SelectedItem is int rows ? rows : 10;
         s.BackgroundOpacity = Math.Round(OpacityValue.Value, 2);
         s.RowSize = (int)Math.Round(RowSizeValue.Value);

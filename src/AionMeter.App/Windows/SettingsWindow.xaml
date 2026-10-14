@@ -120,6 +120,20 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- Discord Rich Presence -->
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding DiscordPresenceSection, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
+                            <CheckBox x:Name="DiscordPresence" Style="{StaticResource DarkCheck}"
+                                      Content="{Binding DiscordPresenceEnabled, Source={x:Static s:UiText.Current}}" />
+                            <TextBlock Style="{StaticResource Hint}" Text="{Binding DiscordPresenceHint, Source={x:Static s:UiText.Current}}" />
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Text="{Binding DiscordFactionLabel, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
+                                <ComboBox x:Name="DiscordFactionBox" MinWidth="190" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
                     <!-- Meter -->
                     <Border Style="{StaticResource Section}">
                         <StackPanel>

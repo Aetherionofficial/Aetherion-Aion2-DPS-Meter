@@ -59,6 +59,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                             WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource GhostButton}" Content="{Binding CompareSelected, Source={x:Static s:UiText.Current}}" Click="Compare_Click" Margin="0,0,8,0" />
                     <Button Style="{StaticResource IconButton}" Content="&#xE72C;" Click="Refresh_Click" ToolTip="{Binding TipRefresh, Source={x:Static s:UiText.Current}}" />
                     <Button Style="{StaticResource IconButton}" Content="&#xE838;" Click="OpenFolder_Click" ToolTip="{Binding TipOpenFolder, Source={x:Static s:UiText.Current}}" />
                     <Button Style="{StaticResource IconButton}" Content="&#xE74D;" Click="Delete_Click" ToolTip="{Binding TipDelete, Source={x:Static s:UiText.Current}}" />
@@ -72,7 +73,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <ListBox x:Name="Fights" Background="{StaticResource Bg1}" Foreground="{StaticResource Text}" BorderThickness="0" Padding="6"
-                         ItemContainerStyle="{StaticResource ListItem}" SelectionChanged="Fights_SelectionChanged"
+                         SelectionMode="Extended" ItemContainerStyle="{StaticResource ListItem}" SelectionChanged="Fights_SelectionChanged"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
