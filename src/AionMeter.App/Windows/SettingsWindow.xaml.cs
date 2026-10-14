@@ -88,6 +88,9 @@ public partial class SettingsWindow : Window
 
     private void FarmGuide_Click(object sender, RoutedEventArgs e) => new FarmGuideWindow { Owner = this }.ShowDialog();
 
+    private void DiscordSupport_Click(object sender, RoutedEventArgs e) =>
+        Process.Start(new ProcessStartInfo("https://discord.gg/mostwantedde") { UseShellExecute = true });
+
     private async Task RefreshLicenseStatusAsync()
     {
         try

@@ -259,7 +259,7 @@ public sealed class UiText
     public string TrayShow { get; init; } = "Show overlay";
     public string TrayHistory { get; init; } = "Fight history…";
     public string TraySettings { get; init; } = "Settings…";
-    public string TrayDiscordSupport { get; init; } = "Aetherion Discord — Help & support";
+    public string TrayDiscordSupport { get; init; } = "Discord Support";
     public string TrayDemo { get; init; } = "Run demo fight";
     public string TrayReplay { get; init; } = "Replay capture file…";
     public string TrayExit { get; init; } = "Exit";
@@ -544,7 +544,7 @@ public sealed class UiText
         DamageUnsentTip = "Bei Weltbossen mit vielen Spielern sendet das Spiel nur für wenige Spieler vollständige Schadenswerte. Für andere fehlen Zahlen oder DoT-Schaden. Daher sind deren Werte und Anteile hier niedriger als tatsächlich; dieses Meter kann die fehlenden Daten nicht sehen.",
         TipRestart = "Meter neu starten ({0}): bisherigen Kampf speichern und Zählung neu beginnen", InProgress = "Läuft", Kill = "Sieg", Wipe = "Niederlage", Ended = "Beendet",
         OpenWorld = "Offene Welt", OpenFight = "Kampf öffnen", Fights = "Kämpfe", NamesLater = "Namen nach dem nächsten Ladebildschirm", YourPlace = "Dein Rang in diesem Kampf", Party = "Gruppe", Seconds = "Sek.",
-        SwitchLanguage = "Sprache wechseln", TrayHide = "Overlay ausblenden", TrayShow = "Overlay anzeigen", TrayHistory = "Kampfverlauf…", TraySettings = "Einstellungen…", TrayDiscordSupport = "Aetherion Discord — Hilfe & Support",
+        SwitchLanguage = "Sprache wechseln", TrayHide = "Overlay ausblenden", TrayShow = "Overlay anzeigen", TrayHistory = "Kampfverlauf…", TraySettings = "Einstellungen…", TrayDiscordSupport = "Discord Support öffnen",
         TrayDemo = "Beispielkampf starten", TrayReplay = "Aufzeichnung wiedergeben…", TrayExit = "Beenden",
         ClickThroughOn = "Klickdurchlässig EIN — Overlay ignoriert die Maus. {0} schaltet es aus.", ClickThroughOff = "Klickdurchlässig AUS",
         Live = "Live", LiveHint = "zeigt den aktuellen Kampf", SessionSection = "DIESE SITZUNG", SavedToday = "GESPEICHERT · HEUTE", SavedYesterday = "GESPEICHERT · GESTERN",

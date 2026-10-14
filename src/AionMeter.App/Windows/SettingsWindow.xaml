@@ -63,7 +63,11 @@
                         <StackPanel>
                             <TextBlock Text="AETHERION • PREMIUM" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
                             <TextBlock Text="Farm-Routen für Kinah und Pets direkt im Meter." Style="{StaticResource Hint}" Margin="0,0,0,8" />
-                            <Button Style="{StaticResource PrimaryButton}" Content="Farm-Guide öffnen" Click="FarmGuide_Click" HorizontalAlignment="Left" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Farm-Guide öffnen" Click="FarmGuide_Click" HorizontalAlignment="Left" />
+                                <Button Style="{StaticResource GhostButton}" Content="Discord Support" Click="DiscordSupport_Click"
+                                        HorizontalAlignment="Left" Margin="8,0,0,0" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                     <!-- Language -->

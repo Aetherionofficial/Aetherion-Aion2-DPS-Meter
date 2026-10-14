@@ -245,7 +245,10 @@ public sealed class CombatTracker
         if (!sourceIsPlayer && IsLikelyNpc(source)) return; // NPC hitting NPC
 
         var npc = _entities.UpsertNpc(target);
-        if (npc.Hp == 0) return; // trailing DoT ticks on a corpse must not open a new segment after the kill
+        if (npc.Hp == 0 && !npc.IsDummy) return; // trailing DoT ticks on a corpse must not open a new segment after the kill
+        // Training dummies can emit a transient zero-HP state while remaining reusable targets. Do not let that
+        // stale state discard the next hit or make the same practice session look like a brand-new fight.
+        if (npc.IsDummy && npc.Hp == 0) npc.Hp = -1;
 
         if (Options.TargetMode == TargetMode.BossOnly)
         {
@@ -350,11 +353,11 @@ public sealed class CombatTracker
         enc.BossHp = e.CurrentHp;
         if (e.CurrentHp < enc.BossLowestHp) enc.BossLowestHp = e.CurrentHp;
 
-        if (e.CurrentHp <= 0)
+        if (e.CurrentHp <= 0 && !npc.IsDummy)
         {
             Finish(EncounterEndReason.Kill, Math.Max(e.TimeMs, enc.LastDamageMs));
         }
-        else if (enc.BossMaxHp > 0 && enc.BossLowestHp < enc.BossMaxHp * 0.9 && e.CurrentHp >= enc.BossMaxHp * 0.995)
+        else if (!npc.IsDummy && enc.BossMaxHp > 0 && enc.BossLowestHp < enc.BossMaxHp * 0.9 && e.CurrentHp >= enc.BossMaxHp * 0.995)
         {
             Finish(EncounterEndReason.Wipe, enc.LastDamageMs); // boss healed back to full: the group wiped or reset
         }
@@ -363,6 +366,13 @@ public sealed class CombatTracker
     private void OnDeath(DeathEvent e)
     {
         EndBossLimit(e.ActorId);
+        if (_entities.TryGetNpc(e.ActorId, out var dummy) && dummy.IsDummy)
+        {
+            // Training targets are reusable and their death/reset notices do not end the practice session.
+            dummy.Hp = -1;
+            dummy.HpAtMs = e.TimeMs;
+            return;
+        }
         if (_current is { } current && current.LastTargetId == e.ActorId) current.LastTargetId = 0;
         if (!_entities.TryGetNpc(e.ActorId, out var npc)) return;
         if (npc.Hp != 0)
@@ -389,6 +399,7 @@ public sealed class CombatTracker
         if (_entities.IsPlayerLike(e.ActorId)) return;
         var npc = _entities.UpsertNpc(e.ActorId);
         npc.InCombat = e.InCombat;
+        if (npc.IsDummy) return; // dummy state toggles may flicker between each practice hit
         if (!e.InCombat) EndBossLimit(e.ActorId); // a wipe or a reset: no clock runs any more
         if (e.InCombat || _current is not { IsActive: true } enc || enc.BossId != e.ActorId) return;
 
@@ -638,7 +649,8 @@ public sealed class CombatTracker
     private void CheckIdle(long nowMs)
     {
         if (_current is not { IsActive: true } enc) return;
-        var bossAlive = enc.BossId is { } b && IsAlive(b);
+        var bossAlive = enc.BossId is { } b &&
+            (_entities.TryGetNpc(b, out var npc) && npc.IsDummy || IsAlive(b));
         var timeout = bossAlive ? Options.BossIdleTimeoutMs : Options.IdleTimeoutMs;
         if (nowMs - enc.LastDamageMs > timeout) Finish(EncounterEndReason.Idle, enc.LastDamageMs);
     }
