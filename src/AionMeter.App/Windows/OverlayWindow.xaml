@@ -66,16 +66,73 @@
             <Setter Property="Margin" Value="8,0,0,1" />
         </Style>
 
-        <!-- The hover toolbar's buttons, sized to the slim top line -->
+        <!-- The hover toolbar's buttons: clear, high-contrast icon chips that stay legible over the game. -->
         <Style x:Key="ToolIcon" TargetType="ButtonBase" BasedOn="{StaticResource IconButton}">
-            <Setter Property="Width" Value="22" />
-            <Setter Property="Height" Value="22" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#F3F5FA" />
+            <Setter Property="Background" Value="#A619202D" />
+            <Setter Property="BorderBrush" Value="#70AAB4C5" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Margin" Value="1,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ButtonBase">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E62A3649" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FFE0A0" />
+                                <Setter Property="Foreground" Value="#FFFFE0A0" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E6A9772C" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FFFFD276" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="ToolToggle" TargetType="ToggleButton" BasedOn="{StaticResource IconToggle}">
-            <Setter Property="Width" Value="22" />
-            <Setter Property="Height" Value="22" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#F3F5FA" />
+            <Setter Property="Background" Value="#A619202D" />
+            <Setter Property="BorderBrush" Value="#70AAB4C5" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Margin" Value="1,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#B34A391A" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#D9B56A" />
+                                <Setter Property="Foreground" Value="#FFFFD98B" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E62A3649" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FFE0A0" />
+                                <Setter Property="Foreground" Value="#FFFFE0A0" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E6A9772C" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FFFFD276" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <SolidColorBrush x:Key="Cream" Color="#F3E6C8" />

@@ -143,4 +143,3 @@ Remove-Item $sourceStage -Recurse -Force
 $outputs += $sourceZip
 
 Get-Item $outputs | Select-Object Name, @{ n = "MB"; e = { [math]::Round($_.Length / 1MB, 1) } }
-
