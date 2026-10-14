@@ -112,6 +112,8 @@ public sealed record SkillRow(
     double? HeavyRate,
     double? MultiRate);
 
+public sealed record HealingSkillRow(int SkillCode, string Name, long Amount, int Events);
+
 public sealed record HitQuality(
     int Hits,
     int DotTicks,
@@ -141,7 +143,9 @@ public sealed record CombatantDetail(
     IReadOnlyList<CastRecord> Casts,
     int ServerId = 0,
     int GearScore = 0,
-    long CombatPower = 0);
+    long CombatPower = 0,
+    IReadOnlyList<HealingSkillRow>? HealingSkills = null,
+    long HealingTotal = 0);
 
 public sealed record SegmentInfo(Guid Id, string Title, DateTimeOffset StartedAt, long CombatMs, bool IsActive, EncounterEndReason Reason, long TotalDamage);
 

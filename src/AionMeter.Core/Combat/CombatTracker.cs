@@ -297,7 +297,13 @@ public sealed class CombatTracker
     {
         if (_current is not { IsActive: true } enc) return;
         var source = _entities.ResolveOwner(h.SourceId);
-        if (enc.Combatants.TryGetValue(source, out var c)) c.Healing += h.Amount;
+        if (h.Amount <= 0 || !_entities.IsKnownPlayer(source)) return;
+        var c = GetCombatant(enc, source);
+        c.Healing += h.Amount;
+        if (!c.HealingSkills.TryGetValue(h.SkillCode, out var skill))
+            c.HealingSkills[h.SkillCode] = skill = new HealingSkillStats { SkillCode = h.SkillCode };
+        skill.Amount += h.Amount;
+        skill.Events++;
     }
 
     private void OnNpcHp(NpcHpEvent e)
@@ -793,15 +799,19 @@ public sealed class CombatTracker
     {
         var combatMs = enc.CombatMs;
         var seconds = combatMs / 1000.0;
+        // Live DPS follows recent damage and falls to zero after three idle seconds. The full-fight
+        // average remains available in the saved breakdown once the encounter ends.
+        var liveWindowMs = Math.Min(3_000L, Math.Max(1_000L, nowMs - enc.StartMs));
+        var liveWindowStart = Math.Max(0, nowMs - liveWindowMs - enc.StartMs);
         var total = Math.Max(1, enc.TotalDamage);
         var rows = new List<CombatantSnapshot>(enc.Combatants.Count);
         foreach (var c in enc.Combatants.Values)
         {
             RefreshIdentity(c);
             var t = c.Total;
-            // Keep the same cumulative rate while the fight is live and after it ends. A rolling window
-            // makes DPS jump when attacks pause, then jump again when the encounter is finalized.
-            var dps = t.Damage / seconds;
+            var dps = enc.IsActive
+                ? c.Casts.Where(hit => hit.OffsetMs >= liveWindowStart).Sum(hit => hit.Damage) / (liveWindowMs / 1000.0)
+                : t.Damage / seconds;
             rows.Add(new CombatantSnapshot(
                 c.ActorId, c.Name, c.Class, c.IsSelf,
                 t.Damage, dps, (double)t.Damage / total,
@@ -850,9 +860,14 @@ public sealed class CombatTracker
             }
         }
 
+        var partyDps = enc.IsActive
+            ? enc.Combatants.Values.SelectMany(c => c.Casts)
+                .Where(hit => hit.OffsetMs >= liveWindowStart).Sum(hit => hit.Damage) / (liveWindowMs / 1000.0)
+            : enc.TotalDamage / seconds;
+
         return new EncounterSnapshot(
             enc.Id, Title(enc), enc.Zone, ToTime(enc.StartMs), enc.ClockMs(nowMs), combatMs, enc.IsActive, enc.Reason,
-            enc.TotalDamage, enc.TotalDamage / seconds, boss, rows, MainTargetCode(enc),
+            enc.TotalDamage, partyDps, boss, rows, MainTargetCode(enc),
             enc.Attackers.Count + rows.Count(r => !r.IsUnknownSummons && !enc.Attackers.Contains(r.ActorId)));
     }
 
@@ -882,9 +897,14 @@ public sealed class CombatTracker
             t.Max, c.MaxHitSkill != 0 ? _data.SkillName(c.MaxHitSkill) : null);
 
         var casts = c.Casts.Count <= maxCasts ? c.Casts.ToArray() : c.Casts.GetRange(0, maxCasts).ToArray();
+        var healingSkills = c.HealingSkills.Values
+            .Select(h => new HealingSkillRow(h.SkillCode, _data.SkillName(h.SkillCode), h.Amount, h.Events))
+            .OrderByDescending(h => h.Amount)
+            .ToArray();
         return new CombatantDetail(
             c.ActorId, c.Name, c.Class, c.IsSelf, t.Damage, t.Damage / seconds, (double)t.Damage / Math.Max(1, enc.TotalDamage),
-            enc.CombatMs, c.DamageTaken, c.HitsTaken, quality, skills, c.PerSecond.ToArray(), casts, c.ServerId, c.GearScore, c.CombatPower);
+            enc.CombatMs, c.DamageTaken, c.HitsTaken, quality, skills, c.PerSecond.ToArray(), casts, c.ServerId, c.GearScore,
+            c.CombatPower, healingSkills, c.Healing);
     }
 
     private FightRecord BuildRecord(Encounter enc)

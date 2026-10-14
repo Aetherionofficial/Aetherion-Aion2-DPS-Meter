@@ -55,6 +55,13 @@ public sealed class SkillStats
     public HitStats Stats { get; } = new();
 }
 
+public sealed class HealingSkillStats
+{
+    public required int SkillCode { get; init; }
+    public long Amount { get; set; }
+    public int Events { get; set; }
+}
+
 /// <summary>One cast / hit in order, for the rotation view.</summary>
 public readonly record struct CastRecord(int OffsetMs, int SkillCode, long Damage, HitFlags Flags);
 
@@ -79,6 +86,7 @@ public sealed class Combatant
 
     public HitStats Total { get; } = new();
     public Dictionary<int, SkillStats> Skills { get; } = new();
+    public Dictionary<int, HealingSkillStats> HealingSkills { get; } = new();
     /// <summary>Damage per whole second since encounter start.</summary>
     public List<long> PerSecond { get; } = new();
     public List<CastRecord> Casts { get; } = new();
@@ -118,6 +126,13 @@ public sealed class Combatant
         DamageTaken += other.DamageTaken;
         HitsTaken += other.HitsTaken;
         Healing += other.Healing;
+        foreach (var (skillCode, heal) in other.HealingSkills)
+        {
+            if (!HealingSkills.TryGetValue(skillCode, out var current))
+                HealingSkills[skillCode] = current = new HealingSkillStats { SkillCode = skillCode };
+            current.Amount += heal.Amount;
+            current.Events += heal.Events;
+        }
         if (FirstHitMs == 0 || (other.FirstHitMs != 0 && other.FirstHitMs < FirstHitMs)) FirstHitMs = other.FirstHitMs;
         LastHitMs = Math.Max(LastHitMs, other.LastHitMs);
     }
@@ -184,7 +199,7 @@ public sealed class Encounter
     /// <summary>Fight length used for DPS: first hit to last hit, so idle tails never dilute the numbers.</summary>
     public long CombatMs => Math.Max(1_000, LastDamageMs - StartMs);
 
-    /// <summary>Wall-clock timer shown in the overlay header.</summary>
+    /// <summary>Timer shown in the overlay header; while live it pauses between damage events.</summary>
     public long ClockMs(long nowMs) =>
-        Math.Max(0, (IsActive ? nowMs : EndMs > 0 ? EndMs : LastDamageMs) - StartMs);
+        Math.Max(0, (IsActive ? Math.Min(nowMs, LastDamageMs) : EndMs > 0 ? EndMs : LastDamageMs) - StartMs);
 }

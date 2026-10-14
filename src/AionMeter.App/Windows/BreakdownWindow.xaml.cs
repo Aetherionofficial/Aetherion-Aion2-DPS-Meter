@@ -31,6 +31,8 @@ public partial class BreakdownWindow : Window
         private static readonly Brush SelfBrush = new SolidColorBrush(Color.FromRgb(0xEC, 0xCB, 0x82));
     }
 
+    public sealed record HealingItem(string Name, Brush Swatch, ImageSource? Icon, string Events, string Amount, string Tooltip);
+
     public sealed record SkillItem(
         string Name, Brush Swatch, ImageSource? Icon, string Hits, string Damage, string Dps, string Avg, string Max, string Crit,
         string Share, double ShareWidth, string DotTag, string Tooltip,
@@ -105,6 +107,7 @@ public partial class BreakdownWindow : Window
             "accuracy" => TabAccuracy,
             "rotation" => TabRotation,
             "defense" => TabDefense,
+            "healing" => TabHealing,
             _ => TabDps,
         };
         tab.IsChecked = true;
@@ -168,6 +171,17 @@ public partial class BreakdownWindow : Window
         StatDps.Text = Format.Compact(d.Dps);
         StatShare.Text = Format.Share(d.Share);
         StatTime.Text = Format.Clock(d.CombatMs);
+        HealingTotalValue.Text = Format.Grouped(d.HealingTotal);
+        HealingList.ItemsSource = (d.HealingSkills ?? [])
+            .OrderByDescending(h => h.Amount)
+            .Select(h =>
+            {
+                var color = RotationStrip.SkillColor(h.SkillCode);
+                var swatch = new SolidColorBrush(color);
+                swatch.Freeze();
+                return new HealingItem(h.Name, swatch, _icons.Get(h.SkillCode), h.Events.ToString(),
+                    Format.Grouped(h.Amount), $"{h.Name} ({h.SkillCode})\n{T.HealingAmount}: {Format.Grouped(h.Amount)}\n{T.HealingEvents}: {h.Events}");
+            }).ToList();
 
         var maxShare = d.Skills.Count > 0 ? d.Skills.Max(s => s.Share) : 1;
         SkillList.ItemsSource = _skillOrder.Apply(d.Skills, T.Culture).Select(s => ToItem(s, maxShare)).ToList();
@@ -291,6 +305,7 @@ public partial class BreakdownWindow : Window
         PageAccuracy.Visibility = TabAccuracy.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         PageRotation.Visibility = TabRotation.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         PageDefense.Visibility = TabDefense.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        PageHealing.Visibility = TabHealing.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>Copies the whole window as an image — ready to paste into Discord.</summary>
