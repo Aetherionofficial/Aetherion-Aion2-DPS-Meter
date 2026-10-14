@@ -436,6 +436,7 @@ public sealed class OverlayViewModel : ObservableObject
             var heading = cb.IsUnknownSummons ? T.UnknownSummonsTip : $"#{i + 1} {cb.Name} · {T.ClassName(cb.Class)}";
             row.Tooltip = $"{heading}\n" +
                           $"{T.RowDamage} {Format.Grouped(cb.Damage)} ({Format.Share(cb.Share)}) · DPS {Format.Compact(cb.Dps)}\n" +
+                          $"{T.IdleDpsHint}\n" +
                           $"{T.HealShort} {Format.Grouped(cb.Healing)}\n" +
                           $"{T.RowHits} {cb.Hits} · {T.RowCrit} {Format.Percent(cb.CritRate)} · {T.RowMax} {Format.Grouped(cb.MaxHit)}";
         }
