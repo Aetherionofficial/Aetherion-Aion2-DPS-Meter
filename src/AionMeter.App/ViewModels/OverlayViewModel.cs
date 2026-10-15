@@ -131,9 +131,9 @@ public sealed class RowViewModel : ObservableObject
             FillBrush = Freeze(fill);
             DpsBrush = Freeze(new SolidColorBrush(Lighten(v, 0.55)));
             var soft = new LinearGradientBrush { StartPoint = new System.Windows.Point(0, 0), EndPoint = new System.Windows.Point(1, 0) };
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x80, v.R, v.G, v.B), 0));
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x48, v.R, v.G, v.B), 0.6));
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x14, v.R, v.G, v.B), 1));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, v.R, v.G, v.B), 0));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x20, v.R, v.G, v.B), 0.6));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x08, v.R, v.G, v.B), 1));
             SoftFillBrush = Freeze(soft);
             AccentBrush = Freeze(new SolidColorBrush(Lighten(v, 0.1)));
             Raise(nameof(SoftFillBrush));
