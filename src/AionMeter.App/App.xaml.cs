@@ -101,7 +101,7 @@ public partial class App : Application
         _singleInstance = new Mutex(true, $"AionMeter.SingleInstance.{InstanceSuffix}", out var first);
         if (!first)
         {
-            // Started again (the shortcut clicked twice): the running meter shows its overlay, this copy leaves quietly.
+            // Started again (the shortcut clicked twice): return to the overlay/settings workspace and leave quietly.
             if (EventWaitHandle.TryOpenExisting(ShowRequestName, out var running))
                 using (running) running.Set();
             else // a version from before 0.2.2 is running
@@ -165,7 +165,7 @@ public partial class App : Application
         _meter.StartCapture();
 
         _overlay = new OverlayWindow(_meter);
-        // Create the native overlay handle for global hotkeys, then leave Raid Command as the primary surface.
+        // Create the native overlay handle for global hotkeys before showing the default overlay/settings workspace.
         _overlay.Show();
         _overlay.Hide();
 
@@ -193,7 +193,9 @@ public partial class App : Application
                 Log.Info("Exit chosen in the tray menu");
                 Shutdown();
             }));
-        ShowRaidCommand();
+        // Start in the requested workspace: live DPS overlay at the left with the full settings panel beside it.
+        SetOverlayVisible(true);
+        ShowSettings();
         SessionEnding += (_, end) => Log.Info($"Windows {end.ReasonSessionEnding}: closing");
 
         // A new player's first start: without Npcap nothing can be measured — say so and offer the download.
@@ -203,7 +205,11 @@ public partial class App : Application
         // Another start of the app asks this one to show the overlay.
         _showRequest = new EventWaitHandle(false, EventResetMode.AutoReset, ShowRequestName);
         _showWait = ThreadPool.RegisterWaitForSingleObject(_showRequest,
-            (_, _) => Dispatcher.BeginInvoke(ShowRaidCommand), null, Timeout.Infinite, executeOnlyOnce: false);
+            (_, _) => Dispatcher.BeginInvoke(() =>
+            {
+                SetOverlayVisible(true);
+                ShowSettings();
+            }), null, Timeout.Infinite, executeOnlyOnce: false);
 
         // New versions on GitHub: tray item, the overlay's update button and one notification per version.
         _meter.Updates.Changed += OnUpdatesChanged;

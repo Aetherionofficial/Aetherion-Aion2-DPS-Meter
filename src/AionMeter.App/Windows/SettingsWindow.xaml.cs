@@ -125,11 +125,15 @@ public partial class SettingsWindow : Window
         {
             _activeSettingsNav.Background = System.Windows.Media.Brushes.Transparent;
             _activeSettingsNav.Foreground = (System.Windows.Media.Brush)FindResource("TextDim");
+            if (_activeSettingsNav.Template.FindName("Marker", _activeSettingsNav) is FrameworkElement oldMarker)
+                oldMarker.Visibility = Visibility.Collapsed;
         }
         if (button is not null)
         {
             button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xC9, 0xA4, 0x5C));
             button.Foreground = (System.Windows.Media.Brush)FindResource("GoldBright");
+            if (button.Template.FindName("Marker", button) is FrameworkElement marker)
+                marker.Visibility = Visibility.Visible;
             _activeSettingsNav = button;
         }
 
