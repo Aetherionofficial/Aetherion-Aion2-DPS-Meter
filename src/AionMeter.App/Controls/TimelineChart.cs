@@ -51,7 +51,7 @@ public sealed class TimelineChart : FrameworkElement
             dc.DrawText(text, new Point(plot.Left - text.Width - 6, y - text.Height / 2));
         }
 
-        var step = seconds switch { <= 30 => 5, <= 90 => 15, <= 300 => 30, <= 900 => 60, _ => 300 };
+        var step = seconds switch { <= 5 => 1, <= 30 => 5, <= 90 => 15, <= 300 => 30, <= 900 => 60, _ => 300 };
         for (var s = 0; s <= seconds; s += step)
         {
             var x = plot.Left + plot.Width * s / (seconds - 1.0);
@@ -81,6 +81,8 @@ public sealed class TimelineChart : FrameworkElement
                 var fill = new LinearGradientBrush(Color.FromArgb(0x70, s.Color.R, s.Color.G, s.Color.B),
                     Color.FromArgb(0x05, s.Color.R, s.Color.G, s.Color.B), 90);
                 dc.DrawGeometry(fill, new Pen(new SolidColorBrush(s.Color), 2) { LineJoin = PenLineJoin.Round }, geo);
+                if (values.Length == 1)
+                    dc.DrawEllipse(new SolidColorBrush(s.Color), null, Pt(0, values[0]), 3.5, 3.5);
             }
             else
             {

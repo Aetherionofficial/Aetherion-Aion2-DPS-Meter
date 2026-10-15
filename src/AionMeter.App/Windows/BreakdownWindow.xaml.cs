@@ -128,6 +128,7 @@ public partial class BreakdownWindow : Window
         if (summary is null) return;
 
         FightTitle.Text = summary.Title;
+        FightTitle.ToolTip = summary.Title;
         FightPortrait.Source = _portraits?.Of(summary);
         FightMeta.Text = $"{summary.StartedAt.ToString("dd MMM HH:mm", T.Culture)} · {Format.Clock(summary.CombatMs)} · {Format.Compact(summary.PartyDps)}/s {T.PartyDpsSuffix}"
                          + (summary.MostDamageUnsent ? $"\n{T.DamageUnsentLine(summary)}" : "")
@@ -171,8 +172,8 @@ public partial class BreakdownWindow : Window
         StatDps.Text = Format.Compact(d.Dps);
         StatShare.Text = Format.Share(d.Share);
         StatTime.Text = Format.Clock(d.CombatMs);
-        HealingTotalValue.Text = Format.Grouped(d.HealingTotal);
-        HealingList.ItemsSource = (d.HealingSkills ?? [])
+        HealingTotalValue.Text = d.HealingTotal > 0 ? Format.Grouped(d.HealingTotal) : "—";
+        var healingSkills = (d.HealingSkills ?? [])
             .OrderByDescending(h => h.Amount)
             .Select(h =>
             {
@@ -182,6 +183,9 @@ public partial class BreakdownWindow : Window
                 return new HealingItem(h.Name, swatch, _icons.Get(h.SkillCode), h.Events.ToString(),
                     Format.Grouped(h.Amount), $"{h.Name} ({h.SkillCode})\n{T.HealingAmount}: {Format.Grouped(h.Amount)}\n{T.HealingEvents}: {h.Events}");
             }).ToList();
+        HealingList.ItemsSource = healingSkills;
+        HealingList.Visibility = healingSkills.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        HealingEmptyMessage.Visibility = healingSkills.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
 
         var topSkill = d.Skills.OrderByDescending(s => s.Damage).FirstOrDefault();
         HighlightSkillName.Text = topSkill?.Name ?? "—";
@@ -193,7 +197,7 @@ public partial class BreakdownWindow : Window
         HighlightPeakTime.Text = Format.Clock((long)peakSecond.second * 1000);
 
         var topHeal = (d.HealingSkills ?? []).OrderByDescending(h => h.Amount).FirstOrDefault();
-        HighlightHealingValue.Text = Format.Grouped(d.HealingTotal);
+        HighlightHealingValue.Text = d.HealingTotal > 0 ? Format.Grouped(d.HealingTotal) : "—";
         HighlightHealingSkill.Text = topHeal is null || topHeal.Amount <= 0 ? T.HighlightNoHealing : topHeal.Name;
 
         var maxShare = d.Skills.Count > 0 ? d.Skills.Max(s => s.Share) : 1;

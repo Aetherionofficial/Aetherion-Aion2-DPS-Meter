@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:AionMeter.App.Controls"
         xmlns:s="clr-namespace:AionMeter.App.Services"
-        Title="{Binding BreakdownTitle, Source={x:Static s:UiText.Current}}" Width="900" Height="680" MinWidth="640" MinHeight="420"
+        Title="{Binding BreakdownTitle, Source={x:Static s:UiText.Current}}" Width="1180" Height="760" MinWidth="980" MinHeight="580"
         WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" Background="{StaticResource Bg0}"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         FontFamily="{StaticResource UiFont}" Foreground="{StaticResource Text}">
@@ -66,7 +66,7 @@
     <Border BorderBrush="{StaticResource GoldDim}" BorderThickness="1">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="190" />
+                <ColumnDefinition Width="220" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -128,7 +128,7 @@
                                                    Foreground="{Binding Rank.Fg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                     <c:ClassGlyph Grid.Column="1" Class="{Binding Class}" Width="19" Height="19" HorizontalAlignment="Left" />
-                                    <TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="12.5" Foreground="{Binding NameBrush}"
+                                    <TextBlock Grid.Column="2" Text="{Binding Name}" ToolTip="{Binding Name}" FontSize="12.5" Foreground="{Binding NameBrush}"
                                                FontWeight="{Binding NameWeight}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="3" Text="{Binding ShareText}" FontFamily="{StaticResource NumberFont}" FontSize="11"
                                                Foreground="{StaticResource TextDim}" VerticalAlignment="Center" Margin="6,0,0,0" />
@@ -470,6 +470,9 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
+                        <TextBlock x:Name="HealingEmptyMessage" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextMute}" FontSize="13"
+                                   Text="{Binding HighlightNoHealing, Source={x:Static s:UiText.Current}}" Visibility="Collapsed" />
                     </Grid>
                 </Grid>
             </Grid>
