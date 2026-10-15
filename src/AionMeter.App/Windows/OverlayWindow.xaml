@@ -198,7 +198,7 @@
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
                 <!-- track -->
-                <Border x:Name="Track" CornerRadius="4" Background="#14FFFFFF" />
+                <Border x:Name="Track" CornerRadius="4" Background="#B20B1119" />
                 <!-- fill -->
                 <Border CornerRadius="4" Background="{Binding SoftFillBrush}" RenderTransformOrigin="0,0.5">
                     <Border.RenderTransform>
@@ -251,7 +251,7 @@
             </Grid>
             <DataTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="Track" Property="Background" Value="#26FFFFFF" />
+                    <Setter TargetName="Track" Property="Background" Value="#D20B1119" />
                 </Trigger>
                 <DataTrigger Binding="{Binding IsSelf}" Value="True">
                     <Setter TargetName="NameText" Property="Foreground" Value="{StaticResource SelfGold}" />

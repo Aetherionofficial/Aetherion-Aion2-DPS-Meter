@@ -134,7 +134,11 @@ public sealed class UiText
     /// readable at a glance.
     /// </summary>
     public string PlayerLabel(string name, Core.Events.GameClass cls) =>
-        name.StartsWith('#') && ClassName(cls) is { Length: > 0 } c ? $"{c} {name}" : name;
+        name.StartsWith('#')
+            ? ClassName(cls) is { Length: > 0 } c ? $"{c} {name}" : string.Format(UnknownPlayerFormat, name[1..])
+            : name;
+
+    public string UnknownPlayerFormat { get; init; } = "Player {0}";
 
     /// <summary>A row of the ranking: a player, or the pseudo-row of pets whose owner is unknown.</summary>
     public string CombatantLabel(uint actorId, string name, Core.Events.GameClass cls) =>
@@ -532,6 +536,7 @@ public sealed class UiText
     private static readonly UiText De = new()
     {
         Code = "de", LanguageName = "Deutsch",
+        UnknownPlayerFormat = "Spieler {0}",
         OverlayLive = "LIVE-KAMPF", GroupDps = "GRUPPEN-DPS", GroupHps = "GRUPPEN-HPS", PeakFiveSeconds = "Peak 5 Sek.", FooterDetailsLabel = "Kampfdetails", FooterCompareLabel = "Vergleich", FooterRankingLabel = "DPS / HPS wechseln",
         ShowHealingInfo = "Heilung / HPS", ShowPeakDpsInfo = "Peak-DPS", ShowBossHpInfo = "Boss-LP", ShowGearInfo = "Gear-Infos",
         CombinedOverlayMode = "Schaden + Heilung", CompactOverlayMode = "Nur DPS · kompakt", OverlayRank = "RANG", OverlayShare = "ANTEIL",

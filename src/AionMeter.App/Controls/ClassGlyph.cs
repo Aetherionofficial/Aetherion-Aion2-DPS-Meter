@@ -24,8 +24,9 @@ public static class ClassVisuals
 
     private static readonly Dictionary<GameClass, ImageSource?> Emblems = new();
 
+    // A neutral player silhouette avoids suggesting an unknown class is literally a question mark.
     private static readonly Geometry UnknownGlyph = Freeze(Geometry.Parse(
-        "M12 3.5 A8.5 8.5 0 1 0 12.01 3.5 Z M9.5 9.5 C9.5 6.5 14.5 6.5 14.5 9.5 C14.5 11.5 12 11.5 12 14 M12 17 L12 17.5"));
+        "M12 3.5 A4 4 0 1 0 12.01 3.5 Z M4 21 C4.5 16.5 7.5 14.5 12 14.5 C16.5 14.5 19.5 16.5 20 21"));
 
     // Saturated fills for the full-height damage bars (the emblem hues, pushed so a whole row reads at a glance).
     private static readonly Dictionary<GameClass, Color> BarColors = new()
