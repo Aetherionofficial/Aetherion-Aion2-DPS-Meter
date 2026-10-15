@@ -41,8 +41,8 @@ public sealed class AppSettings
     // Overlay window
     public double OverlayLeft { get; set; } = 125;
     public double OverlayTop { get; set; } = 129;
-    public double OverlayWidth { get; set; } = 470;
-    public double OverlayHeight { get; set; } = 630;
+    public double OverlayWidth { get; set; } = 410;
+    public double OverlayHeight { get; set; } = 700;
     public double BackgroundOpacity { get; set; } = 0.96;
     public bool Locked { get; set; }
     public bool ClickThrough { get; set; }
@@ -71,10 +71,10 @@ public sealed class AppSettings
     public TargetMode TargetMode { get; set; } = TargetMode.BossOnly;
     /// <summary>True: the leader's bar is full and the rest are sized against it. False: bars show share of party damage.</summary>
     public bool BarsRelativeToTop { get; set; } = true;
-    public int MaxRows { get; set; } = 10;
-    public const int MinRowSize = 85, MaxRowSize = 100;
+    public int MaxRows { get; set; } = 8;
+    public const int MinRowSize = 70, MaxRowSize = 100;
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
-    public int RowSize { get; set; } = 100;
+    public int RowSize { get; set; } = 80;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
     public bool ShowGear { get; set; } = true;
     public bool ShowHealingPanel { get; set; } = true;
@@ -121,7 +121,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 10;
+    private const int CurrentLayout = 11;
 
     public static AppSettings Load()
     {
@@ -174,6 +174,14 @@ public sealed class AppSettings
                     if (Math.Abs(s.EventTimersTop - 110) < 1) s.EventTimersTop = 225;
                     if (Math.Abs(s.EventTimersWidth - 380) < 1) s.EventTimersWidth = 330;
                     if (Math.Abs(s.EventTimersOpacity - 0.76) < 0.02) s.EventTimersOpacity = 0.94;
+                }
+                if (s.LayoutVersion < 11)
+                {
+                    // v11 makes the combat overlay narrower and taller so it covers less of the game view.
+                    if (s.OverlayWidth >= 440) s.OverlayWidth = 410;
+                    if (s.OverlayHeight <= 630) s.OverlayHeight = 700;
+                    if (s.MaxRows == 10) s.MaxRows = 8;
+                    if (s.RowSize >= 95) s.RowSize = 80;
                 }
                 s.Language = UiText.Normalize(s.Language);
                 s.LayoutVersion = CurrentLayout;

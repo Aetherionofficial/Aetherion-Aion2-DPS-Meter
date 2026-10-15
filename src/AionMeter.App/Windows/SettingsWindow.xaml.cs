@@ -13,11 +13,20 @@ public partial class SettingsWindow : Window
 {
     private readonly MeterService _meter;
     private readonly List<(string? Name, string Label)> _devices = new();
+    private readonly double _originalOverlayWidth;
+    private readonly double _originalOverlayHeight;
+    private readonly int _originalRowSize;
     private Button? _activeSettingsNav;
+    private double _previewWidth;
+    private double _previewHeight;
+    private bool _settingsSaved;
 
     public SettingsWindow(MeterService meter)
     {
         _meter = meter;
+        _originalOverlayWidth = meter.Settings.OverlayWidth;
+        _originalOverlayHeight = meter.Settings.OverlayHeight;
+        _originalRowSize = meter.Settings.RowSize;
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
         Left = Math.Max(workArea.Left + 8, workArea.Right - Width - workArea.Width * 0.085);
@@ -26,12 +35,18 @@ public partial class SettingsWindow : Window
         Load();
         _ = RefreshLicenseStatusAsync();
         // The row size slider previews on the overlay; closing without saving puts the saved size back.
-        Closed += (_, _) => AppHost.Current.PreviewRowSize(_meter.Settings.RowSize);
+        Closed += (_, _) =>
+        {
+            AppHost.Current.PreviewRowSize(_settingsSaved ? _meter.Settings.RowSize : _originalRowSize);
+            if (!_settingsSaved) AppHost.Current.PreviewOverlaySize(_originalOverlayWidth, _originalOverlayHeight);
+        };
     }
 
     private void Load()
     {
         var s = _meter.Settings;
+        _previewWidth = s.OverlayWidth;
+        _previewHeight = s.OverlayHeight;
         BarsRelative.IsChecked = s.BarsRelativeToTop;
         ShowBoss.IsChecked = s.ShowBossPanel;
         ShowGear.IsChecked = s.ShowGear;
@@ -125,9 +140,11 @@ public partial class SettingsWindow : Window
             "appearance" => new[] { AppearanceSection, LanguageSection, DataFilesSection },
             "general" => new[] { OverlayBehaviorSection, MeterSection, HotkeysSection, LicenseSection, DataSection },
             "account" => new[] { PremiumSection, UpdatesSection },
+            "map" => new[] { MapSection },
+            "guide" => new[] { GuideSection },
             _ => new[] { OverlaySection },
         };
-        FrameworkElement[] allSections = new FrameworkElement[] { PremiumSection, LanguageSection, OverlaySection, AppearanceSection, TimerSection, MeterSection,
+        FrameworkElement[] allSections = new FrameworkElement[] { PremiumSection, LanguageSection, OverlaySection, MapSection, GuideSection, AppearanceSection, TimerSection, MeterSection,
             HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection };
         foreach (var section in allSections)
             section.Visibility = visible.Contains(section) ? Visibility.Visible : Visibility.Collapsed;
@@ -140,23 +157,34 @@ public partial class SettingsWindow : Window
             "appearance" => T.NavAppearance,
             "general" => T.NavGeneral,
             "account" => T.NavAccount,
+            "map" => T.MapPageTitle,
+            "guide" => T.GuidePageTitle,
             _ => T.SettingsOverlayTitle,
         };
-        PageSubtitle.Text = page == "timer" ? T.TimerPageHint : T.SettingsPageHint;
+        PageSubtitle.Text = page switch
+        {
+            "timer" => T.TimerPageHint,
+            "map" => T.MapPageHint,
+            "guide" => T.GuidePageHint,
+            _ => T.SettingsPageHint,
+        };
         SettingsScroll.ScrollToTop();
     }
 
     private void SizePreset_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string preset }) return;
-        (int rows, int size) = preset switch
+        (int rows, int size, double width, double height) = preset switch
         {
-            "compact" => (5, 85),
-            "large" => (15, 100),
-            _ => (10, 90),
+            "compact" => (5, 70, 350, 560),
+            "large" => (12, 90, 460, 780),
+            _ => (8, 80, 400, 680),
         };
         MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(value => Math.Abs(value - rows)).First();
         RowSizeValue.Value = size;
+        _previewWidth = width;
+        _previewHeight = height;
+        AppHost.Current.PreviewOverlaySize(width, height);
     }
 
     private void OverlayView_Click(object sender, RoutedEventArgs e)
@@ -167,6 +195,10 @@ public partial class SettingsWindow : Window
     }
 
     private void FarmGuide_Click(object sender, RoutedEventArgs e) => new FarmGuideWindow { Owner = this }.ShowDialog();
+
+    private void OpenMap_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowAionMap();
+
+    private void OpenGuide_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowWakayashi();
 
     private void DiscordSupport_Click(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo("https://discord.gg/mostwantedde") { UseShellExecute = true });
@@ -230,6 +262,8 @@ public partial class SettingsWindow : Window
         s.DiscordPresenceEnabled = DiscordPresence.IsChecked == true;
         s.DiscordFaction = (DiscordFactionBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "";
         s.MaxRows = MaxRows.SelectedItem is int rows ? rows : 10;
+        s.OverlayWidth = _previewWidth;
+        s.OverlayHeight = _previewHeight;
         s.BackgroundOpacity = Math.Round(OpacityValue.Value, 2);
         s.RowSize = (int)Math.Round(RowSizeValue.Value);
         s.TargetMode = Mode.SelectedIndex == 1 ? TargetMode.All : TargetMode.BossOnly;
@@ -255,6 +289,7 @@ public partial class SettingsWindow : Window
 
         _meter.ApplySettings();
         if (captureChanged) _meter.RestartCapture();
+        _settingsSaved = true;
         Close();
         AppHost.Current.OnSettingsChanged();
         if (language != UiText.Normalize(s.Language)) AppHost.Current.SetLanguage(language);

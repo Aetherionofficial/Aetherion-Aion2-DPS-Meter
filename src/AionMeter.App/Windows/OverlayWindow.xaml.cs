@@ -346,6 +346,20 @@ public partial class OverlayWindow : Window
         FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
         FooterCompareButton.Visibility = Width >= 390 ? Visibility.Visible : Visibility.Collapsed;
         FooterRankingButton.Visibility = Width >= 440 ? Visibility.Visible : Visibility.Collapsed;
+        var compactToolbar = Width < 480;
+        ChatToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
+        MapToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
+        GuideToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
+        EventsToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
+        RestartButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    /// <summary>Preview a Settings size preset without saving it until the player presses Save.</summary>
+    public void PreviewSize(double width, double height)
+    {
+        Width = Math.Max(MinWidth, width);
+        Height = Math.Max(MinHeight, height);
+        ApplyResponsiveLayout();
     }
 
     private void OpenBreakdown(uint actorId)

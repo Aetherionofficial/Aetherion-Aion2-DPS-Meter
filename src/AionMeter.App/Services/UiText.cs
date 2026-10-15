@@ -401,6 +401,14 @@ public sealed class UiText
     public string NavAppearance { get; init; } = "Appearance";
     public string NavGeneral { get; init; } = "General";
     public string NavAccount { get; init; } = "Aetherion Premium";
+    public string NavMap { get; init; } = "AION2 Map";
+    public string NavGuide { get; init; } = "Wakayashi.gg";
+    public string MapPageTitle { get; init; } = "Questlog.gg AION2 map";
+    public string MapPageHint { get; init; } = "Open the interactive map and AION2 news in a dedicated window.";
+    public string OpenMapLabel { get; init; } = "Open AION2 map";
+    public string GuidePageTitle { get; init; } = "Wakayashi.gg guide";
+    public string GuidePageHint { get; init; } = "Open Wakayashi.gg separately from the map and the combat overlay.";
+    public string OpenGuideLabel { get; init; } = "Open Wakayashi.gg";
     public string SettingsPageHint { get; init; } = "Important options at a glance, even during combat.";
     public string SettingsKicker { get; init; } = "AETHERION • SETTINGS";
     public string SettingsOverlayTitle { get; init; } = "Customize overlay";
@@ -408,7 +416,7 @@ public sealed class UiText
     public string OverlayViewTitle { get; init; } = "View";
     public string VisibleInfoTitle { get; init; } = "Visible information";
     public string WindowSizeTitle { get; init; } = "Window size";
-    public string WindowSizeHint { get; init; } = "Scales text, spacing and visible rows together.";
+    public string WindowSizeHint { get; init; } = "Preset sizes keep the overlay narrow and tall; fine-tune it with the corner grip.";
     public string PresetCompact { get; init; } = "Compact";
     public string PresetStandard { get; init; } = "Standard";
     public string PresetLarge { get; init; } = "Large";
@@ -532,6 +540,9 @@ public sealed class UiText
         ShowHealingInfo = "Heilung / HPS", ShowPeakDpsInfo = "Peak-DPS", ShowBossHpInfo = "Boss-LP", ShowGearInfo = "Gear-Infos",
         CombinedOverlayMode = "Schaden + Heilung", CompactOverlayMode = "Nur DPS · kompakt", OverlayRank = "RANG", OverlayShare = "ANTEIL",
         MapLabel = "AION2-Hub",
+        NavMap = "AION2-Karte", NavGuide = "Wakayashi.gg",
+        MapPageTitle = "Questlog.gg AION2-Karte", MapPageHint = "Öffne die interaktive Karte und AION2-News in einem eigenen Fenster.", OpenMapLabel = "AION2-Karte öffnen",
+        GuidePageTitle = "Wakayashi.gg Guide", GuidePageHint = "Öffne Wakayashi.gg getrennt von der Karte und vom Kampf-Overlay.", OpenGuideLabel = "Wakayashi.gg öffnen",
         DiscordPresenceSection = "DISCORD-STATUS", DiscordPresenceEnabled = "Klasse, Level und Fraktion auf Discord anzeigen",
         DiscordPresenceHint = "Wird gemäß deinen Discord-Datenschutzeinstellungen in deiner Aktivität angezeigt und direkt an die Discord-Desktop-App gesendet. Wähle deine Fraktion unten aus; der AION-Mitschnitt liefert sie nicht zuverlässig.",
         DiscordFactionLabel = "Deine Fraktion", DiscordFactionUnknown = "Nicht festgelegt", DiscordFactionElyos = "Elyos", DiscordFactionAsmodian = "Asmodier",
@@ -619,7 +630,7 @@ public sealed class UiText
         YourFights = "Deine Kämpfe", SavedCount = "{0} gespeichert", ShownOf = "{0} von {1}", FilterAll = "Alle", FilterBosses = "Bosse", FilterKills = "Siege",
         ShowInOverlay = "Im Overlay anzeigen", TipShowInOverlay = "Diesen Kampf im Overlay anzeigen (Live-Modus kehrt beim nächsten Pull zurück)", HistoryEmpty = "Besiege einen Boss — der Kampf erscheint hier automatisch.",
         PlayersShort = "Sp.", JustNow = "gerade eben", MinutesAgo = "vor {0} Min.", HoursAgo = "vor {0} Std.", DeleteConfirm = "„{0}“ ({1}) löschen?", TipRefresh = "Aktualisieren", TipOpenFolder = "Ordner öffnen", TipDelete = "Ausgewählten Kampf löschen", TipOpenBreakdown = "Vollständige Auswertung öffnen", DamageWord = "Schaden",
-        SettingsTitle = "Einstellungen", NavOverlay = "Overlay", NavTimer = "Timer", NavFights = "Kampf & Verlauf", NavAppearance = "Darstellung", NavGeneral = "Allgemein", NavAccount = "Aetherion Premium", SettingsPageHint = "Alles Wichtige auf einen Blick, auch im Kampf.", SettingsKicker = "AETHERION • EINSTELLUNGEN", SettingsOverlayTitle = "Overlay anpassen", CombatOverlayLabel = "KAMPF-OVERLAY", OverlayViewTitle = "Ansicht", VisibleInfoTitle = "Sichtbare Informationen", WindowSizeTitle = "Fenstergröße", WindowSizeHint = "Skaliert Schrift, Abstände und Reihen gemeinsam.", PresetCompact = "Kompakt", PresetStandard = "Standard", PresetLarge = "Groß", TransparencyTitle = "Transparenz", TransparencyHint = "Mehr Deckkraft sorgt für gute Lesbarkeit.", TransparentLabel = "Durchsichtig", OpaqueLabel = "Deckend", TimerPageHint = "Passe Timer-Hinweise und Lesbarkeit an.", TimerAlertLabel = "Boss-Hinweis (Minuten vor Respawn)", TimerOpacityLabel = "Timer-Deckkraft", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
+        SettingsTitle = "Einstellungen", NavOverlay = "Overlay", NavTimer = "Timer", NavFights = "Kampf & Verlauf", NavAppearance = "Darstellung", NavGeneral = "Allgemein", NavAccount = "Aetherion Premium", SettingsPageHint = "Alles Wichtige auf einen Blick, auch im Kampf.", SettingsKicker = "AETHERION • EINSTELLUNGEN", SettingsOverlayTitle = "Overlay anpassen", CombatOverlayLabel = "KAMPF-OVERLAY", OverlayViewTitle = "Ansicht", VisibleInfoTitle = "Sichtbare Informationen", WindowSizeTitle = "Fenstergröße", WindowSizeHint = "Schmale Hochformate verdecken weniger vom Spiel; am Eck kannst du fein nachjustieren.", PresetCompact = "Kompakt", PresetStandard = "Standard", PresetLarge = "Groß", TransparencyTitle = "Transparenz", TransparencyHint = "Mehr Deckkraft sorgt für gute Lesbarkeit.", TransparentLabel = "Durchsichtig", OpaqueLabel = "Deckend", TimerPageHint = "Passe Timer-Hinweise und Lesbarkeit an.", TimerAlertLabel = "Boss-Hinweis (Minuten vor Respawn)", TimerOpacityLabel = "Timer-Deckkraft", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
         LanguageLabel = "Sprache", BreakdownTitle = "Kampfauswertung — AION2 DPS Meter", HistoryTitle = "Kampfverlauf — AION2 DPS Meter",
         TipTargetMode = "Nur Boss / alle getroffenen Ziele", TipLock = "Position fixieren", TipSettings = "Einstellungen",
         TipOpacity = "Hintergrundtransparenz", TipHide = "Overlay ausblenden (Strg+Umschalt+D)", ModeBossOnly = "BOSS", ModeAll = "ALLE",
@@ -652,6 +663,9 @@ public sealed class UiText
         ShowHealingInfo = "Лечение / HPS", ShowPeakDpsInfo = "Пиковый DPS", ShowBossHpInfo = "Здоровье босса", ShowGearInfo = "Экипировка",
         CombinedOverlayMode = "Урон + лечение", CompactOverlayMode = "Только DPS · компактно", OverlayRank = "МЕСТО", OverlayShare = "ДОЛЯ",
         LanguageName = "Русский",
+        NavMap = "Карта AION2", NavGuide = "Wakayashi.gg",
+        MapPageTitle = "Карта AION2 на Questlog.gg", MapPageHint = "Откройте интерактивную карту и новости AION2 в отдельном окне.", OpenMapLabel = "Открыть карту AION2",
+        GuidePageTitle = "Гайд Wakayashi.gg", GuidePageHint = "Откройте Wakayashi.gg отдельно от карты и боевого оверлея.", OpenGuideLabel = "Открыть Wakayashi.gg",
         MapLabel = "Хаб AION2",
         DiscordPresenceSection = "СТАТУС DISCORD", DiscordPresenceEnabled = "Показывать класс, уровень и фракцию в Discord",
         DiscordPresenceHint = "Отображается в вашей активности Discord согласно настройкам приватности и отправляется прямо в приложение Discord. Выберите фракцию ниже: захват AION не передаёт её надёжно.",
@@ -917,7 +931,7 @@ public sealed class UiText
         TipOpenBreakdown = "Открыть полный разбор",
         DamageWord = "урона",
 
-        SettingsTitle = "Настройки", NavOverlay = "Оверлей", NavTimer = "Таймер", NavFights = "Бой и история", NavAppearance = "Внешний вид", NavGeneral = "Общие", NavAccount = "Aetherion Premium", SettingsPageHint = "Важные настройки всегда под рукой, даже во время боя.", SettingsKicker = "AETHERION • НАСТРОЙКИ", SettingsOverlayTitle = "Настроить оверлей", CombatOverlayLabel = "БОЕВОЙ ОВЕРЛЕЙ", OverlayViewTitle = "Вид", VisibleInfoTitle = "Видимая информация", WindowSizeTitle = "Размер окна", WindowSizeHint = "Масштаб текста, интервалов и отображаемых строк.", PresetCompact = "Компактный", PresetStandard = "Стандартный", PresetLarge = "Большой", TransparencyTitle = "Прозрачность", TransparencyHint = "Непрозрачность повышает читаемость.", TransparentLabel = "Прозрачный", OpaqueLabel = "Непрозрачный", TimerPageHint = "Настройте уведомления таймера и читаемость.", TimerAlertLabel = "Уведомление о боссе (минут до возрождения)", TimerOpacityLabel = "Прозрачность таймера",
+        SettingsTitle = "Настройки", NavOverlay = "Оверлей", NavTimer = "Таймер", NavFights = "Бой и история", NavAppearance = "Внешний вид", NavGeneral = "Общие", NavAccount = "Aetherion Premium", SettingsPageHint = "Важные настройки всегда под рукой, даже во время боя.", SettingsKicker = "AETHERION • НАСТРОЙКИ", SettingsOverlayTitle = "Настроить оверлей", CombatOverlayLabel = "БОЕВОЙ ОВЕРЛЕЙ", OverlayViewTitle = "Вид", VisibleInfoTitle = "Видимая информация", WindowSizeTitle = "Размер окна", WindowSizeHint = "Узкий высокий формат меньше закрывает игру; размер можно точно настроить за уголок.", PresetCompact = "Компактный", PresetStandard = "Стандартный", PresetLarge = "Большой", TransparencyTitle = "Прозрачность", TransparencyHint = "Непрозрачность повышает читаемость.", TransparentLabel = "Прозрачный", OpaqueLabel = "Непрозрачный", TimerPageHint = "Настройте уведомления таймера и читаемость.", TimerAlertLabel = "Уведомление о боссе (минут до возрождения)", TimerOpacityLabel = "Прозрачность таймера",
         LanguageLabel = "Язык",
         BreakdownTitle = "Разбор боя",
         HistoryTitle = "История боёв",

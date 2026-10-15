@@ -117,6 +117,9 @@
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavFights, Source={x:Static s:UiText.Current}}" Tag="fights" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Tag="appearance" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGeneral, Source={x:Static s:UiText.Current}}" Tag="general" Click="SettingsNav_Click" />
+                    <TextBlock Text="AION2 EXTRAS" Foreground="{StaticResource TextMute}" FontSize="9" Margin="12,16,0,4" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavMap, Source={x:Static s:UiText.Current}}" Tag="map" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGuide, Source={x:Static s:UiText.Current}}" Tag="guide" Click="SettingsNav_Click" />
                     <TextBlock Text="KONTO" Foreground="{StaticResource TextMute}" FontSize="9" Margin="12,16,0,4" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAccount, Source={x:Static s:UiText.Current}}" Tag="account" Click="SettingsNav_Click" />
                 </StackPanel>
@@ -201,6 +204,22 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
+                    <Border x:Name="MapSection" Style="{StaticResource Section}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="QUESTLOG.GG · AION2" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <TextBlock Text="{Binding MapPageTitle, Source={x:Static s:UiText.Current}}" FontSize="17" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding MapPageHint, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,6,0,12" />
+                            <Button Style="{StaticResource PrimaryButton}" Content="{Binding OpenMapLabel, Source={x:Static s:UiText.Current}}" Click="OpenMap_Click" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="GuideSection" Style="{StaticResource Section}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="AION2 GUIDE · SEPARATES FENSTER" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <TextBlock Text="{Binding GuidePageTitle, Source={x:Static s:UiText.Current}}" FontSize="17" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding GuidePageHint, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,6,0,12" />
+                            <Button Style="{StaticResource PrimaryButton}" Content="{Binding OpenGuideLabel, Source={x:Static s:UiText.Current}}" Click="OpenGuide_Click" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
                     <Border x:Name="AppearanceSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
@@ -212,7 +231,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <TextBlock Text="{Binding RowSize, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
-                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="85" Maximum="100" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
+                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="70" Maximum="100" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
                                 <TextBlock x:Name="RowSizeText" VerticalAlignment="Center" Margin="10,0,0,0" />
                             </StackPanel>
                             <TextBlock Style="{StaticResource Hint}" Margin="190,2,0,0" Text="{Binding RowSizeHint, Source={x:Static s:UiText.Current}}" />

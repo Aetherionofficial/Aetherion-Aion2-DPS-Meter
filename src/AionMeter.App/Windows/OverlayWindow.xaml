@@ -5,7 +5,7 @@
         xmlns:vm="clr-namespace:AionMeter.App.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
-        Title="AION2 DPS Meter" Width="470" Height="630" MinWidth="320" MinHeight="260"
+        Title="AION2 DPS Meter" Width="410" Height="700" MinWidth="300" MinHeight="360"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" SizeChanged="Overlay_SizeChanged"
@@ -361,19 +361,19 @@
                             ToolTip="Switch DPS / HPS ranking" />
                     <Button Style="{StaticResource Chip}" Content="{Binding LanguageCode}" Click="Language_Click" Margin="0,0,5,0"
                             ToolTip="{Binding T.SwitchLanguage}" />
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE787;" Click="Events_Click" ToolTip="{Binding T.EventTimersTitle}" />
+                    <Button x:Name="ChatToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
+                    <Button x:Name="MapToolButton" Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
+                    <Button x:Name="GuideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8A7;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />
+                    <Button x:Name="TimersToolButton" Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />
+                    <Button x:Name="EventsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE787;" Click="Events_Click" ToolTip="{Binding T.EventTimersTitle}" />
                     <Button x:Name="RestartButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" />
                     <ToggleButton x:Name="LockButton" Style="{StaticResource ToolToggle}" Click="Lock_Click" ToolTip="{Binding T.TipLock}">
                         <TextBlock x:Name="LockGlyph" Text="&#xE785;" />
                     </ToggleButton>
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="{Binding T.TipSettings}" />
+                    <Button x:Name="SettingsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="{Binding T.TipSettings}" />
                     <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0" Maximum="1" Margin="5,0,3,0"
                             ValueChanged="Opacity_Changed" VerticalAlignment="Center" ToolTip="{Binding T.TipOpacity}" />
-                    <Button Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="Hide_Click" ToolTip="{Binding T.TipHide}" />
+                    <Button x:Name="HideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="Hide_Click" ToolTip="{Binding T.TipHide}" />
                 </StackPanel>
 
                 <Border Grid.Column="1" Background="#AD111D27" BorderBrush="#344651" BorderThickness="1" CornerRadius="4" Padding="8,5" VerticalAlignment="Center">

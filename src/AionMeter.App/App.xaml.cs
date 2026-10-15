@@ -715,6 +715,9 @@ public partial class App : Application
     /// <summary>The Settings window's row size slider, shown on the overlay before it is saved.</summary>
     public void PreviewRowSize(int percent) => _overlay?.ApplyRowSize(percent);
 
+    /// <summary>The Settings window's size presets, shown on the overlay before they are saved.</summary>
+    public void PreviewOverlaySize(double width, double height) => _overlay?.PreviewSize(width, height);
+
     private void PickReplay()
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
