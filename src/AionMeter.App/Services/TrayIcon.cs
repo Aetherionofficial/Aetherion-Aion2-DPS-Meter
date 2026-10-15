@@ -43,7 +43,7 @@ public sealed class TrayIcon : IDisposable
         _history = new ToolStripMenuItem("", null, (_, _) => actions.History());
         _timers = new ToolStripMenuItem("", null, (_, _) => actions.BossTimers());
         _eventTimers = new ToolStripMenuItem("", null, (_, _) => actions.EventTimers());
-        _map = new ToolStripMenuItem("AION2 Map (Questlog)", null, (_, _) => actions.Map());
+        _map = new ToolStripMenuItem("AION2 Hub · Map", null, (_, _) => actions.Map());
         _settings = new ToolStripMenuItem("", null, (_, _) => actions.Settings());
         _discordSupport = new ToolStripMenuItem("", null, (_, _) => actions.DiscordSupport());
         _language = new ToolStripMenuItem("", null, (_, _) => actions.ToggleLanguage());
@@ -88,6 +88,7 @@ public sealed class TrayIcon : IDisposable
         _history.Text = t.TrayHistory;
         _timers.Text = t.TrayTimers;
         _eventTimers.Text = t.EventTimersTitle;
+        _map.Text = t.MapLabel;
         _settings.Text = t.TraySettings;
         _discordSupport.Text = t.TrayDiscordSupport;
         _language.Text = t.SwitchLanguage;

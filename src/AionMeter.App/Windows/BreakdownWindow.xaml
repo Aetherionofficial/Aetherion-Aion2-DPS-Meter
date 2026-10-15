@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:AionMeter.App.Controls"
         xmlns:s="clr-namespace:AionMeter.App.Services"
-        Title="{Binding BreakdownTitle, Source={x:Static s:UiText.Current}}" Width="1180" Height="760" MinWidth="980" MinHeight="580"
+        Title="{Binding BreakdownTitle, Source={x:Static s:UiText.Current}}" Width="1280" Height="840" MinWidth="1040" MinHeight="640"
         WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" Background="{StaticResource Bg0}"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         FontFamily="{StaticResource UiFont}" Foreground="{StaticResource Text}">
@@ -66,7 +66,7 @@
     <Border BorderBrush="{StaticResource GoldDim}" BorderThickness="1">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="230" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 

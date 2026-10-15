@@ -43,7 +43,7 @@ public static class SampleRenderer
             case "breakdown":
                 var segment = meter.Tracker.Segments()[0].Id;
                 var breakdown = new BreakdownWindow(new ViewModels.LiveFightView(meter.Tracker, segment), 2, meter.Data, meter.Icons, meter.Portraits)
-                    { Width = o.Width ?? 900, Height = o.Height ?? 680 };
+                    { Width = o.Width ?? 1280, Height = o.Height ?? 840 };
                 if (o.Tab is { } tab) breakdown.ShowTab(tab);
                 host = breakdown;
                 refresh = breakdown.ReloadNow;
@@ -61,7 +61,7 @@ public static class SampleRenderer
                 refresh = timers.ReloadNow;
                 break;
             case "settings":
-                host = new SettingsWindow(meter) { Width = o.Width ?? 640, Height = o.Height ?? 900 };
+                host = new SettingsWindow(meter) { Width = o.Width ?? 1040, Height = o.Height ?? 760 };
                 refresh = () => { };
                 break;
             case "update" or "update-portable":

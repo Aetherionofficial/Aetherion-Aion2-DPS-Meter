@@ -58,7 +58,8 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        Log.Info($"Startup requested. Version {InstanceSuffix}; executable {Environment.ProcessPath}.");
+        if (ArgValue(e.Args, "--render-sample") is not null) Log.Enabled = false;
+        else Log.Info($"Startup requested. Version {InstanceSuffix}; executable {Environment.ProcessPath}.");
 #if AETHERION_OWNER_BUILD
         if (e.Args.Contains("--owner-key-issuer"))
         {

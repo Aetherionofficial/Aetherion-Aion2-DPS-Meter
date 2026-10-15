@@ -28,7 +28,7 @@ public sealed class UiText
 
     public string Code { get; init; } = "en";
     public string LanguageName { get; init; } = "English";
-    public string MapLabel { get; init; } = "Map";
+    public string MapLabel { get; init; } = "AION2 hub";
     public string DiscordPresenceSection { get; init; } = "DISCORD PRESENCE";
     public string DiscordPresenceEnabled { get; init; } = "Share class, level and faction on Discord";
     public string DiscordPresenceHint { get; init; } = "Shown in your Discord activity according to your Discord privacy settings. Sent directly to the Discord desktop app. Select your faction below; AION capture does not reliably provide it.";
@@ -377,6 +377,7 @@ public sealed class UiText
     public string ModeBossOnly { get; init; } = "BOSS";
     public string ModeAll { get; init; } = "ALL";
     public string SecLanguage { get; init; } = "LANGUAGE";
+    public string SecAccount { get; init; } = "ACCOUNT";
     public string LanguageHint { get; init; } = "Interface, skill and monster names. Applied immediately.";
     public string SecOverlay { get; init; } = "OVERLAY";
     public string BarsRelative { get; init; } = "Bars relative to the top player";
@@ -474,7 +475,7 @@ public sealed class UiText
     private static readonly UiText De = new()
     {
         Code = "de", LanguageName = "Deutsch",
-        MapLabel = "Karte",
+        MapLabel = "AION2-Hub",
         DiscordPresenceSection = "DISCORD-STATUS", DiscordPresenceEnabled = "Klasse, Level und Fraktion auf Discord anzeigen",
         DiscordPresenceHint = "Wird gemäß deinen Discord-Datenschutzeinstellungen in deiner Aktivität angezeigt und direkt an die Discord-Desktop-App gesendet. Wähle deine Fraktion unten aus; der AION-Mitschnitt liefert sie nicht zuverlässig.",
         DiscordFactionLabel = "Deine Fraktion", DiscordFactionUnknown = "Nicht festgelegt", DiscordFactionElyos = "Elyos", DiscordFactionAsmodian = "Asmodier",
@@ -562,7 +563,7 @@ public sealed class UiText
         YourFights = "Deine Kämpfe", SavedCount = "{0} gespeichert", ShownOf = "{0} von {1}", FilterAll = "Alle", FilterBosses = "Bosse", FilterKills = "Siege",
         ShowInOverlay = "Im Overlay anzeigen", TipShowInOverlay = "Diesen Kampf im Overlay anzeigen (Live-Modus kehrt beim nächsten Pull zurück)", HistoryEmpty = "Besiege einen Boss — der Kampf erscheint hier automatisch.",
         PlayersShort = "Sp.", JustNow = "gerade eben", MinutesAgo = "vor {0} Min.", HoursAgo = "vor {0} Std.", DeleteConfirm = "„{0}“ ({1}) löschen?", TipRefresh = "Aktualisieren", TipOpenFolder = "Ordner öffnen", TipDelete = "Ausgewählten Kampf löschen", TipOpenBreakdown = "Vollständige Auswertung öffnen", DamageWord = "Schaden",
-        SettingsTitle = "Einstellungen", SecLanguage = "SPRACHE", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
+        SettingsTitle = "Einstellungen", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
         LanguageLabel = "Sprache", BreakdownTitle = "Kampfauswertung — AION2 DPS Meter", HistoryTitle = "Kampfverlauf — AION2 DPS Meter",
         TipTargetMode = "Nur Boss / alle getroffenen Ziele", TipLock = "Position fixieren", TipSettings = "Einstellungen",
         TipOpacity = "Hintergrundtransparenz", TipHide = "Overlay ausblenden (Strg+Umschalt+D)", ModeBossOnly = "BOSS", ModeAll = "ALLE",
@@ -592,7 +593,7 @@ public sealed class UiText
     {
         Code = "ru",
         LanguageName = "Русский",
-        MapLabel = "Карта",
+        MapLabel = "Хаб AION2",
         DiscordPresenceSection = "СТАТУС DISCORD", DiscordPresenceEnabled = "Показывать класс, уровень и фракцию в Discord",
         DiscordPresenceHint = "Отображается в вашей активности Discord согласно настройкам приватности и отправляется прямо в приложение Discord. Выберите фракцию ниже: захват AION не передаёт её надёжно.",
         DiscordFactionLabel = "Ваша фракция", DiscordFactionUnknown = "Не выбрана", DiscordFactionElyos = "Элийцы", DiscordFactionAsmodian = "Асмодиане",
@@ -868,6 +869,7 @@ public sealed class UiText
         ModeBossOnly = "БОСС",
         ModeAll = "ВСЁ",
         SecLanguage = "ЯЗЫК",
+        SecAccount = "УЧЁТНАЯ ЗАПИСЬ",
         LanguageHint = "Интерфейс, названия умений и монстров. Применяется сразу.",
         SecOverlay = "ОВЕРЛЕЙ",
         BarsRelative = "Полосы относительно лидера",

@@ -53,7 +53,7 @@ driver. The embedded map uses the Microsoft Edge WebView2 Runtime; see [Installa
   overlay or browse the history window. Select two saved fights with Ctrl-click to compare damage, DPS, duration and healing.
 - **Field boss timers from the game** — open the field boss list on the in-game map once and the meter keeps every
   respawn counting down, per server, with a tray alert before a boss you watch returns.
-- **AION 2 world map** — open Questlog's interactive map from the overlay or tray menu. It is embedded with WebView2 and needs an internet connection.
+- **AION2 hub in the meter** — open Wakayashi's German class guides, events and game resources from the overlay or tray menu. Switch to Questlog's interactive world map in the same window; links that request a new window stay in the app. WebView2 and an internet connection are required.
 - **Event schedule** — live local countdowns for Spacetime Rifts, Shugo Festival, Dimensional Invasion, Arena of
   Tactics and selected scheduled Abyss bosses. These recurring times are community-observed; field-boss times still
   come directly from the game's map list.
@@ -175,7 +175,7 @@ ready; click either to install it at once. If the installer fails, the old versi
 notification and an *Update to …* tray item, and the update window offers *Update*, *Later* and *Skip this version*
 (the update window shows what's new in the interface language).
 
-A portable copy (zip) cannot replace itself: it announces new versions and opens the download page. The only thing sent is the request to `api.github.com` itself (user agent `AION2DpsMeter/<version>`).
+A portable copy (zip) can be updated from the in-app update window: it downloads and verifies the new archive, replaces the app files and restarts. The only thing sent is the request to `api.github.com` itself (user agent `AION2DpsMeter/<version>`).
 
 ### Who counts as a player
 

@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:s="clr-namespace:AionMeter.App.Services"
-        Title="{Binding SettingsTitle, Source={x:Static s:UiText.Current}}" Width="600" Height="700" MinHeight="420"
+        Title="{Binding SettingsTitle, Source={x:Static s:UiText.Current}}" Width="1040" Height="760" MinWidth="820" MinHeight="580"
         WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" Background="{StaticResource Bg0}"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         FontFamily="{StaticResource UiFont}" Foreground="{StaticResource Text}" FontSize="12.5">
@@ -29,6 +29,30 @@
             <Setter Property="Width" Value="190" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
+        <Style x:Key="SettingsNavButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource TextDim}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="12,9" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="{StaticResource HoverFill}" />
+                                <Setter Property="Foreground" Value="{StaticResource GoldBright}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="ComboBox">
             <Setter Property="MinWidth" Value="180" />
             <Setter Property="Height" Value="26" />
@@ -45,21 +69,40 @@
 
     <Border BorderBrush="{StaticResource GoldDim}" BorderThickness="1">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="176" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="52" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid Margin="20,0,8,0">
+            <Grid Grid.ColumnSpan="2" Margin="20,0,8,0">
                 <TextBlock Text="{Binding SettingsTitle, Source={x:Static s:UiText.Current}}" FontFamily="{StaticResource TitleFont}"
                            FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center" />
                 <Button Style="{StaticResource IconButton}" Content="&#xE711;" Click="Cancel_Click" HorizontalAlignment="Right"
                         VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20,0,20,0">
+            <Border Grid.Row="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+                <StackPanel Margin="12,16">
+                    <TextBlock Text="AETHERION" Foreground="{StaticResource Gold}" FontWeight="SemiBold" FontSize="10" Margin="12,0,0,10" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecLanguage, Source={x:Static s:UiText.Current}}" Tag="language" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecOverlay, Source={x:Static s:UiText.Current}}" Tag="overlay" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecMeter, Source={x:Static s:UiText.Current}}" Tag="meter" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecHistory, Source={x:Static s:UiText.Current}}" Tag="history" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecCapture, Source={x:Static s:UiText.Current}}" Tag="capture" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecHotkeys, Source={x:Static s:UiText.Current}}" Tag="hotkeys" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecAccount, Source={x:Static s:UiText.Current}}" Tag="account" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecUpdates, Source={x:Static s:UiText.Current}}" Tag="updates" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecData, Source={x:Static s:UiText.Current}}" Tag="data" Click="SettingsNav_Click" />
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="20,0,20,0">
                 <StackPanel>
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="PremiumSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="AETHERION • PREMIUM" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
                             <TextBlock Text="Farm-Routen für Kinah und Pets direkt im Meter." Style="{StaticResource Hint}" Margin="0,0,0,8" />
@@ -71,7 +114,7 @@
                         </StackPanel>
                     </Border>
                     <!-- Language -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="LanguageSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecLanguage, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
@@ -84,7 +127,7 @@
                     </Border>
 
                     <!-- Overlay -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="OverlaySection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecOverlay, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <CheckBox x:Name="BarsRelative" Style="{StaticResource DarkCheck}"
@@ -125,7 +168,7 @@
                     </Border>
 
                     <!-- Discord Rich Presence -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="MeterSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding DiscordPresenceSection, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <CheckBox x:Name="DiscordPresence" Style="{StaticResource DarkCheck}"
@@ -139,7 +182,7 @@
                     </Border>
 
                     <!-- Meter -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="HistorySection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecMeter, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
@@ -161,7 +204,7 @@
                     </Border>
 
                     <!-- History -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="CaptureSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecHistory, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <CheckBox x:Name="SaveHistory" Style="{StaticResource DarkCheck}"
@@ -184,7 +227,7 @@
                     </Border>
 
                     <!-- Capture -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="HotkeysSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecCapture, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
@@ -200,7 +243,7 @@
                     </Border>
 
                     <!-- Hotkeys -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="LicenseSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecHotkeys, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
@@ -225,7 +268,7 @@
 
                     <!-- Updates -->
                     <!-- Aetherion account and license -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="UpdatesSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="AETHERION • LIZENZ" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
                             <TextBlock x:Name="LicenseStatusText" Text="Lizenzstatus wird geladen …" TextWrapping="Wrap" Foreground="{StaticResource TextDim}" Margin="0,0,0,8" />
@@ -239,12 +282,12 @@
                     </Border>
 
                     <!-- Updates -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="DataSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecUpdates, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <CheckBox x:Name="CheckUpdates" Style="{StaticResource DarkCheck}"
                                       Content="{Binding CheckUpdatesAuto, Source={x:Static s:UiText.Current}}" />
-                            <TextBlock Style="{StaticResource Hint}" Text="Updates kommen aus deinem GitHub-Repository. Installierte Versionen können Updates automatisch laden; portable Versionen öffnen die Release-Seite." />
+                            <TextBlock Style="{StaticResource Hint}" Text="Updates werden direkt im Meter geladen. Installierte Versionen installieren sie automatisch in einem ruhigen Moment; portable Kopien aktualisieren sich über das Update-Fenster." />
                             <CheckBox x:Name="AutoInstallUpdates" Style="{StaticResource DarkCheck}" Margin="0,4,0,0"
                                       Content="{Binding AutoInstallUpdates, Source={x:Static s:UiText.Current}}" />
                             <TextBlock Style="{StaticResource Hint}" Text="{Binding AutoInstallHint, Source={x:Static s:UiText.Current}}" />
@@ -281,7 +324,7 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <Border Grid.Row="2" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="20,12">
+            <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="20,12">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Style="{StaticResource GhostButton}" Content="{Binding Cancel, Source={x:Static s:UiText.Current}}"
                             Click="Cancel_Click" Margin="0,0,8,0" />

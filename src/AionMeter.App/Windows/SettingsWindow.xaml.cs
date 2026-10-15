@@ -12,6 +12,7 @@ public partial class SettingsWindow : Window
 {
     private readonly MeterService _meter;
     private readonly List<(string? Name, string Label)> _devices = new();
+    private Button? _activeSettingsNav;
 
     public SettingsWindow(MeterService meter)
     {
@@ -85,6 +86,33 @@ public partial class SettingsWindow : Window
     }
 
     private static UiText T => UiText.Current;
+
+    private void SettingsNav_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string section } button) return;
+        if (_activeSettingsNav is not null)
+        {
+            _activeSettingsNav.Background = System.Windows.Media.Brushes.Transparent;
+            _activeSettingsNav.Foreground = (System.Windows.Media.Brush)FindResource("TextDim");
+        }
+        button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xC9, 0xA4, 0x5C));
+        button.Foreground = (System.Windows.Media.Brush)FindResource("GoldBright");
+        _activeSettingsNav = button;
+        var target = section switch
+        {
+            "language" => LanguageSection,
+            "overlay" => OverlaySection,
+            "meter" => MeterSection,
+            "history" => HistorySection,
+            "capture" => CaptureSection,
+            "hotkeys" => HotkeysSection,
+            "account" => LicenseSection,
+            "updates" => UpdatesSection,
+            "data" => DataSection,
+            _ => PremiumSection,
+        };
+        target.BringIntoView();
+    }
 
     private void FarmGuide_Click(object sender, RoutedEventArgs e) => new FarmGuideWindow { Owner = this }.ShowDialog();
 

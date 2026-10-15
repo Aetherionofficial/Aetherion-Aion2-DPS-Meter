@@ -5,12 +5,11 @@ using Microsoft.Web.WebView2.Core;
 
 namespace AionMeter.App.Windows;
 
-/// <summary>Questlog's interactive AION 2 world map, displayed inside Aetherion using the system WebView2 runtime.</summary>
+/// <summary>AION 2 guides and map, displayed inside Aetherion using the system WebView2 runtime.</summary>
 public partial class MapWindow : Window
 {
+    private const string PortalUrl = "https://wakayashi.gg/aion2";
     private const string MapUrl = "https://questlog.gg/aion-2/de/map";
-    private const string RuntimeUrl = "https://developer.microsoft.com/microsoft-edge/webview2/";
-
     public MapWindow()
     {
         InitializeComponent();
@@ -24,15 +23,20 @@ public partial class MapWindow : Window
             await Browser.EnsureCoreWebView2Async();
             Browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
             Browser.CoreWebView2.Settings.IsStatusBarEnabled = false;
+            Browser.CoreWebView2.NewWindowRequested += (_, args) =>
+            {
+                args.Handled = true;
+                Browser.CoreWebView2.Navigate(args.Uri);
+            };
             Browser.CoreWebView2.NavigationCompleted += (_, _) => UpdateNavigationButtons();
             Browser.CoreWebView2.HistoryChanged += (_, _) => UpdateNavigationButtons();
-            Browser.Source = new Uri(MapUrl);
+            Browser.Source = new Uri(PortalUrl);
         }
         catch (Exception ex)
         {
             RuntimeNotice.Visibility = Visibility.Visible;
-            RuntimeMessage.Text = "Die Karte konnte nicht eingebettet geladen werden. Prüfe deine Internetverbindung oder installiere die Microsoft Edge WebView2 Runtime. Die Karte lässt sich über „Im Browser öffnen“ weiterhin aufrufen. " + ex.Message;
-            Log.Error("Could not initialize the embedded AION2 map", ex);
+            RuntimeMessage.Text = "Die AION2-Seite konnte nicht eingebettet geladen werden. Prüfe deine Internetverbindung oder installiere die Microsoft Edge WebView2 Runtime. " + ex.Message;
+            Log.Error("Could not initialize the embedded AION2 hub", ex);
         }
     }
 
@@ -55,11 +59,15 @@ public partial class MapWindow : Window
 
     private void Reload_Click(object sender, RoutedEventArgs e) => Browser.Reload();
 
+    private void Portal_Click(object sender, RoutedEventArgs e) => Browser.Source = new Uri(PortalUrl);
+
+    private void Map_Click(object sender, RoutedEventArgs e) => Browser.Source = new Uri(MapUrl);
+
     private void OpenBrowser_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            Process.Start(new ProcessStartInfo(MapUrl) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(Browser.Source?.AbsoluteUri ?? PortalUrl) { UseShellExecute = true });
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
