@@ -62,7 +62,7 @@ driver. The embedded map uses the Microsoft Edge WebView2 Runtime; see [Installa
 - **12 selectable languages** — the interface is fully translated into German, English and Russian. Turkish, Polish, Bosnian, French, Korean, Traditional Chinese (Taiwan), Arabic, Simplified Chinese and Italian are also selectable; their interface text currently falls back to English. Skill, NPC and dungeon names use localized data where available and otherwise fall back to English.
 - **Farm guide** — faction-specific Kinah and pet routes, with links to current spot maps.
 - **Discord access** — sign in with Discord and redeem a one-time key purchased through an Aetherion Discord ticket. Keys grant 1 day, 1 week, 30 days, 90 days or lifetime access; timed keys can extend an existing timed subscription.
-- **Discord Rich Presence** — optionally show Aetherion DPS Meter, your detected class and level, and the faction you select in Settings. The feature is off by default and uses the Discord desktop app.
+- **Discord Rich Presence** — optionally show Aetherion DPS Meter and your detected faction, class and level when AION 2 is running. The feature is off by default and uses the Discord desktop app.
 - **Partner access** — partner keys grant lifetime access and show the Partner badge. Regular users see their remaining days in the overlay. Lifetime and Partner accounts cannot redeem additional keys.
 - **Key blocking** — the owner can revoke a key in Supabase. Revoking a redeemed key also ends the linked account's access; the app rechecks access periodically.
 - **Updates** — Aetherion checks the MostWanted-DPS GitHub releases. Installed copies can download and install a new setup file; portable copies show the release page.

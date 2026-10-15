@@ -323,8 +323,18 @@ public partial class App : Application
         if (_meter is null) return Task.CompletedTask;
         var profile = _meter.Tracker.SelfProfile;
         var className = profile is { Class: not AionMeter.Core.Events.GameClass.Unknown } p ? p.Class.ToString() : null;
-        return _discordPresence.UpdateAsync(_meter.Settings.DiscordPresenceEnabled, className,
-            profile?.Level ?? 0, _meter.Settings.DiscordFaction);
+        var serverId = _meter.Tracker.SelfServerId;
+        // Global server IDs encode the character race in their thousands digit (race × 1000 + region × 100 + server).
+        var faction = (serverId / 1000) switch
+        {
+            1 => "Elyos",
+            2 => "Asmodian",
+            _ => null,
+        };
+        var characterDetected = _meter.CaptureStatus.State == CaptureState.Capturing &&
+                                className is not null && profile is { Level: > 0 } && faction is not null;
+        return _discordPresence.UpdateAsync(_meter.Settings.DiscordPresenceEnabled, characterDetected,
+            className, profile?.Level ?? 0, faction);
     }
 
     // ------------------------------------------------------------ automatic show / hide

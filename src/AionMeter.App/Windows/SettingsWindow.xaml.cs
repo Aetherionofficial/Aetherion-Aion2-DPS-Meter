@@ -60,11 +60,6 @@ public partial class SettingsWindow : Window
         BossAlertMinutesBox.Text = s.BossAlertMinutes.ToString();
         EventTimerOpacity.Value = s.EventTimersOpacity;
         DiscordPresence.IsChecked = s.DiscordPresenceEnabled;
-        DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionUnknown, Tag = "" });
-        DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionElyos, Tag = "Elyos" });
-        DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionAsmodian, Tag = "Asmodian" });
-        DiscordFactionBox.SelectedIndex = Math.Max(0, DiscordFactionBox.Items.Cast<ComboBoxItem>().ToList()
-            .FindIndex(i => string.Equals(i.Tag as string, s.DiscordFaction, StringComparison.OrdinalIgnoreCase)));
         foreach (var n in new[] { 5, 8, 10, 12, 15, 20 }) MaxRows.Items.Add(n);
         MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(n => Math.Abs(n - s.MaxRows)).First();
         OpacityValue.Value = s.BackgroundOpacity;
@@ -264,7 +259,6 @@ public partial class SettingsWindow : Window
         if (int.TryParse(BossAlertMinutesBox.Text, out var alertMinutes)) s.BossAlertMinutes = Math.Clamp(alertMinutes, 0, 60);
         s.EventTimersOpacity = Math.Clamp(EventTimerOpacity.Value, 0.2, 1);
         s.DiscordPresenceEnabled = DiscordPresence.IsChecked == true;
-        s.DiscordFaction = (DiscordFactionBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "";
         s.MaxRows = MaxRows.SelectedItem is int rows ? rows : 10;
         s.OverlayWidth = _previewWidth;
         s.OverlayHeight = _previewHeight;

@@ -46,11 +46,7 @@ public sealed class UiText
     public string OverlayShare { get; init; } = "SHARE";
     public string DiscordPresenceSection { get; init; } = "DISCORD PRESENCE";
     public string DiscordPresenceEnabled { get; init; } = "Share class, level and faction on Discord";
-    public string DiscordPresenceHint { get; init; } = "Shown in your Discord activity according to your Discord privacy settings. Sent directly to the Discord desktop app. Select your faction below; AION capture does not reliably provide it.";
-    public string DiscordFactionLabel { get; init; } = "Your faction";
-    public string DiscordFactionUnknown { get; init; } = "Not set";
-    public string DiscordFactionElyos { get; init; } = "Elyos";
-    public string DiscordFactionAsmodian { get; init; } = "Asmodian";
+    public string DiscordPresenceHint { get; init; } = "When AION 2 is detected, your faction, class and level are read from the game connection and shown in your Discord activity. Sent directly to the Discord desktop app.";
     public string CompareSelected { get; init; } = "Compare 2";
     public string CompareBest { get; init; } = "Compare best";
     public string CompareBestUnavailable { get; init; } = "No earlier run for this boss and character was found.";
@@ -544,8 +540,7 @@ public sealed class UiText
         MapPageTitle = "Questlog.gg AION2-Karte", MapPageHint = "Öffne die interaktive Karte und AION2-News in einem eigenen Fenster.", OpenMapLabel = "AION2-Karte öffnen",
         GuidePageTitle = "Wakayashi.gg Guide", GuidePageHint = "Öffne Wakayashi.gg getrennt von der Karte und vom Kampf-Overlay.", OpenGuideLabel = "Wakayashi.gg öffnen",
         DiscordPresenceSection = "DISCORD-STATUS", DiscordPresenceEnabled = "Klasse, Level und Fraktion auf Discord anzeigen",
-        DiscordPresenceHint = "Wird gemäß deinen Discord-Datenschutzeinstellungen in deiner Aktivität angezeigt und direkt an die Discord-Desktop-App gesendet. Wähle deine Fraktion unten aus; der AION-Mitschnitt liefert sie nicht zuverlässig.",
-        DiscordFactionLabel = "Deine Fraktion", DiscordFactionUnknown = "Nicht festgelegt", DiscordFactionElyos = "Elyos", DiscordFactionAsmodian = "Asmodier",
+        DiscordPresenceHint = "Sobald AION 2 erkannt wird, liest Aetherion Fraktion, Klasse und Level aus der Spielverbindung und zeigt sie in deiner Discord-Aktivität an. Die Daten werden direkt an die Discord-Desktop-App gesendet.",
         CompareSelected = "2 vergleichen", CompareBest = "Mit Bestwert vergleichen", CompareBestUnavailable = "Kein früherer Lauf für diesen Boss und Charakter gefunden.", CompareSelectOne = "Wähle einen gespeicherten Kampf aus, um ihn mit deinem Bestwert zu vergleichen.", SessionTitle = "SESSION-STATISTIK", SessionFightsLabel = "KÄMPFE", SessionKillsLabel = "BOSS-KILLS", SessionDamageLabel = "SCHADEN", SessionDurationLabel = "KAMPFZEIT", SessionKillsPerHourLabel = "BOSS-KILLS / STUNDE", SessionDamagePerHourLabel = "SCHADEN / STUNDE", SessionUntrackedLabel = "Kinah, Abyss-Punkte und Drops werden noch nicht erfasst: Die Paketformate sind noch nicht identifiziert.", CompareTitle = "Kampfvergleich", CompareSelectTwo = "Wähle genau zwei gespeicherte Kämpfe zum Vergleichen aus.",
         CompareHint = "Wähle zwei Kämpfe mit Strg-Klick aus.", CompareMetric = "WERT", CompareDamage = "GESAMTSCHADEN", CompareDps = "GRUPPEN-DPS",
         CompareDuration = "DAUER", CompareHealing = "GESAMTHEILUNG", CompareDelta = "ÄNDERUNG",
@@ -668,8 +663,7 @@ public sealed class UiText
         GuidePageTitle = "Гайд Wakayashi.gg", GuidePageHint = "Откройте Wakayashi.gg отдельно от карты и боевого оверлея.", OpenGuideLabel = "Открыть Wakayashi.gg",
         MapLabel = "Хаб AION2",
         DiscordPresenceSection = "СТАТУС DISCORD", DiscordPresenceEnabled = "Показывать класс, уровень и фракцию в Discord",
-        DiscordPresenceHint = "Отображается в вашей активности Discord согласно настройкам приватности и отправляется прямо в приложение Discord. Выберите фракцию ниже: захват AION не передаёт её надёжно.",
-        DiscordFactionLabel = "Ваша фракция", DiscordFactionUnknown = "Не выбрана", DiscordFactionElyos = "Элийцы", DiscordFactionAsmodian = "Асмодиане",
+        DiscordPresenceHint = "После обнаружения AION 2 фракция, класс и уровень считываются из игрового соединения и отображаются в вашей активности Discord. Данные передаются напрямую в приложение Discord.",
         CompareSelected = "Сравнить 2", CompareBest = "Сравнить с рекордом", CompareBestUnavailable = "Для этого босса и персонажа нет предыдущего боя.", CompareSelectOne = "Выберите один бой для сравнения с личным рекордом.", SessionTitle = "СТАТИСТИКА СЕССИИ", SessionFightsLabel = "БОИ", SessionKillsLabel = "УБИЙСТВА БОССОВ", SessionDamageLabel = "УРОН", SessionDurationLabel = "ВРЕМЯ БОЯ", SessionKillsPerHourLabel = "УБИЙСТВА БОССОВ / ЧАС", SessionDamagePerHourLabel = "УРОН / ЧАС", SessionUntrackedLabel = "Кинах, очки Бездны и добыча пока не отслеживаются: форматы пакетов ещё не определены.", CompareTitle = "Сравнение боёв", CompareSelectTwo = "Выберите ровно два сохранённых боя для сравнения.",
         CompareHint = "Выберите два боя, удерживая Ctrl.", CompareMetric = "ПОКАЗАТЕЛЬ", CompareDamage = "ОБЩИЙ УРОН", CompareDps = "DPS ГРУППЫ",
         CompareDuration = "ДЛИТЕЛЬНОСТЬ", CompareHealing = "ОБЩЕЕ ЛЕЧЕНИЕ", CompareDelta = "ИЗМЕНЕНИЕ",

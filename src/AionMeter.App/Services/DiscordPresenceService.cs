@@ -16,22 +16,25 @@ public sealed class DiscordPresenceService : IDisposable
     private string? _lastState;
     private long _lastConnectAttempt;
 
-    public async Task UpdateAsync(bool enabled, string? className, int level, string? faction)
+    public async Task UpdateAsync(bool enabled, bool characterDetected, string? className, int level, string? faction)
     {
         await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            if (!enabled)
+            if (!enabled || !characterDetected)
             {
                 await ClearAndCloseAsync().ConfigureAwait(false);
                 return;
             }
 
-            var details = !string.IsNullOrWhiteSpace(className) && level > 0
-                ? $"{className} · Lv. {level}"
-                : "AION 2 · DPS Meter active";
-            var state = string.IsNullOrWhiteSpace(faction) ? "Faction not set" : faction;
-            var key = details + "\n" + state;
+            var character = new[]
+            {
+                string.IsNullOrWhiteSpace(faction) ? null : faction,
+                level > 0 ? $"Lv. {level}" : null,
+                string.IsNullOrWhiteSpace(className) ? null : className,
+            };
+            var details = string.Join(" · ", character.Where(part => part is not null));
+            var key = details;
             if (key == _lastState && _pipe?.IsConnected == true) return;
 
             if (!await EnsureConnectedAsync().ConfigureAwait(false)) return;
@@ -44,7 +47,6 @@ public sealed class DiscordPresenceService : IDisposable
                     activity = new
                     {
                         details,
-                        state,
                         assets = new
                         {
                             large_image = "download",
