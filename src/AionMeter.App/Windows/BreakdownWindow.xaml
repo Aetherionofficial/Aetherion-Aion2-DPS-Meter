@@ -418,6 +418,8 @@
                         <UniformGrid x:Name="DefenseTiles" Rows="1" Margin="-6,0,0,0" HorizontalAlignment="Left" />
                         <TextBlock Margin="0,16,0,0" Foreground="{StaticResource TextMute}" FontSize="11.5" TextWrapping="Wrap"
                                    Text="{Binding DefNote, Source={x:Static s:UiText.Current}}" />
+                        <TextBlock x:Name="IncomingBreakdown" Margin="0,12,0,0" Foreground="{StaticResource Text}" FontSize="11.5"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
 
                     <!-- Healing by skill -->

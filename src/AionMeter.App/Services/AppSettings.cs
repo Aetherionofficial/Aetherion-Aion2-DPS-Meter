@@ -12,6 +12,12 @@ public enum HistoryMode
     All,
 }
 
+public enum OverlayRanking
+{
+    Damage,
+    Healing,
+}
+
 public sealed class AppSettings
 {
     public static string AppDataDir { get; } =
@@ -64,6 +70,8 @@ public sealed class AppSettings
     public int RowSize { get; set; } = 100;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
     public bool ShowGear { get; set; } = true;
+    /// <summary>Overlay ranking: damage (DPS) or healing (HPS).</summary>
+    public OverlayRanking OverlayRanking { get; set; } = OverlayRanking.Damage;
     public bool ShowBossPanel { get; set; } = true;
     public int IdleTimeoutSec { get; set; } = 10;
     public int BossIdleTimeoutSec { get; set; } = 30;

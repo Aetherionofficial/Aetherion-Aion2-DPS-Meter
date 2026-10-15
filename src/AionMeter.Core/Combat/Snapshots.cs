@@ -31,7 +31,8 @@ public sealed record CombatantSnapshot(
     int ServerId = 0,
     int GearScore = 0,
     long CombatPower = 0,
-    long Healing = 0)
+    long Healing = 0,
+    double BurstDps = 0)
 {
     /// <summary>The "summons, owner unknown" pseudo-row (see <see cref="Combatant.UnknownSummonsId"/>).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
@@ -145,7 +146,11 @@ public sealed record CombatantDetail(
     int GearScore = 0,
     long CombatPower = 0,
     IReadOnlyList<HealingSkillRow>? HealingSkills = null,
-    long HealingTotal = 0);
+    long HealingTotal = 0,
+    IReadOnlyList<IncomingSkillRow>? IncomingSkills = null,
+    IReadOnlyList<DeathRecord>? Deaths = null);
+
+public sealed record IncomingSkillRow(int SkillCode, string Name, long Damage, int Hits);
 
 public sealed record SegmentInfo(Guid Id, string Title, DateTimeOffset StartedAt, long CombatMs, bool IsActive, EncounterEndReason Reason, long TotalDamage);
 
@@ -165,4 +170,5 @@ public sealed record BossNotice(int NpcCode, int MapId, string? Zone, BossNotice
     int ServerId = 0);
 
 /// <summary>A whole fight as saved to disk.</summary>
-public sealed record FightRecord(int Version, EncounterSnapshot Summary, IReadOnlyList<CombatantDetail> Details);
+public sealed record FightRecord(int Version, EncounterSnapshot Summary, IReadOnlyList<CombatantDetail> Details,
+    IReadOnlyList<DeathRecord>? Deaths = null);

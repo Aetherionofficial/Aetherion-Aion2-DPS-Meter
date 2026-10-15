@@ -323,6 +323,8 @@
                 <StackPanel x:Name="Toolbar" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="Collapsed">
                     <Button Style="{StaticResource Chip}" Content="{Binding ModeLabel}" Click="Mode_Click" Margin="0,0,5,0"
                             ToolTip="{Binding T.TipTargetMode}" />
+                    <Button Style="{StaticResource Chip}" Content="{Binding RankingLabel}" Click="Ranking_Click" Margin="0,0,5,0"
+                            ToolTip="Switch DPS / HPS ranking" />
                     <Button Style="{StaticResource Chip}" Content="{Binding LanguageCode}" Click="Language_Click" Margin="0,0,5,0"
                             ToolTip="{Binding T.SwitchLanguage}" />
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />

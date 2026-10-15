@@ -62,6 +62,15 @@ public sealed class HealingSkillStats
     public int Events { get; set; }
 }
 
+public sealed class IncomingSkillStats
+{
+    public required int SkillCode { get; init; }
+    public long Damage { get; set; }
+    public int Hits { get; set; }
+}
+
+public sealed record DeathRecord(long TimeMs, uint ActorId, string Name, int SkillCode, long DamageTaken, long RecentDamageTaken);
+
 /// <summary>One cast / hit in order, for the rotation view.</summary>
 public readonly record struct CastRecord(int OffsetMs, int SkillCode, long Damage, HitFlags Flags);
 
@@ -87,6 +96,7 @@ public sealed class Combatant
     public HitStats Total { get; } = new();
     public Dictionary<int, SkillStats> Skills { get; } = new();
     public Dictionary<int, HealingSkillStats> HealingSkills { get; } = new();
+    public Dictionary<int, IncomingSkillStats> IncomingSkills { get; } = new();
     /// <summary>Highest recent-window DPS observed while the encounter is live; held during pauses between attacks.</summary>
     public double PeakLiveDps { get; set; }
     /// <summary>Damage per whole second since encounter start.</summary>
@@ -97,6 +107,9 @@ public sealed class Combatant
     public long DamageTaken { get; set; }
     public int HitsTaken { get; set; }
     public long Healing { get; set; }
+    public long LastIncomingMs { get; set; }
+    public int LastIncomingSkill { get; set; }
+    public long RecentIncomingDamage { get; set; }
 
     public long FirstHitMs { get; set; }
     public long LastHitMs { get; set; }
@@ -134,6 +147,13 @@ public sealed class Combatant
                 HealingSkills[skillCode] = current = new HealingSkillStats { SkillCode = skillCode };
             current.Amount += heal.Amount;
             current.Events += heal.Events;
+        }
+        foreach (var (skillCode, incoming) in other.IncomingSkills)
+        {
+            if (!IncomingSkills.TryGetValue(skillCode, out var current))
+                IncomingSkills[skillCode] = current = new IncomingSkillStats { SkillCode = skillCode };
+            current.Damage += incoming.Damage;
+            current.Hits += incoming.Hits;
         }
         if (FirstHitMs == 0 || (other.FirstHitMs != 0 && other.FirstHitMs < FirstHitMs)) FirstHitMs = other.FirstHitMs;
         LastHitMs = Math.Max(LastHitMs, other.LastHitMs);
@@ -195,6 +215,7 @@ public sealed class Encounter
 
     /// <summary>Players seen landing hits on the fight's targets (hit notices), whether or not their damage arrived.</summary>
     public HashSet<uint> Attackers { get; } = new();
+    public List<DeathRecord> Deaths { get; } = new();
 
     public long TotalDamage { get; set; }
     /// <summary>Highest recent-window party DPS observed during this live encounter.</summary>

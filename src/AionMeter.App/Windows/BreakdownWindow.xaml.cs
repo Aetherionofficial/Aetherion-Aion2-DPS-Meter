@@ -215,6 +215,17 @@ public partial class BreakdownWindow : Window
         AddTile(DefenseTiles, T.DefTaken, Format.Compact(d.DamageTaken), string.Format(T.DefHits, d.HitsTaken));
         AddTile(DefenseTiles, T.DefTakenPerSec, Format.Compact(d.DamageTaken / Math.Max(1.0, d.CombatMs / 1000.0)), "");
         AddTile(DefenseTiles, T.DefDotTicks, q.DotTicks.ToString(), T.DefDot);
+        var incomingLines = (d.IncomingSkills ?? [])
+            .Take(8)
+            .Select(i => $"{i.Name} · {Format.Compact(i.Damage)} · {i.Hits} hits")
+            .ToList();
+        var deaths = d.Deaths ?? [];
+        if (deaths.Count > 0)
+        {
+            incomingLines.Insert(0, $"Deaths: {deaths.Count} · last {DateTimeOffset.FromUnixTimeMilliseconds(deaths[^1].TimeMs).ToLocalTime():HH:mm:ss}" +
+                (deaths[^1].SkillCode != 0 ? $" · { _skillName(deaths[^1].SkillCode) } · last 10s {Format.Compact(deaths[^1].RecentDamageTaken)}" : ""));
+        }
+        IncomingBreakdown.Text = incomingLines.Count == 0 ? "No incoming hits recorded" : string.Join(Environment.NewLine, incomingLines);
 
         Rotation.SetData(d.Casts, _skillName, _icons.Get);
 

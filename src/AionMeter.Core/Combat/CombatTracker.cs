@@ -235,10 +235,19 @@ public sealed class CombatTracker
         if (targetIsPlayer)
         {
             // Mob → player: incoming damage for the defence view. Player → player (PvP, duels) is ignored for now.
-            if (!sourceIsPlayer && _current is { IsActive: true } && _current.Combatants.TryGetValue(target, out var victim))
+            if (!sourceIsPlayer && _current is { IsActive: true } active && _entities.IsKnownPlayer(target))
             {
+                var victim = GetCombatant(active, target);
                 victim.DamageTaken += d.Damage;
                 victim.HitsTaken++;
+                if (!victim.IncomingSkills.TryGetValue(d.SkillCode, out var incoming))
+                    victim.IncomingSkills[d.SkillCode] = incoming = new IncomingSkillStats { SkillCode = d.SkillCode };
+                incoming.Damage += d.Damage;
+                incoming.Hits++;
+                if (victim.LastIncomingMs == 0 || d.TimeMs - victim.LastIncomingMs > 10_000) victim.RecentIncomingDamage = 0;
+                victim.RecentIncomingDamage += d.Damage;
+                victim.LastIncomingMs = d.TimeMs;
+                victim.LastIncomingSkill = d.SkillCode;
             }
             return;
         }
@@ -369,6 +378,18 @@ public sealed class CombatTracker
     private void OnDeath(DeathEvent e)
     {
         EndBossLimit(e.ActorId);
+        if (_current is { IsActive: true } playerFight && _entities.IsKnownPlayer(e.ActorId))
+        {
+            var player = GetCombatant(playerFight, e.ActorId);
+            playerFight.Deaths.Add(new DeathRecord(e.TimeMs, e.ActorId,
+                string.IsNullOrWhiteSpace(player.Name) ? $"#{e.ActorId}" : player.Name,
+                player.LastIncomingSkill, player.DamageTaken, player.LastIncomingMs > 0 && e.TimeMs - player.LastIncomingMs <= 10_000
+                    ? player.RecentIncomingDamage : 0));
+            player.RecentIncomingDamage = 0;
+            player.LastIncomingMs = 0;
+            player.LastIncomingSkill = 0;
+            return;
+        }
         if (_entities.TryGetNpc(e.ActorId, out var dummy) && dummy.IsDummy)
         {
             // Training targets are reusable and their death/reset notices do not end the practice session.
@@ -822,9 +843,7 @@ public sealed class CombatTracker
         var rows = new List<CombatantSnapshot>(enc.Combatants.Count);
         foreach (var c in enc.Combatants.Values)
         {
-            // Healing-only entries are intentionally omitted from the DPS ranking. A row is shown
-            // only after this actor has actually dealt damage in the encounter.
-            if (c.Total.Damage <= 0) continue;
+            if (c.Total.Damage <= 0 && c.Healing <= 0) continue;
             RefreshIdentity(c);
             var t = c.Total;
             var recentDamage = RecentDamage(c, liveWindowStart, elapsedMs);
@@ -842,7 +861,7 @@ public sealed class CombatTracker
                 c.ActorId, c.Name, c.Class, c.IsSelf,
                 t.Damage, dps, (double)t.Damage / total,
                 t.Hits, t.Hits > 0 ? (double)t.Crits / t.Hits : 0,
-                t.Max, c.DamageTaken, c.ServerId, c.GearScore, c.CombatPower, c.Healing));
+                t.Max, c.DamageTaken, c.ServerId, c.GearScore, c.CombatPower, c.Healing, PeakBurstDps(c)));
         }
         rows.Sort((a, b) => b.Damage.CompareTo(a.Damage));
         // Pets without a known owner are not a player: list them last so they never take a place in the ranking.
@@ -907,6 +926,22 @@ public sealed class CombatTracker
         return damage;
     }
 
+    /// <summary>Highest damage in any five consecutive seconds, as a per-second rate.</summary>
+    private static double PeakBurstDps(Combatant c)
+    {
+        if (c.PerSecond.Count == 0) return 0;
+        var width = Math.Min(5, c.PerSecond.Count);
+        long window = 0;
+        for (var i = 0; i < width; i++) window += c.PerSecond[i];
+        var best = window;
+        for (var i = width; i < c.PerSecond.Count; i++)
+        {
+            window += c.PerSecond[i] - c.PerSecond[i - width];
+            if (window > best) best = window;
+        }
+        return best / (double)width;
+    }
+
     private CombatantDetail BuildDetail(Encounter enc, Combatant c, int maxCasts)
     {
         var seconds = enc.CombatMs / 1000.0;
@@ -940,7 +975,10 @@ public sealed class CombatTracker
         return new CombatantDetail(
             c.ActorId, c.Name, c.Class, c.IsSelf, t.Damage, t.Damage / seconds, (double)t.Damage / Math.Max(1, enc.TotalDamage),
             enc.CombatMs, c.DamageTaken, c.HitsTaken, quality, skills, c.PerSecond.ToArray(), casts, c.ServerId, c.GearScore,
-            c.CombatPower, healingSkills, c.Healing);
+            c.CombatPower, healingSkills, c.Healing,
+            c.IncomingSkills.Values.Select(i => new IncomingSkillRow(i.SkillCode, _data.SkillName(i.SkillCode), i.Damage, i.Hits))
+                .OrderByDescending(i => i.Damage).ToArray(),
+            enc.Deaths.Where(death => death.ActorId == c.ActorId).ToArray());
     }
 
     private FightRecord BuildRecord(Encounter enc)
@@ -950,7 +988,7 @@ public sealed class CombatTracker
             .OrderByDescending(c => c.Total.Damage)
             .Select(c => BuildDetail(enc, c, 5_000))
             .ToList();
-        return new FightRecord(1, snapshot, details);
+        return new FightRecord(2, snapshot, details, enc.Deaths.ToArray());
     }
 
     /// <summary>Null when nothing was measured, so the UI can show a dash instead of a fake zero.</summary>

@@ -219,6 +219,7 @@ public sealed class OverlayViewModel : ObservableObject
     private string _status = "Starting…";
     private Brush _statusBrush = Brushes.Gray;
     private string _modeLabel = "BOSS";
+    private string _rankingLabel = "DPS";
     private string _detail = "";
     private string _topHit = "";
     private string _topHitBy = "";
@@ -296,6 +297,7 @@ public sealed class OverlayViewModel : ObservableObject
     public string Status { get => _status; set => Set(ref _status, value); }
     public Brush StatusBrush { get => _statusBrush; set => Set(ref _statusBrush, value); }
     public string ModeLabel { get => _modeLabel; set => Set(ref _modeLabel, value); }
+    public string RankingLabel { get => _rankingLabel; set => Set(ref _rankingLabel, value); }
     /// <summary>"Krao Cave · Kill"</summary>
     public string Detail { get => _detail; set => Set(ref _detail, value); }
     /// <summary>Biggest single hit of the fight, "1,052,914".</summary>
@@ -332,7 +334,7 @@ public sealed class OverlayViewModel : ObservableObject
     public bool HasGear { get => _hasGear; private set => Set(ref _hasGear, value); }
     private bool _hasGear;
 
-    public void Apply(EncounterSnapshot? snap, int maxRows, bool relativeToTop)
+    public void Apply(EncounterSnapshot? snap, int maxRows, bool relativeToTop, OverlayRanking ranking = OverlayRanking.Damage)
     {
         if (snap is null)
         {
@@ -361,8 +363,12 @@ public sealed class OverlayViewModel : ObservableObject
         Title = T.FightTitle(snap);
         // Running: wall clock since the pull. Finished: the fight's real length (first to last hit).
         Clock = Format.ClockShort(snap.IsActive ? snap.ClockMs : snap.CombatMs);
-        PartyDps = Format.Compact(snap.PartyDps) + "/s";
-        TotalDamage = Format.Compact(snap.TotalDamage);
+        var healingTotal = snap.Combatants.Sum(c => c.Healing);
+        var seconds = Math.Max(1, snap.CombatMs / 1000.0);
+        var rankingHealing = ranking == OverlayRanking.Healing;
+        RankingLabel = rankingHealing ? "HPS" : "DPS";
+        PartyDps = rankingHealing ? Format.Compact(healingTotal / seconds) + "/s" : Format.Compact(snap.PartyDps) + "/s";
+        TotalDamage = rankingHealing ? Format.Compact(healingTotal) : Format.Compact(snap.TotalDamage);
 
         var result = snap.Reason switch
         {
@@ -383,7 +389,12 @@ public sealed class OverlayViewModel : ObservableObject
         Detail = partial is not null ? $"{result} · {partial}" : string.IsNullOrEmpty(zone) ? result : $"{zone} · {result}";
         // A world boss whose crowd the server kept from us: the party's DPS would be a fraction of the real one.
         MostDamageUnsent = snap.MostDamageUnsent;
-        Footer = MostDamageUnsent ? T.DamageUnsentLine(snap) : $"{T.Players(snap.PlayerCount)} · {T.Party} {PartyDps}";
+        var rankedCount = rankingHealing
+            ? snap.Combatants.Count(c => !c.IsUnknownSummons && c.Healing > 0)
+            : snap.Combatants.Count(c => !c.IsUnknownSummons && c.Damage > 0);
+        Footer = MostDamageUnsent && !rankingHealing
+            ? T.DamageUnsentLine(snap)
+            : $"{T.Players(rankedCount)} · {T.Party} {PartyDps}";
 
         var top = snap.Combatants.MaxBy(x => x.MaxHit);
         TopHit = top is { MaxHit: > 0 } ? Format.Grouped(top.MaxHit) : "";
@@ -404,7 +415,11 @@ public sealed class OverlayViewModel : ObservableObject
             HasBoss = false;
         }
 
-        var list = snap.Combatants;
+        var list = snap.Combatants
+            .Where(c => rankingHealing ? c.Healing > 0 || (c.IsSelf && snap.IsActive) : c.Damage > 0 || c.IsUnknownSummons || (c.IsSelf && snap.IsActive))
+            .OrderByDescending(c => rankingHealing ? c.Healing : c.Damage)
+            .ThenBy(c => c.IsUnknownSummons ? 1 : 0)
+            .ToList();
         var count = Math.Min(maxRows, list.Count);
         // Always keep the local player visible even when they are outside the top N.
         var selfIndex = -1;
@@ -416,7 +431,7 @@ public sealed class OverlayViewModel : ObservableObject
         while (Rows.Count > rowsNeeded) Rows.RemoveAt(Rows.Count - 1);
         while (Rows.Count < rowsNeeded) Rows.Add(new RowViewModel());
 
-        var best = list.Count > 0 ? Math.Max(1, list[0].Damage) : 1;
+        var best = list.Count > 0 ? Math.Max(1, rankingHealing ? list[0].Healing : list[0].Damage) : 1;
         for (var r = 0; r < rowsNeeded; r++)
         {
             var i = showSelfExtra && r == rowsNeeded - 1 ? selfIndex : r;
@@ -429,13 +444,14 @@ public sealed class OverlayViewModel : ObservableObject
             row.CombatPower = ShowGear && GearFits && cb.CombatPower > 0 ? Format.Power(cb.CombatPower) : "";
             row.Class = cb.Class;
             row.IsSelf = cb.IsSelf;
-            row.Dps = Format.Compact(cb.Dps) + "/s";
-            row.Damage = Format.Compact(cb.Damage);
-            row.Share = $"{Format.Share(cb.Share)} · {T.HealShort} {Format.Compact(cb.Healing)}";
-            row.Fill = relativeToTop ? (double)cb.Damage / best : cb.Share;
+            row.Dps = Format.Compact(rankingHealing ? cb.Healing / seconds : cb.Dps) + "/s";
+            row.Damage = Format.Compact(rankingHealing ? cb.Healing : cb.Damage);
+            var share = rankingHealing ? (double)cb.Healing / Math.Max(1, healingTotal) : cb.Share;
+            row.Share = rankingHealing ? Format.Share(share) : $"{Format.Share(share)} · {T.HealShort} {Format.Compact(cb.Healing)}";
+            row.Fill = relativeToTop ? (double)(rankingHealing ? cb.Healing : cb.Damage) / best : share;
             var heading = cb.IsUnknownSummons ? T.UnknownSummonsTip : $"#{i + 1} {cb.Name} · {T.ClassName(cb.Class)}";
             row.Tooltip = $"{heading}\n" +
-                          $"{T.RowDamage} {Format.Grouped(cb.Damage)} ({Format.Share(cb.Share)}) · DPS {Format.Compact(cb.Dps)}\n" +
+                          $"{T.RowDamage} {Format.Grouped(cb.Damage)} ({Format.Share(cb.Share)}) · DPS {Format.Compact(cb.Dps)} · 5s burst {Format.Compact(cb.BurstDps)}\n" +
                           $"{T.IdleDpsHint}\n" +
                           $"{T.HealShort} {Format.Grouped(cb.Healing)}\n" +
                           $"{T.RowHits} {cb.Hits} · {T.RowCrit} {Format.Percent(cb.CritRate)} · {T.RowMax} {Format.Grouped(cb.MaxHit)}";

@@ -106,7 +106,7 @@ public partial class OverlayWindow : Window
         if (_saved is { } saved)
         {
             _vm.Apply(saved.Record.Summary with { Title = saved.Title, Zone = _meter.DisplayZone(saved.Record.Summary.Zone) },
-                _settings.MaxRows, _settings.BarsRelativeToTop);
+                _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
             _vm.SetSegment("saved", saved.Entry.StartedAt.ToString("dd.MM HH:mm"));
         }
         else
@@ -119,7 +119,7 @@ public partial class OverlayWindow : Window
                 _segment = null;
                 snap = _meter.Tracker.Snapshot(null, now);
             }
-            _vm.Apply(snap, _settings.MaxRows, _settings.BarsRelativeToTop);
+            _vm.Apply(snap, _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
             _vm.SetSegment(_segment is null ? "live" : "session", snap?.StartedAt.ToString("HH:mm"));
         }
         if (!_settings.ShowBossPanel) _vm.HasBoss = false;
@@ -387,6 +387,13 @@ public partial class OverlayWindow : Window
         _settings.TargetMode = _settings.TargetMode == TargetMode.BossOnly ? TargetMode.All : TargetMode.BossOnly;
         _meter.ApplySettings();
         UpdateModeLabel();
+    }
+
+    private void Ranking_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.OverlayRanking = _settings.OverlayRanking == OverlayRanking.Damage
+            ? OverlayRanking.Healing : OverlayRanking.Damage;
+        Refresh();
     }
 
     // ------------------------------------------------------------ fight picker
