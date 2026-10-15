@@ -345,7 +345,8 @@ public partial class App : Application
             _autoShown = true;
         }
         else if (!engaged && _autoShown && _overlay.IsVisible && s.AutoHideSeconds > 0 &&
-                 now - _lastEngagedTick > s.AutoHideSeconds * 1000L && !_overlay.IsMouseOver)
+                 now - _lastEngagedTick > s.AutoHideSeconds * 1000L && !_overlay.IsMouseOver &&
+                 _settingsWindow is not { IsVisible: true })
         {
             _overlay.Hide();
             _autoShown = false;
@@ -564,17 +565,19 @@ public partial class App : Application
 
     public void ShowSettings()
     {
-        if (_settingsWindow is { IsLoaded: true })
+        if (_settingsWindow is { IsLoaded: true } existing)
         {
-            Activate(_settingsWindow);
+            if (!existing.IsVisible) existing.Show();
+            Activate(existing);
             return;
         }
-        _settingsWindow = new SettingsWindow(_meter);
+        _settingsWindow = new SettingsWindow(_meter) { Owner = _overlay };
         _settingsWindow.Closed += (_, _) =>
         {
             _settingsWindow = null;
         };
         _settingsWindow.Show();
+        Activate(_settingsWindow);
     }
 
     private static void OpenDiscordSupport()
