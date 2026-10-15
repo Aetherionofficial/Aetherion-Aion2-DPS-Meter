@@ -372,14 +372,20 @@ public sealed class OverlayViewModel : ObservableObject
         Title = T.FightTitle(snap);
         // Running: wall clock since the pull. Finished: the fight's real length (first to last hit).
         Clock = Format.ClockShort(snap.IsActive ? snap.ClockMs : snap.CombatMs);
-        var healingTotal = snap.Combatants.Sum(c => c.Healing);
+        // World-boss packets can include damage from actors outside the local player's visible area. The game
+        // supplies their real identity only for nearby/visible players; don't expose remote actor IDs as players.
+        var visibleCombatants = snap.Combatants.Where(HasVisibleIdentity).ToList();
+        var visiblePlayers = visibleCombatants.Where(c => !c.IsUnknownSummons).ToList();
+        var visibleDamage = visiblePlayers.Sum(c => c.Damage);
         var seconds = Math.Max(1, snap.CombatMs / 1000.0);
         var rankingHealing = ranking == OverlayRanking.Healing;
         RankingLabel = rankingHealing ? "HPS" : "DPS";
-        PartyHps = Format.Compact(healingTotal / seconds) + "/s";
-        PartyPeakDps = Format.Compact(snap.PeakPartyDps);
-        PartyDps = rankingHealing ? Format.Compact(healingTotal / seconds) + "/s" : Format.Compact(snap.PartyDps) + "/s";
-        TotalDamage = rankingHealing ? Format.Compact(healingTotal) : Format.Compact(snap.TotalDamage);
+        var visibleHealing = visiblePlayers.Sum(c => c.Healing);
+        PartyHps = Format.Compact(visibleHealing / seconds) + "/s";
+        PartyPeakDps = snap.Combatants.Any(c => !HasVisibleIdentity(c)) ? "—" : Format.Compact(snap.PeakPartyDps);
+        var visibleDps = snap.IsActive ? visiblePlayers.Sum(c => c.Dps) : visibleDamage / seconds;
+        PartyDps = rankingHealing ? Format.Compact(visibleHealing / seconds) + "/s" : Format.Compact(visibleDps) + "/s";
+        TotalDamage = rankingHealing ? Format.Compact(visibleHealing) : Format.Compact(visibleDamage);
 
         var result = snap.Reason switch
         {
@@ -401,13 +407,13 @@ public sealed class OverlayViewModel : ObservableObject
         // A world boss whose crowd the server kept from us: the party's DPS would be a fraction of the real one.
         MostDamageUnsent = snap.MostDamageUnsent;
         var rankedCount = rankingHealing
-            ? snap.Combatants.Count(c => !c.IsUnknownSummons && c.Healing > 0)
-            : snap.Combatants.Count(c => !c.IsUnknownSummons && c.Damage > 0);
+            ? visiblePlayers.Count(c => c.Healing > 0)
+            : visiblePlayers.Count(c => c.Damage > 0);
         Footer = MostDamageUnsent && !rankingHealing
             ? T.DamageUnsentLine(snap)
             : $"{T.Players(rankedCount)} · {T.Party} {PartyDps}";
 
-        var top = snap.Combatants.MaxBy(x => x.MaxHit);
+        var top = visibleCombatants.MaxBy(x => x.MaxHit);
         TopHit = top is { MaxHit: > 0 } ? Format.Grouped(top.MaxHit) : "";
         TopHitBy = top is { MaxHit: > 0 } ? string.Format(T.TopHitBy, top.Name) : "";
         // The top line holds only the title: the biggest hit lives in its tooltip.
@@ -426,7 +432,7 @@ public sealed class OverlayViewModel : ObservableObject
             HasBoss = false;
         }
 
-        var list = snap.Combatants
+        var list = visibleCombatants
             .Where(c => rankingHealing ? c.Healing > 0 || (c.IsSelf && snap.IsActive) : c.Damage > 0 || c.IsUnknownSummons || (c.IsSelf && snap.IsActive))
             .OrderByDescending(c => rankingHealing ? c.Healing : c.Damage)
             .ThenBy(c => c.IsUnknownSummons ? 1 : 0)
@@ -457,7 +463,7 @@ public sealed class OverlayViewModel : ObservableObject
             row.IsSelf = cb.IsSelf;
             row.Dps = Format.Compact(rankingHealing ? cb.Healing / seconds : cb.Dps) + "/s";
             row.Damage = Format.Compact(rankingHealing ? cb.Healing : cb.Damage);
-            var share = rankingHealing ? (double)cb.Healing / Math.Max(1, healingTotal) : cb.Share;
+            var share = rankingHealing ? (double)cb.Healing / Math.Max(1, visibleHealing) : (double)cb.Damage / Math.Max(1, visibleDamage);
             row.Share = Format.Share(share);
             row.Fill = relativeToTop ? (double)(rankingHealing ? cb.Healing : cb.Damage) / best : share;
             var heading = cb.IsUnknownSummons ? T.UnknownSummonsTip : $"#{i + 1} {cb.Name} · {T.ClassName(cb.Class)}";
@@ -474,6 +480,9 @@ public sealed class OverlayViewModel : ObservableObject
         SelfPlaceBrush = RankBrushes.For(selfIndex + 1).Bg;
         SelfPlaceForeground = RankBrushes.For(selfIndex + 1).Fg;
     }
+
+    private static bool HasVisibleIdentity(CombatantSnapshot c) =>
+        c.IsUnknownSummons || c.IsSelf || !string.Equals(c.Name, $"#{c.ActorId}", StringComparison.Ordinal);
 
     /// <summary>Card label above the title. <paramref name="kind"/>: live / last / segment / saved.</summary>
     public void SetSegment(string kind, string? when = null)
