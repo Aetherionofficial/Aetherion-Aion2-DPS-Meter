@@ -30,7 +30,8 @@ function New-Zip([string]$folder, [string]$zipPath) {
 function Find-Iscc {
     $cmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }
-    "$env:LOCALAPPDATA\Programs\Inno Setup 7", "$env:ProgramFiles\Inno Setup 7", "${env:ProgramFiles(x86)}\Inno Setup 7" |
+    "$env:LOCALAPPDATA\Programs\Inno Setup 7", "$env:USERPROFILE\AppData\Local\Programs\Inno Setup 7",
+    "$env:ProgramFiles\Inno Setup 7", "${env:ProgramFiles(x86)}\Inno Setup 7" |
         ForEach-Object { Join-Path $_ "ISCC.exe" } | Where-Object { Test-Path $_ } | Select-Object -First 1
 }
 

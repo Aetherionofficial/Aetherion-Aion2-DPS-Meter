@@ -220,14 +220,20 @@ public partial class BreakdownWindow : Window
         AddTile(DefenseTiles, T.DefTakenPerSec, Format.Compact(d.DamageTaken / Math.Max(1.0, d.CombatMs / 1000.0)), "");
         AddTile(DefenseTiles, T.DefDotTicks, q.DotTicks.ToString(), T.DefDot);
         var incomingLines = (d.IncomingSkills ?? [])
-            .Take(8)
+            .OrderByDescending(i => i.Damage)
             .Select(i => $"{i.Name} · {Format.Compact(i.Damage)} · {i.Hits} hits")
             .ToList();
         var deaths = d.Deaths ?? [];
         if (deaths.Count > 0)
         {
-            incomingLines.Insert(0, $"Deaths: {deaths.Count} · last {DateTimeOffset.FromUnixTimeMilliseconds(deaths[^1].TimeMs).ToLocalTime():HH:mm:ss}" +
-                (deaths[^1].SkillCode != 0 ? $" · { _skillName(deaths[^1].SkillCode) } · last 10s {Format.Compact(deaths[^1].RecentDamageTaken)}" : ""));
+            incomingLines.Insert(0, $"DEATHS ({deaths.Count}) — latest incoming skill, not guaranteed killing blow");
+            incomingLines.InsertRange(1, deaths.Select(death =>
+            {
+                var at = Format.ClockPrecise(Math.Max(0, death.TimeMs - summary.StartedAt.ToUnixTimeMilliseconds()));
+                var skill = death.SkillCode != 0 ? _skillName(death.SkillCode) : "unknown skill";
+                return $"{at} · {death.Name} · {skill} · previous 10s: {Format.Compact(death.RecentDamageTaken)}";
+            }));
+            incomingLines.Insert(deaths.Count + 1, "INCOMING DAMAGE BY SKILL");
         }
         IncomingBreakdown.Text = incomingLines.Count == 0 ? "No incoming hits recorded" : string.Join(Environment.NewLine, incomingLines);
 

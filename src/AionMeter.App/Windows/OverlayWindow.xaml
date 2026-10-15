@@ -5,7 +5,7 @@
         xmlns:vm="clr-namespace:AionMeter.App.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
-        Title="AION2 DPS Meter" Width="470" Height="540" MinWidth="300" MinHeight="160"
+        Title="AION2 DPS Meter" Width="470" Height="640" MinWidth="410" MinHeight="420"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
@@ -24,13 +24,13 @@
         <GridLength x:Key="ColGlyphWidth">26</GridLength>
         <Thickness x:Key="ColGap">10,0,0,0</Thickness>
         <sys:Double x:Key="NameMaxWidth">220</sys:Double>
-        <sys:Double x:Key="RowHeight">28</sys:Double>
-        <Thickness x:Key="RowMargin">0,0,0,3</Thickness>
-        <sys:Double x:Key="RowNameFont">13.5</sys:Double>
+        <sys:Double x:Key="RowHeight">56</sys:Double>
+        <Thickness x:Key="RowMargin">0,0,0,7</Thickness>
+        <sys:Double x:Key="RowNameFont">14</sys:Double>
         <sys:Double x:Key="RowGearFont">12</sys:Double>
         <sys:Double x:Key="RowNumberFont">13.5</sys:Double>
         <sys:Double x:Key="RowSubFont">12</sys:Double>
-        <sys:Double x:Key="RowGlyphSize">20</sys:Double>
+        <sys:Double x:Key="RowGlyphSize">24</sys:Double>
         <sys:Double x:Key="RowRankFont">11</sys:Double>
         <sys:Double x:Key="RowAccentWidth">3</sys:Double>
 
@@ -226,56 +226,52 @@
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
                 <!-- track -->
-                <Border x:Name="Track" CornerRadius="4" Background="#14FFFFFF" />
-                <!-- fill -->
-                <Border CornerRadius="4" Background="{Binding FillBrush}" RenderTransformOrigin="0,0.5">
-                    <Border.RenderTransform>
-                        <ScaleTransform ScaleX="{Binding Fill}" />
-                    </Border.RenderTransform>
-                </Border>
-                <!-- class strip -->
-                <Border Width="{DynamicResource RowAccentWidth}" HorizontalAlignment="Left" CornerRadius="4,0,0,4" Background="{Binding AccentBrush}" />
+                <Border x:Name="Track" CornerRadius="9" Background="#15202A" BorderBrush="#202D37" BorderThickness="1" />
                 <!-- your own row -->
                 <Border CornerRadius="4" BorderThickness="1" BorderBrush="#B3F2C25A"
                         Visibility="{Binding IsSelf, Converter={StaticResource VisibleIf}}" />
 
-                <Grid Margin="8,0,10,0" Effect="{StaticResource TextShadow}">
+                <Grid Margin="10,0,12,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{DynamicResource ColRankWidth}" />
-                        <ColumnDefinition Width="{DynamicResource ColGlyphWidth}" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Gs" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Cp" />
+                        <ColumnDefinition Width="34" />
+                        <ColumnDefinition Width="30" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Dps" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Damage" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Share" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Place: plain digits, the top three in medal colours -->
-                    <TextBlock Text="{Binding RankText}" FontFamily="{StaticResource NumberFont}" FontSize="{DynamicResource RowRankFont}"
-                               FontWeight="Bold" Foreground="{Binding RankColor}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Border Width="24" Height="24" CornerRadius="12" Background="{Binding RankBackground}"
+                            BorderBrush="{Binding RankBorder}" BorderThickness="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding RankText}" FontFamily="{StaticResource NumberFont}" FontSize="{DynamicResource RowRankFont}"
+                                   FontWeight="Bold" Foreground="{Binding RankForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
 
                     <c:ClassGlyph Grid.Column="1" Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}"
                                   Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
 
                     <!-- As wide as the longest name, up to what the other columns leave (OverlayWindow.FitNames) -->
-                    <TextBlock x:Name="NameText" Grid.Column="2" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="SemiBold"
-                               Foreground="White" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="2,0,0,1"
-                               MaxWidth="{DynamicResource NameMaxWidth}" />
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="2,0,8,0">
+                        <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="SemiBold"
+                                   Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="{DynamicResource NameMaxWidth}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding GearScore, StringFormat=GS {0}}" FontSize="9" Foreground="#A5B1BA"
+                                       Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}" />
+                            <TextBlock Text="{Binding CombatPower, StringFormat=CP {0}}" FontSize="9" Foreground="#8FDBD0" Margin="6,0,0,0"
+                                       Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}" />
+                        </StackPanel>
+                    </StackPanel>
 
-                    <!-- Gear score and combat power, right by the name: only players of your party have them (the party roster) -->
-                    <TextBlock Grid.Column="3" Style="{StaticResource GearText}" Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}"
-                               ToolTip="{Binding DataContext.T.TipGs, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="GS " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding GearScore, Mode=OneWay}" Foreground="#FFD873" /></TextBlock>
-                    <TextBlock Grid.Column="4" Style="{StaticResource GearText}" Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}"
-                               ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="CP " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#8FDBFF" /></TextBlock>
-
-                    <TextBlock Grid.Column="6" Text="{Binding Dps}" Style="{StaticResource RowNumber}"
+                    <TextBlock Grid.Column="3" Text="{Binding Dps}" FontFamily="{StaticResource NumberFont}" FontSize="12.5" FontWeight="Bold"
+                               Foreground="#E8EDF0" VerticalAlignment="Center" Margin="0,0,14,0"
                                ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <TextBlock Grid.Column="7" Text="{Binding Damage}" Style="{StaticResource RowSub}"
-                               ToolTip="{Binding DataContext.T.TipDamage, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <TextBlock Grid.Column="8" Text="{Binding Share}" Style="{StaticResource RowSub}" />
+                    <TextBlock Grid.Column="4" Text="{Binding Share}" FontFamily="{StaticResource NumberFont}" FontSize="11"
+                               Foreground="#B8C4CA" VerticalAlignment="Center" />
                 </Grid>
+                <Border Height="3" Margin="10,0,10,7" VerticalAlignment="Bottom" Background="{Binding AccentBrush}"
+                        RenderTransformOrigin="0,0.5">
+                    <Border.RenderTransform><ScaleTransform ScaleX="{Binding Fill}" /></Border.RenderTransform>
+                </Border>
             </Grid>
             <DataTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -299,8 +295,9 @@
             </Border.Effect>
         </Border>
 
-        <Grid x:Name="CardBody" Margin="12,8,12,8">
+        <Grid x:Name="CardBody" Margin="12,12,12,10">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -309,16 +306,19 @@
 
             <!-- The one top line: the fight's title on the left (the toolbar while the mouse is over the overlay), the state
                  and the timer on the right -->
-            <Grid x:Name="Header" Background="Transparent" Height="22">
+            <Grid x:Name="Header" Background="Transparent" Height="34">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="13.5" FontWeight="SemiBold"
+                    <StackPanel x:Name="FightTitlePanel">
+                    <TextBlock Text="{Binding T.OverlayLive}" FontSize="9" FontWeight="Bold" Foreground="#8FA3AD" />
+                    <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="15" FontWeight="Bold"
                            Foreground="#EEF0F5" TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center" Margin="0,0,10,0" Effect="{StaticResource TextShadow}" Background="Transparent"
+                           VerticalAlignment="Center" Margin="0,1,10,0" Effect="{StaticResource TextShadow}" Background="Transparent"
                            MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
+                    </StackPanel>
 
                 <StackPanel x:Name="Toolbar" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="Collapsed">
                     <Button Style="{StaticResource Chip}" Content="{Binding ModeLabel}" Click="Mode_Click" Margin="0,0,5,0"
@@ -377,27 +377,44 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Boss HP: a slim bar -->
-            <Grid Grid.Row="1" Height="16" Margin="0,5,0,0" Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
+            <!-- Boss health -->
+            <Grid Grid.Row="1" Height="28" Margin="0,5,0,3" Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
                 <Border CornerRadius="4" Background="#2A1418" />
                 <Border CornerRadius="4" Background="{StaticResource HpFill}" RenderTransformOrigin="0,0.5">
                     <Border.RenderTransform>
                         <ScaleTransform ScaleX="{Binding BossHpFraction}" />
                     </Border.RenderTransform>
                 </Border>
-                <Grid Margin="7,0">
+                <Grid Margin="8,0">
                     <Grid.Effect>
                         <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.9" Color="Black" />
                     </Grid.Effect>
-                    <TextBlock Text="{Binding BossHpText}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10.5"
-                               Foreground="White" VerticalAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="BOSS-LEBEN" FontSize="8" FontWeight="Bold" Foreground="#FFE0A0" />
+                        <TextBlock Text="{Binding BossHpText}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10"
+                                   Foreground="White" />
+                    </StackPanel>
                     <TextBlock Text="{Binding BossPercent}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10.5"
                                Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Right" />
                 </Grid>
             </Grid>
 
+            <!-- Group output at a glance -->
+            <Grid Grid.Row="2" Margin="0,7,0,4">
+                <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="8" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <Border x:Name="GroupDpsCard" Background="#15202A" BorderBrush="#263640" BorderThickness="1" CornerRadius="9" Padding="12,8">
+                    <StackPanel><TextBlock Text="{Binding T.GroupDps}" FontSize="9" FontWeight="Bold" Foreground="#8FA3AD" />
+                        <TextBlock Text="{Binding PartyDps}" FontFamily="{StaticResource NumberFont}" FontSize="21" FontWeight="Bold" Foreground="#EAF0F3" />
+                    </StackPanel>
+                </Border>
+                <Border x:Name="GroupHpsCard" Grid.Column="2" Background="#10211F" BorderBrush="#1B5049" BorderThickness="1" CornerRadius="9" Padding="12,8">
+                    <StackPanel><TextBlock Text="{Binding T.GroupHps}" FontSize="9" FontWeight="Bold" Foreground="#75C8B7" />
+                        <TextBlock Text="{Binding PartyHps}" FontFamily="{StaticResource NumberFont}" FontSize="21" FontWeight="Bold" Foreground="#EAF0F3" /></StackPanel>
+                </Border>
+            </Grid>
+
             <!-- Party: the rows share their value column widths -->
-            <Grid Grid.Row="2" Margin="0,7,0,0" Grid.IsSharedSizeScope="True">
+            <Grid Grid.Row="3" Margin="0,7,0,0" Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -405,20 +422,22 @@
 
                 <!-- No column labels (the numbers read by themselves: 738K/s, 14.58M, 22.5 %): this empty grid only tells
                      OverlayWindow.FitNames how wide the rows' columns are -->
-                <Grid x:Name="ColumnLabels" Height="0" Margin="8,0,10,0">
+                <Grid x:Name="ColumnLabels" Height="0" Margin="10,0,12,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{DynamicResource ColRankWidth}" />
-                        <ColumnDefinition Width="{DynamicResource ColGlyphWidth}" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Gs" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Cp" />
+                        <ColumnDefinition Width="34" />
+                        <ColumnDefinition Width="30" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Dps" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Damage" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Share" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                 </Grid>
 
+                <Grid Grid.Row="0" Margin="0,0,10,3">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="34" /><ColumnDefinition Width="30" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding T.OverlayRank}" FontSize="8" FontWeight="Bold" Foreground="#899BA5" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="DPS" FontSize="8" FontWeight="Bold" Foreground="#899BA5" Margin="0,0,14,0" />
+                    <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="8" FontWeight="Bold" Foreground="#899BA5" VerticalAlignment="Center" />
+                </Grid>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">
                     <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
@@ -429,7 +448,7 @@
             </Grid>
 
             <!-- Footer -->
-            <StackPanel Grid.Row="3" Margin="0,6,0,0">
+            <StackPanel Grid.Row="4" Margin="0,8,0,0">
                 <!-- New version on GitHub: a slim banner until it is installed, skipped or closed for this session -->
                 <Grid x:Name="UpdateBanner" Margin="0,0,0,6" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>

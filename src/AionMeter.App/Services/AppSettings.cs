@@ -20,8 +20,15 @@ public enum OverlayRanking
 
 public sealed class AppSettings
 {
-    public static string AppDataDir { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AionMeter");
+    public static string AppDataDir { get; } = ResolveAppDataDir();
+
+    private static string ResolveAppDataDir()
+    {
+        var configured = Environment.GetEnvironmentVariable("AIONMETER_APPDATA");
+        return string.IsNullOrWhiteSpace(configured)
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AionMeter")
+            : Path.GetFullPath(configured);
+    }
 
     private static string FilePath => Path.Combine(AppDataDir, "settings.json");
 
@@ -34,8 +41,8 @@ public sealed class AppSettings
     // Overlay window
     public double OverlayLeft { get; set; } = 80;
     public double OverlayTop { get; set; } = 160;
-    public double OverlayWidth { get; set; } = 460;
-    public double OverlayHeight { get; set; } = 330;
+    public double OverlayWidth { get; set; } = 470;
+    public double OverlayHeight { get; set; } = 640;
     public double BackgroundOpacity { get; set; } = 0.9;
     public bool Locked { get; set; }
     public bool ClickThrough { get; set; }
@@ -70,6 +77,9 @@ public sealed class AppSettings
     public int RowSize { get; set; } = 100;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
     public bool ShowGear { get; set; } = true;
+    public bool ShowHealingPanel { get; set; } = true;
+    public bool ShowPeakDps { get; set; } = true;
+    public bool CompactDpsOnly { get; set; }
     /// <summary>Overlay ranking: damage (DPS) or healing (HPS).</summary>
     public OverlayRanking OverlayRanking { get; set; } = OverlayRanking.Damage;
     public bool ShowBossPanel { get; set; } = true;
@@ -111,7 +121,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 6;
+    private const int CurrentLayout = 7;
 
     public static AppSettings Load()
     {
@@ -138,6 +148,12 @@ public sealed class AppSettings
                     s.AutoInstallUpdates = false;
                 }
                 if (s.LayoutVersion < 6) s.CheckUpdates = true;
+                if (s.LayoutVersion < 7)
+                {
+                    // v7 = dashboard-style combat card with boss health, party DPS/HPS tiles and roomier player rows.
+                    s.OverlayWidth = Math.Max(s.OverlayWidth, 470);
+                    s.OverlayHeight = Math.Max(s.OverlayHeight, 620);
+                }
                 s.Language = UiText.Normalize(s.Language);
                 s.LayoutVersion = CurrentLayout;
                 return s;

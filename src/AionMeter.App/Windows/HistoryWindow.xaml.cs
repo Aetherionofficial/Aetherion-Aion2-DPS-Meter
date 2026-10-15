@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using AionMeter.App.Services;
 using AionMeter.App.ViewModels;
 using AionMeter.Core;
@@ -20,6 +21,7 @@ public partial class HistoryWindow : Window
     private FightRecord? _record;
     private RecordFightView? _view;
     private HistoryEntry? _entry;
+    private readonly DispatcherTimer _sessionRefresh = new() { Interval = TimeSpan.FromSeconds(1) };
 
     public sealed record FightItem(
         HistoryEntry Entry, string Title, string Meta, string Dps, string When, string ResultGlyph, Brush ResultBrush,
@@ -52,13 +54,31 @@ public partial class HistoryWindow : Window
         InitializeComponent();
         _drag = Controls.DragAnywhere.Attach(this);
         Loaded += (_, _) => Reload();
+        _sessionRefresh.Tick += (_, _) => RefreshSessionSummary();
+        Loaded += (_, _) => { RefreshSessionSummary(); _sessionRefresh.Start(); };
         Store.Changed += OnStoreChanged;
         _meter.Portraits.PortraitReady += OnPortraitReady;
         Closed += (_, _) =>
         {
+            _sessionRefresh.Stop();
             Store.Changed -= OnStoreChanged;
             _meter.Portraits.PortraitReady -= OnPortraitReady;
         };
+    }
+
+    private void RefreshSessionSummary()
+    {
+        var fights = _meter.SessionFights;
+        SessionFightsValue.Text = fights.Count.ToString(T.Culture);
+        var kills = fights.Count(f => f.Summary.Reason == EncounterEndReason.Kill && f.Summary.Boss is not null);
+        SessionKillsValue.Text = kills.ToString(T.Culture);
+        var damage = fights.Sum(f => f.Summary.TotalDamage);
+        SessionDamageValue.Text = Format.Compact(damage);
+        var combatMs = fights.Sum(f => f.Summary.CombatMs);
+        SessionDurationValue.Text = Format.Clock(combatMs);
+        var hours = Math.Max(TimeSpan.FromMinutes(1).TotalHours, (DateTimeOffset.Now - _meter.SessionStartedAt).TotalHours);
+        SessionKillsPerHourValue.Text = (kills / hours).ToString("0.0", T.Culture);
+        SessionDamagePerHourValue.Text = Format.Compact((long)Math.Round(damage / hours));
     }
 
     private void OnStoreChanged() => Dispatcher.BeginInvoke(() => Reload(keepSelection: true));
@@ -183,6 +203,38 @@ public partial class HistoryWindow : Window
             return;
         }
         new FightComparisonWindow(_meter, first.Entry, firstFight, second.Entry, secondFight) { Owner = this }.ShowDialog();
+    }
+
+    private void CompareBest_Click(object sender, RoutedEventArgs e)
+    {
+        if (Fights.SelectedItems.Count != 1 || Fights.SelectedItem is not FightItem selected)
+        {
+            MessageBox.Show(this, T.CompareSelectOne, T.CompareTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var current = selected.Entry;
+        var hasTargetKey = current.BossCode > 0 || current.TargetCode > 0;
+        var sameCharacter = string.IsNullOrWhiteSpace(current.SelfName) || !hasTargetKey
+            ? Enumerable.Empty<HistoryEntry>()
+            : Store.List().Where(entry => entry.FileName != current.FileName
+                && (current.BossCode > 0
+                    ? entry.BossCode == current.BossCode
+                    : entry.BossCode == 0 && entry.TargetCode == current.TargetCode && entry.Zone == current.Zone)
+                && string.Equals(entry.SelfName, current.SelfName, StringComparison.OrdinalIgnoreCase));
+        var best = sameCharacter
+            .OrderByDescending(entry => entry.SelfDps > 0 ? entry.SelfDps : entry.PartyDps)
+            .FirstOrDefault();
+        if (best is null)
+        {
+            MessageBox.Show(this, T.CompareBestUnavailable, T.CompareTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var currentFight = Store.Load(current.Path);
+        var bestFight = Store.Load(best.Path);
+        if (currentFight is null || bestFight is null) return;
+        new FightComparisonWindow(_meter, best, bestFight, current, currentFight) { Owner = this }.ShowDialog();
     }
 
     private void Filter_Changed(object sender, RoutedEventArgs e)

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using AionMeter.App.Services;
 using AionMeter.Core.Capture;
 using AionMeter.Core.Combat;
@@ -31,9 +32,15 @@ public partial class SettingsWindow : Window
         BarsRelative.IsChecked = s.BarsRelativeToTop;
         ShowBoss.IsChecked = s.ShowBossPanel;
         ShowGear.IsChecked = s.ShowGear;
+        ShowHealingPanel.IsChecked = s.ShowHealingPanel;
+        ShowPeakDps.IsChecked = s.ShowPeakDps;
+        CombinedView.IsChecked = !s.CompactDpsOnly;
+        CompactView.IsChecked = s.CompactDpsOnly;
         AutoShow.IsChecked = s.AutoShow;
         AutoHideSeconds.Text = s.AutoHideSeconds.ToString();
         ShowOnStart.IsChecked = s.ShowOnStart;
+        BossAlertMinutesBox.Text = s.BossAlertMinutes.ToString();
+        EventTimerOpacity.Value = s.EventTimersOpacity;
         DiscordPresence.IsChecked = s.DiscordPresenceEnabled;
         DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionUnknown, Tag = "" });
         DiscordFactionBox.Items.Add(new ComboBoxItem { Content = T.DiscordFactionElyos, Tag = "Elyos" });
@@ -83,6 +90,7 @@ public partial class SettingsWindow : Window
         var data = _meter.Data;
         DataInfo.Text = string.Format(T.DataInfo, data.Skills.Count, data.Npcs.Count, data.Npcs.Values.Count(n => n.IsBoss),
             data.DotSkills.Count, data.Maps.Count);
+        SelectSettingsPage("overlay", NavOverlayButton);
     }
 
     private static UiText T => UiText.Current;
@@ -90,28 +98,68 @@ public partial class SettingsWindow : Window
     private void SettingsNav_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string section } button) return;
+        SelectSettingsPage(section, button);
+    }
+
+    private void SelectSettingsPage(string page, Button? button = null)
+    {
         if (_activeSettingsNav is not null)
         {
             _activeSettingsNav.Background = System.Windows.Media.Brushes.Transparent;
             _activeSettingsNav.Foreground = (System.Windows.Media.Brush)FindResource("TextDim");
         }
-        button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xC9, 0xA4, 0x5C));
-        button.Foreground = (System.Windows.Media.Brush)FindResource("GoldBright");
-        _activeSettingsNav = button;
-        var target = section switch
+        if (button is not null)
         {
-            "language" => LanguageSection,
-            "overlay" => OverlaySection,
-            "meter" => MeterSection,
-            "history" => HistorySection,
-            "capture" => CaptureSection,
-            "hotkeys" => HotkeysSection,
-            "account" => LicenseSection,
-            "updates" => UpdatesSection,
-            "data" => DataSection,
-            _ => PremiumSection,
+            button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xC9, 0xA4, 0x5C));
+            button.Foreground = (System.Windows.Media.Brush)FindResource("GoldBright");
+            _activeSettingsNav = button;
+        }
+
+        FrameworkElement[] visible = page switch
+        {
+            "timer" => new[] { TimerSection },
+            "fights" => new[] { HistorySection, CaptureSection },
+            "appearance" => new[] { AppearanceSection, LanguageSection, DataFilesSection },
+            "general" => new[] { OverlayBehaviorSection, MeterSection, HotkeysSection, LicenseSection, DataSection },
+            "account" => new[] { PremiumSection, UpdatesSection },
+            _ => new[] { OverlaySection },
         };
-        target.BringIntoView();
+        FrameworkElement[] allSections = new FrameworkElement[] { PremiumSection, LanguageSection, OverlaySection, AppearanceSection, TimerSection, MeterSection,
+            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection };
+        foreach (var section in allSections)
+            section.Visibility = visible.Contains(section) ? Visibility.Visible : Visibility.Collapsed;
+
+        PageTitle.Text = page switch
+        {
+            "timer" => T.NavTimer,
+            "fights" => T.NavFights,
+            "appearance" => T.NavAppearance,
+            "general" => T.NavGeneral,
+            "account" => T.NavAccount,
+            _ => T.SettingsOverlayTitle,
+        };
+        PageSubtitle.Text = page == "timer" ? T.TimerPageHint : T.SettingsPageHint;
+        SettingsScroll.ScrollToTop();
+    }
+
+    private void SizePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string preset }) return;
+        (int rows, int size) = preset switch
+        {
+            "compact" => (5, 75),
+            "large" => (15, 100),
+            _ => (10, 90),
+        };
+        MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(value => Math.Abs(value - rows)).First();
+        RowSizeValue.Value = size;
+    }
+
+    private void OverlayView_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleButton { Tag: string mode }) return;
+        CompactView.IsChecked = mode == "compact";
+        CombinedView.IsChecked = mode != "compact";
     }
 
     private void FarmGuide_Click(object sender, RoutedEventArgs e) => new FarmGuideWindow { Owner = this }.ShowDialog();
@@ -167,9 +215,14 @@ public partial class SettingsWindow : Window
         s.BarsRelativeToTop = BarsRelative.IsChecked == true;
         s.ShowBossPanel = ShowBoss.IsChecked == true;
         s.ShowGear = ShowGear.IsChecked == true;
+        s.ShowHealingPanel = ShowHealingPanel.IsChecked == true;
+        s.ShowPeakDps = ShowPeakDps.IsChecked == true;
+        s.CompactDpsOnly = CompactView.IsChecked == true;
         s.AutoShow = AutoShow.IsChecked == true;
         if (int.TryParse(AutoHideSeconds.Text, out var autoHide)) s.AutoHideSeconds = Math.Clamp(autoHide, 0, 3600);
         s.ShowOnStart = ShowOnStart.IsChecked == true;
+        if (int.TryParse(BossAlertMinutesBox.Text, out var alertMinutes)) s.BossAlertMinutes = Math.Clamp(alertMinutes, 0, 60);
+        s.EventTimersOpacity = Math.Clamp(EventTimerOpacity.Value, 0.2, 1);
         s.DiscordPresenceEnabled = DiscordPresence.IsChecked == true;
         s.DiscordFaction = (DiscordFactionBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "";
         s.MaxRows = MaxRows.SelectedItem is int rows ? rows : 10;

@@ -48,6 +48,7 @@ public partial class OverlayWindow : Window
         FrameBackground.Opacity = _settings.BackgroundOpacity;
         ApplyLock();
         ApplyRowSize(_settings.RowSize);
+        ApplyOverlayDisplayOptions();
         UpdateModeLabel();
         ApplyHotkeyTips();
         LayoutUpdated += (_, _) => FitNames();
@@ -57,18 +58,17 @@ public partial class OverlayWindow : Window
         // Drag the card by any part of it (unless locked); a click without movement still opens a breakdown.
         _drag = DragAnywhere.Attach(this, canDrag: () => !_settings.Locked, dropped: SavePlacement);
 
-        // The card stays clean: its buttons only appear while the mouse is over it, in place of the title and the state
-        // label (the timer stays).
+        // Keep the combat card clean; the title area becomes the quick toolbar on hover.
         MouseEnter += (_, _) =>
         {
-            TitleText.Visibility = Visibility.Collapsed;
+            FightTitlePanel.Visibility = Visibility.Collapsed;
             LabelPanel.Visibility = Visibility.Collapsed;
             Toolbar.Visibility = Visibility.Visible;
         };
         MouseLeave += (_, _) =>
         {
             Toolbar.Visibility = Visibility.Collapsed;
-            TitleText.Visibility = Visibility.Visible;
+            FightTitlePanel.Visibility = Visibility.Visible;
             LabelPanel.Visibility = Visibility.Visible;
         };
 
@@ -136,8 +136,11 @@ public partial class OverlayWindow : Window
             : unnamed ? "Names appear after the next loading screen"
             : status.Message;
         // Footer reads like the card's caption; capture problems take its place so they are never missed.
+        var footer = _settings.ShowPeakDps && _vm.HasData
+            ? $"{_vm.Footer} · {UiText.Current.PeakFiveSeconds} {_vm.PartyPeakDps}"
+            : _vm.Footer;
         FooterText.Text = status.State is CaptureState.Capturing && _vm.HasData
-            ? (unnamed ? _vm.Footer + " · " + UiText.Current.NamesLater : _vm.Footer)
+            ? (unnamed ? footer + " · " + UiText.Current.NamesLater : footer)
             : _vm.Status;
         _vm.StatusBrush = status.State switch
         {
@@ -190,7 +193,15 @@ public partial class OverlayWindow : Window
         OpacitySlider.Value = _settings.BackgroundOpacity;
         FrameBackground.Opacity = _settings.BackgroundOpacity;
         ApplyRowSize(_settings.RowSize);
+        ApplyOverlayDisplayOptions();
         UpdateModeLabel();
+    }
+
+    private void ApplyOverlayDisplayOptions()
+    {
+        var showHealing = _settings.ShowHealingPanel && !_settings.CompactDpsOnly;
+        GroupHpsCard.Visibility = showHealing ? Visibility.Visible : Visibility.Collapsed;
+        Grid.SetColumnSpan(GroupDpsCard, showHealing ? 1 : 3);
     }
 
     /// <summary>
@@ -201,14 +212,14 @@ public partial class OverlayWindow : Window
     {
         var k = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize) / 100.0;
         var f = Math.Sqrt(k);
-        var height = Math.Round(28 * k);
+        var height = Math.Round(56 * k);
         Resources["RowHeight"] = height;
-        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(1, Math.Round(3 * k)));
-        Resources["RowNameFont"] = Math.Round(13.5 * f, 1);
+        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(7 * k)));
+        Resources["RowNameFont"] = Math.Round(14 * f, 1);
         Resources["RowGearFont"] = Math.Round(12 * f, 1);
         Resources["RowNumberFont"] = Math.Round(13.5 * f, 1);
         Resources["RowSubFont"] = Math.Round(12 * f, 1);
-        Resources["RowGlyphSize"] = Math.Min(Math.Round(20 * f), height - 4);
+        Resources["RowGlyphSize"] = Math.Min(Math.Round(24 * f), height - 8);
         Resources["RowRankFont"] = Math.Round(11 * f, 1);
         Resources["RowAccentWidth"] = Math.Max(2, Math.Round(3 * f));
         Resources["ColRankWidth"] = new GridLength(Math.Round(20 * f));
@@ -216,37 +227,16 @@ public partial class OverlayWindow : Window
         Resources["ColGap"] = new Thickness(Math.Round(10 * f), 0, 0, 0);
     }
 
-    private const int NameColumn = 2, GsColumn = 3, CpColumn = 4, SpacerColumn = 5; // in the row and label grids
-    private const double MinNameWidth = 60;
-    private double _gearWidth; // GS + CP columns when last shown
 
     /// <summary>
-    /// The name column is as wide as the longest name, which may take all the room the other columns leave but no more,
-    /// so the fight's numbers always show (a long name is cut instead). A little is kept back for the rows' scrollbar.
-    /// When even that leaves the names too little, the GS / CP columns step aside until the overlay is wide enough again.
+    /// The name column uses the room left after rank, class icon, DPS and share so combat values never disappear.
     /// </summary>
     private void FitNames()
     {
         if (ColumnLabels.ActualWidth <= 0) return;
         var columns = ColumnLabels.ColumnDefinitions;
-        double others = 0;
-        for (var i = 0; i < columns.Count; i++)
-            if (i is not (NameColumn or SpacerColumn)) others += columns[i].ActualWidth;
-        var room = ColumnLabels.ActualWidth - others - 16; // 4 name margin + 12 for the scrollbar
-
-        if (_vm.GearFits && _vm.HasGear && room < MinNameWidth)
-        {
-            _gearWidth = columns[GsColumn].ActualWidth + columns[CpColumn].ActualWidth;
-            _vm.GearFits = false;
-            Refresh();
-        }
-        else if (!_vm.GearFits && room - _gearWidth >= MinNameWidth + 20) // a margin, so it does not flip back and forth
-        {
-            _vm.GearFits = true;
-            Refresh();
-        }
-
-        var max = Math.Max(30, Math.Floor(room));
+        const double fixedColumns = 34 + 30 + 82 + 58;
+        var max = Math.Max(30, Math.Floor(ColumnLabels.ActualWidth - fixedColumns - 28));
         if (Resources["NameMaxWidth"] is double current && Math.Abs(current - max) < 1) return;
         Resources["NameMaxWidth"] = max;
     }

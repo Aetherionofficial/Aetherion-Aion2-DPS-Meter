@@ -19,6 +19,7 @@ return args.FirstOrDefault() switch
     "live" => Live(args.Skip(1).ToArray()),
     "replay" when args.Length > 1 => Replay(args[1]),
     "dump" when args.Length > 1 => Dump(args[1], args.Length > 2 ? args[2] : null),
+    "opcodes" when args.Length > 1 => OpcodeSummary(args[1]),
     "find" when args.Length > 2 => Find(args[1], args[2]),
     "crits" when args.Length > 1 => Crits(args[1]),
     "entities" when args.Length > 1 => Entities(args[1]),
@@ -39,6 +40,7 @@ int Usage()
         aionmeter-cli live [seconds] [--record]     capture live, print what was decoded
         aionmeter-cli replay <file.pcap>            run a capture through the meter, print fights
         aionmeter-cli dump <file.pcap> [opcode]     print decoded packets (opcode as hex, e.g. 0438)
+        aionmeter-cli opcodes <file.pcap>            count opcodes and show sample bytes for unknown packets
         aionmeter-cli replay <file.pcap> --boss --brief   player counts per fight only
         aionmeter-cli crits <file.pcap>             damage-type / modifier statistics per class (crit check)
         aionmeter-cli entities <file.pcap>          damage dealers that are not announced players, by spawn kind
@@ -47,6 +49,26 @@ int Usage()
                                                     what the meter's update check sees on GitHub; download + verify the installer
         """);
     return 1;
+}
+
+int OpcodeSummary(string path)
+{
+    var replay = new PcapReplaySource(data, path, realtime: false);
+    var packets = new Dictionary<ushort, (long Count, string Sample)>();
+    replay.Pipeline.Parser.Tap = (_, opcode, body) =>
+    {
+        var old = packets.GetValueOrDefault(opcode);
+        packets[opcode] = (old.Count + 1, old.Sample.Length == 0 ? Wire.Hex(body, 48) : old.Sample);
+    };
+    var total = replay.RunToEnd();
+    Console.WriteLine($"{total:N0} packets · {packets.Count} opcodes\n");
+    foreach (var (opcode, item) in packets.OrderByDescending(p => p.Value.Count))
+    {
+        var name = Opcodes.Name(opcode);
+        var known = name != $"{opcode >> 8:x2} {opcode & 0xff:x2}";
+        Console.WriteLine($"{opcode:X4}  {item.Count,8:N0}  {(known ? name : "UNKNOWN"),-12}  {item.Sample}");
+    }
+    return 0;
 }
 
 int UpdateCheck(string[] a)

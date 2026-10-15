@@ -215,6 +215,8 @@ public sealed class OverlayViewModel : ObservableObject
     private string _bossPercent = "";
     private double _bossHpFraction = 1;
     private string _partyDps = "—";
+    private string _partyHps = "—";
+    private string _partyPeakDps = "—";
     private string _totalDamage = "—";
     private string _status = "Starting…";
     private Brush _statusBrush = Brushes.Gray;
@@ -293,6 +295,8 @@ public sealed class OverlayViewModel : ObservableObject
     public string BossPercent { get => _bossPercent; set => Set(ref _bossPercent, value); }
     public double BossHpFraction { get => _bossHpFraction; set => Set(ref _bossHpFraction, value); }
     public string PartyDps { get => _partyDps; set => Set(ref _partyDps, value); }
+    public string PartyHps { get => _partyHps; set => Set(ref _partyHps, value); }
+    public string PartyPeakDps { get => _partyPeakDps; set => Set(ref _partyPeakDps, value); }
     public string TotalDamage { get => _totalDamage; set => Set(ref _totalDamage, value); }
     public string Status { get => _status; set => Set(ref _status, value); }
     public Brush StatusBrush { get => _statusBrush; set => Set(ref _statusBrush, value); }
@@ -347,6 +351,8 @@ public sealed class OverlayViewModel : ObservableObject
             TitleTip = T.TipScrollFights;
             Clock = "0:00";
             PartyDps = "—";
+            PartyHps = "—";
+            PartyPeakDps = "—";
             TotalDamage = "—";
             TopHit = "";
             Footer = "";
@@ -367,6 +373,8 @@ public sealed class OverlayViewModel : ObservableObject
         var seconds = Math.Max(1, snap.CombatMs / 1000.0);
         var rankingHealing = ranking == OverlayRanking.Healing;
         RankingLabel = rankingHealing ? "HPS" : "DPS";
+        PartyHps = Format.Compact(healingTotal / seconds) + "/s";
+        PartyPeakDps = Format.Compact(snap.PeakPartyDps);
         PartyDps = rankingHealing ? Format.Compact(healingTotal / seconds) + "/s" : Format.Compact(snap.PartyDps) + "/s";
         TotalDamage = rankingHealing ? Format.Compact(healingTotal) : Format.Compact(snap.TotalDamage);
 
@@ -447,7 +455,7 @@ public sealed class OverlayViewModel : ObservableObject
             row.Dps = Format.Compact(rankingHealing ? cb.Healing / seconds : cb.Dps) + "/s";
             row.Damage = Format.Compact(rankingHealing ? cb.Healing : cb.Damage);
             var share = rankingHealing ? (double)cb.Healing / Math.Max(1, healingTotal) : cb.Share;
-            row.Share = rankingHealing ? Format.Share(share) : $"{Format.Share(share)} · {T.HealShort} {Format.Compact(cb.Healing)}";
+            row.Share = Format.Share(share);
             row.Fill = relativeToTop ? (double)(rankingHealing ? cb.Healing : cb.Damage) / best : share;
             var heading = cb.IsUnknownSummons ? T.UnknownSummonsTip : $"#{i + 1} {cb.Name} · {T.ClassName(cb.Class)}";
             row.Tooltip = $"{heading}\n" +

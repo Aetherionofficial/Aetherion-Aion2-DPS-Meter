@@ -874,8 +874,10 @@ public sealed class CombatTracker
 
         BossSnapshot? boss = null;
         // Only show HP for an NPC this local player has targeted through their own cast/hit stream.
-        // Other players' damage and NPC HP updates may update that same NPC, but cannot make it appear here.
-        if (enc.LastTargetId is { } targetId and > 0 &&
+        // Other players' damage and NPC HP updates may update that same NPC, but cannot make it appear here. Keep
+        // the known boss visible in a finished result even after a shared kill packet clears LastTargetId.
+        var targetId = enc.LastTargetId > 0 ? enc.LastTargetId : !enc.IsActive ? enc.BossId.GetValueOrDefault() : 0;
+        if (targetId > 0 &&
             _entities.TryGetNpc(targetId, out var primaryTarget) && primaryTarget.Hp >= 0 && primaryTarget.MaxHp > 0)
         {
             if (enc.BossId == targetId)
@@ -909,7 +911,7 @@ public sealed class CombatTracker
         return new EncounterSnapshot(
             enc.Id, Title(enc), enc.Zone, ToTime(enc.StartMs), enc.ClockMs(nowMs), combatMs, enc.IsActive, enc.Reason,
             enc.TotalDamage, partyDps, boss, rows, MainTargetCode(enc),
-            enc.Attackers.Count + rows.Count(r => !r.IsUnknownSummons && !enc.Attackers.Contains(r.ActorId)));
+            enc.Attackers.Count + rows.Count(r => !r.IsUnknownSummons && !enc.Attackers.Contains(r.ActorId)), enc.PeakPartyDps);
     }
 
     private static long RecentDamage(Combatant combatant, long fromMs, long throughMs)

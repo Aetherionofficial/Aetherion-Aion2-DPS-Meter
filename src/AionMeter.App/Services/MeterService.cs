@@ -1,4 +1,5 @@
 using System.IO;
+using System.Collections.Concurrent;
 using AionMeter.Core;
 using AionMeter.Core.Capture;
 using AionMeter.Core.Combat;
@@ -14,9 +15,11 @@ public sealed class MeterService : IDisposable
     private IEventSource? _capture;
     private IEventSource? _replay;
     private DemoFightSource? _demo;
+    private readonly ConcurrentQueue<FightRecord> _sessionFights = new();
 
     public MeterService(AppSettings settings, Func<GameData, IEventSource>? captureFactory)
     {
+        SessionStartedAt = DateTimeOffset.Now;
         Settings = settings;
         CaptureFactory = captureFactory;
         Data = GameData.Load(DataDirectory, UiText.Normalize(settings.Language));
@@ -72,6 +75,8 @@ public sealed class MeterService : IDisposable
     public static string DataDirectory { get; } = EmbeddedData.Install();
 
     public AppSettings Settings { get; }
+    public DateTimeOffset SessionStartedAt { get; }
+    public IReadOnlyList<FightRecord> SessionFights => _sessionFights.ToArray();
     public GameData Data { get; }
     public SkillIcons Icons { get; }
     public BossPortraits Portraits { get; }
@@ -292,6 +297,7 @@ public sealed class MeterService : IDisposable
 
     private void OnEncounterFinished(FightRecord record)
     {
+        if (!_replaying && !DemoRunning) _sessionFights.Enqueue(record);
         LogBossFight(record.Summary);
         if (!ShouldSave(record.Summary)) return;
         if (_exiting) Save(); // the process is about to end: a worker thread would not get to it

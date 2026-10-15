@@ -11,16 +11,16 @@
     </WindowChrome.WindowChrome>
     <Window.Resources>
         <Style x:Key="Section" TargetType="Border">
-            <Setter Property="Background" Value="#0DFFFFFF" />
-            <Setter Property="BorderBrush" Value="#1AFFFFFF" />
+            <Setter Property="Background" Value="#141E27" />
+            <Setter Property="BorderBrush" Value="#26343E" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Padding" Value="14,10" />
             <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
         <Style x:Key="Hint" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource TextMute}" />
-            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="FontSize" Value="10.5" />
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="Margin" Value="24,0,0,6" />
         </Style>
@@ -53,6 +53,32 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="OverlayModeButton" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="{StaticResource TextDim}" />
+            <Setter Property="Background" Value="#1A2831" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="#302B21" />
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#8E7544" />
+                                <Setter Property="Foreground" Value="{StaticResource GoldBright}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="ComboBox">
             <Setter Property="MinWidth" Value="180" />
             <Setter Property="Height" Value="26" />
@@ -70,7 +96,7 @@
     <Border BorderBrush="{StaticResource GoldDim}" BorderThickness="1">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="176" />
+                <ColumnDefinition Width="164" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -88,20 +114,23 @@
             <Border Grid.Row="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
                 <StackPanel Margin="12,16">
                     <TextBlock Text="AETHERION" Foreground="{StaticResource Gold}" FontWeight="SemiBold" FontSize="10" Margin="12,0,0,10" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecLanguage, Source={x:Static s:UiText.Current}}" Tag="language" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecOverlay, Source={x:Static s:UiText.Current}}" Tag="overlay" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecMeter, Source={x:Static s:UiText.Current}}" Tag="meter" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecHistory, Source={x:Static s:UiText.Current}}" Tag="history" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecCapture, Source={x:Static s:UiText.Current}}" Tag="capture" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecHotkeys, Source={x:Static s:UiText.Current}}" Tag="hotkeys" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecAccount, Source={x:Static s:UiText.Current}}" Tag="account" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecUpdates, Source={x:Static s:UiText.Current}}" Tag="updates" Click="SettingsNav_Click" />
-                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding SecData, Source={x:Static s:UiText.Current}}" Tag="data" Click="SettingsNav_Click" />
+                    <Button x:Name="NavOverlayButton" Style="{StaticResource SettingsNavButton}" Content="{Binding NavOverlay, Source={x:Static s:UiText.Current}}" Tag="overlay" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavTimer, Source={x:Static s:UiText.Current}}" Tag="timer" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavFights, Source={x:Static s:UiText.Current}}" Tag="fights" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Tag="appearance" Click="SettingsNav_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGeneral, Source={x:Static s:UiText.Current}}" Tag="general" Click="SettingsNav_Click" />
+                    <TextBlock Text="KONTO" Foreground="{StaticResource TextMute}" FontSize="9" Margin="12,16,0,4" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAccount, Source={x:Static s:UiText.Current}}" Tag="account" Click="SettingsNav_Click" />
                 </StackPanel>
             </Border>
 
             <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="20,0,20,0">
                 <StackPanel>
+                    <StackPanel Margin="0,12,0,18">
+                        <TextBlock Text="{Binding SettingsKicker, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" FontWeight="Bold" FontSize="10" Margin="0,0,0,8" />
+                        <TextBlock x:Name="PageTitle" Text="Overlay anpassen" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock x:Name="PageSubtitle" Text="{Binding SettingsPageHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" Margin="0,5,0,0" />
+                    </StackPanel>
                     <Border x:Name="PremiumSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="AETHERION • PREMIUM" Foreground="{StaticResource Gold}" FontWeight="SemiBold" Margin="0,0,0,8" />
@@ -127,43 +156,94 @@
                     </Border>
 
                     <!-- Overlay -->
-                    <Border x:Name="OverlaySection" Style="{StaticResource Section}">
-                        <StackPanel>
-                            <TextBlock Text="{Binding SecOverlay, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
-                            <CheckBox x:Name="BarsRelative" Style="{StaticResource DarkCheck}"
-                                      Content="{Binding BarsRelative, Source={x:Static s:UiText.Current}}" />
-                            <TextBlock Style="{StaticResource Hint}" Text="{Binding BarsRelativeHint, Source={x:Static s:UiText.Current}}" />
-                            <CheckBox x:Name="ShowBoss" Style="{StaticResource DarkCheck}"
-                                      Content="{Binding ShowBossPanel, Source={x:Static s:UiText.Current}}" />
-                            <CheckBox x:Name="ShowGear" Style="{StaticResource DarkCheck}" Margin="0,6,0,0"
-                                      Content="{Binding ShowGear, Source={x:Static s:UiText.Current}}" />
-                            <TextBlock Style="{StaticResource Hint}" Text="{Binding ShowGearHint, Source={x:Static s:UiText.Current}}" />
-                            <CheckBox x:Name="AutoShow" Style="{StaticResource DarkCheck}" Margin="0,6,0,0"
-                                      Content="{Binding AutoShow, Source={x:Static s:UiText.Current}}" />
-                            <TextBlock Style="{StaticResource Hint}" Text="{Binding AutoShowHint, Source={x:Static s:UiText.Current}}" />
-                            <StackPanel Orientation="Horizontal" Margin="24,0,0,4">
-                                <TextBlock Text="{Binding AutoHide, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="250" />
-                                <TextBox x:Name="AutoHideSeconds" Width="70" />
+                    <StackPanel x:Name="OverlaySection">
+                        <TextBlock Text="{Binding CombatOverlayLabel, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" FontWeight="Bold" FontSize="10" Margin="0,0,0,8" />
+                        <Border Style="{StaticResource Section}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding OverlayViewTitle, Source={x:Static s:UiText.Current}}" FontWeight="SemiBold" FontSize="14" />
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,10" Text="Wähle, was im Kampf im Vordergrund steht." />
+                                <UniformGrid Columns="2">
+                                    <ToggleButton x:Name="CombinedView" Style="{StaticResource OverlayModeButton}" Content="{Binding CombinedOverlayMode, Source={x:Static s:UiText.Current}}" Tag="combined" Click="OverlayView_Click" />
+                                    <ToggleButton x:Name="CompactView" Style="{StaticResource OverlayModeButton}" Content="{Binding CompactOverlayMode, Source={x:Static s:UiText.Current}}" Tag="compact" Click="OverlayView_Click" Margin="0" />
+                                </UniformGrid>
                             </StackPanel>
-                            <CheckBox x:Name="ShowOnStart" Style="{StaticResource DarkCheck}" Margin="0,6,0,0"
-                                      Content="{Binding ShowOnStart, Source={x:Static s:UiText.Current}}" />
+                        </Border>
+                        <Border Style="{StaticResource Section}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding VisibleInfoTitle, Source={x:Static s:UiText.Current}}" FontWeight="SemiBold" FontSize="14" />
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,8" Text="Zusatzwerte bleiben dezent und optional." />
+                                <UniformGrid Columns="2">
+                                    <CheckBox x:Name="ShowBoss" Style="{StaticResource DarkCheck}" Content="{Binding ShowBossHpInfo, Source={x:Static s:UiText.Current}}" />
+                                    <CheckBox x:Name="ShowPeakDps" Style="{StaticResource DarkCheck}" Content="{Binding ShowPeakDpsInfo, Source={x:Static s:UiText.Current}}" />
+                                    <CheckBox x:Name="ShowHealingPanel" Style="{StaticResource DarkCheck}" Content="{Binding ShowHealingInfo, Source={x:Static s:UiText.Current}}" />
+                                    <CheckBox x:Name="ShowGear" Style="{StaticResource DarkCheck}" Content="{Binding ShowGearInfo, Source={x:Static s:UiText.Current}}" />
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Section}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding WindowSizeTitle, Source={x:Static s:UiText.Current}}" FontWeight="SemiBold" FontSize="14" />
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,10" Text="{Binding WindowSizeHint, Source={x:Static s:UiText.Current}}" />
+                                <UniformGrid Columns="3">
+                                    <Button Style="{StaticResource GhostButton}" Content="{Binding PresetCompact, Source={x:Static s:UiText.Current}}" Tag="compact" Click="SizePreset_Click" Margin="0,0,6,0" />
+                                    <Button Style="{StaticResource GhostButton}" Content="{Binding PresetStandard, Source={x:Static s:UiText.Current}}" Tag="standard" Click="SizePreset_Click" Margin="0,0,6,0" />
+                                    <Button Style="{StaticResource GhostButton}" Content="{Binding PresetLarge, Source={x:Static s:UiText.Current}}" Tag="large" Click="SizePreset_Click" />
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Section}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding TransparencyTitle, Source={x:Static s:UiText.Current}}" FontWeight="SemiBold" FontSize="14" />
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,10" Text="{Binding TransparencyHint, Source={x:Static s:UiText.Current}}" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding TransparentLabel, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                    <Slider x:Name="OpacityValue" Style="{StaticResource GoldSlider}" Width="300" Minimum="0.15" Maximum="1" />
+                                    <TextBlock Text="{Binding OpaqueLabel, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <Border x:Name="AppearanceSection" Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
+                            <CheckBox x:Name="BarsRelative" Style="{StaticResource DarkCheck}" Content="{Binding BarsRelative, Source={x:Static s:UiText.Current}}" />
+                            <TextBlock Style="{StaticResource Hint}" Text="{Binding BarsRelativeHint, Source={x:Static s:UiText.Current}}" />
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <TextBlock Text="{Binding RowsShown, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
                                 <ComboBox x:Name="MaxRows" MinWidth="80" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding BackgroundOpacity, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
-                                <Slider x:Name="OpacityValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="0.15" Maximum="1" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <TextBlock Text="{Binding RowSize, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
-                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="50" Maximum="100"
-                                        SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True"
-                                        ValueChanged="RowSize_Changed" />
+                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="50" Maximum="100" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
                                 <TextBlock x:Name="RowSizeText" VerticalAlignment="Center" Margin="10,0,0,0" />
                             </StackPanel>
-                            <TextBlock Style="{StaticResource Hint}" Margin="190,2,0,0"
-                                       Text="{Binding RowSizeHint, Source={x:Static s:UiText.Current}}" />
+                            <TextBlock Style="{StaticResource Hint}" Margin="190,2,0,0" Text="{Binding RowSizeHint, Source={x:Static s:UiText.Current}}" />
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="OverlayBehaviorSection" Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding NavGeneral, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
+                            <CheckBox x:Name="AutoShow" Style="{StaticResource DarkCheck}" Content="{Binding AutoShow, Source={x:Static s:UiText.Current}}" />
+                            <TextBlock Style="{StaticResource Hint}" Text="{Binding AutoShowHint, Source={x:Static s:UiText.Current}}" />
+                            <CheckBox x:Name="ShowOnStart" Style="{StaticResource DarkCheck}" Content="{Binding ShowOnStart, Source={x:Static s:UiText.Current}}" />
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="{Binding AutoHide, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="260" />
+                                <TextBox x:Name="AutoHideSeconds" Width="70" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="TimerSection" Style="{StaticResource Section}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="{Binding NavTimer, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding TimerAlertLabel, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="280" />
+                                <TextBox x:Name="BossAlertMinutesBox" Width="70" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <TextBlock Text="{Binding TimerOpacityLabel, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="280" />
+                                <Slider x:Name="EventTimerOpacity" Style="{StaticResource GoldSlider}" Width="220" Minimum="0.2" Maximum="1" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" Text="Timer-Fenster und Boss-Hinweise werden gemeinsam gespeichert." />
                         </StackPanel>
                     </Border>
 
@@ -302,7 +382,7 @@
                     </Border>
 
                     <!-- Data -->
-                    <Border Style="{StaticResource Section}">
+                    <Border x:Name="DataFilesSection" Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="{Binding SecData, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <CheckBox x:Name="Icons" Style="{StaticResource DarkCheck}"

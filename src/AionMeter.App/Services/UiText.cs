@@ -29,6 +29,18 @@ public sealed class UiText
     public string Code { get; init; } = "en";
     public string LanguageName { get; init; } = "English";
     public string MapLabel { get; init; } = "AION2 hub";
+    public string OverlayLive { get; init; } = "LIVE FIGHT";
+    public string GroupDps { get; init; } = "PARTY DPS";
+    public string GroupHps { get; init; } = "PARTY HPS";
+    public string PeakFiveSeconds { get; init; } = "Peak 5s";
+    public string ShowHealingInfo { get; init; } = "Healing / HPS";
+    public string ShowPeakDpsInfo { get; init; } = "Peak DPS";
+    public string ShowBossHpInfo { get; init; } = "Boss HP";
+    public string ShowGearInfo { get; init; } = "Gear info";
+    public string CombinedOverlayMode { get; init; } = "Damage + healing";
+    public string CompactOverlayMode { get; init; } = "DPS only · compact";
+    public string OverlayRank { get; init; } = "RANK";
+    public string OverlayShare { get; init; } = "SHARE";
     public string DiscordPresenceSection { get; init; } = "DISCORD PRESENCE";
     public string DiscordPresenceEnabled { get; init; } = "Share class, level and faction on Discord";
     public string DiscordPresenceHint { get; init; } = "Shown in your Discord activity according to your Discord privacy settings. Sent directly to the Discord desktop app. Select your faction below; AION capture does not reliably provide it.";
@@ -37,6 +49,17 @@ public sealed class UiText
     public string DiscordFactionElyos { get; init; } = "Elyos";
     public string DiscordFactionAsmodian { get; init; } = "Asmodian";
     public string CompareSelected { get; init; } = "Compare 2";
+    public string CompareBest { get; init; } = "Compare best";
+    public string CompareBestUnavailable { get; init; } = "No earlier run for this boss and character was found.";
+    public string CompareSelectOne { get; init; } = "Select one saved fight to compare with your best run.";
+    public string SessionTitle { get; init; } = "SESSION STATISTICS";
+    public string SessionFightsLabel { get; init; } = "FIGHTS";
+    public string SessionKillsLabel { get; init; } = "BOSS KILLS";
+    public string SessionDamageLabel { get; init; } = "DAMAGE";
+    public string SessionDurationLabel { get; init; } = "COMBAT TIME";
+    public string SessionKillsPerHourLabel { get; init; } = "BOSS KILLS / HOUR";
+    public string SessionDamagePerHourLabel { get; init; } = "DAMAGE / HOUR";
+    public string SessionUntrackedLabel { get; init; } = "Kinah, Abyss points and drops are not tracked yet: their packet formats have not been identified.";
     public string CompareTitle { get; init; } = "Fight comparison";
     public string CompareSelectTwo { get; init; } = "Select exactly two saved fights to compare.";
     public string CompareHint { get; init; } = "Select two fights in the list with Ctrl-click.";
@@ -366,6 +389,30 @@ public sealed class UiText
 
     // ---------------------------------------------------------------- settings window
     public string SettingsTitle { get; init; } = "Settings";
+    public string NavOverlay { get; init; } = "Overlay";
+    public string NavTimer { get; init; } = "Timer";
+    public string NavFights { get; init; } = "Fight & history";
+    public string NavAppearance { get; init; } = "Appearance";
+    public string NavGeneral { get; init; } = "General";
+    public string NavAccount { get; init; } = "Aetherion Premium";
+    public string SettingsPageHint { get; init; } = "Important options at a glance, even during combat.";
+    public string SettingsKicker { get; init; } = "AETHERION • SETTINGS";
+    public string SettingsOverlayTitle { get; init; } = "Customize overlay";
+    public string CombatOverlayLabel { get; init; } = "COMBAT OVERLAY";
+    public string OverlayViewTitle { get; init; } = "View";
+    public string VisibleInfoTitle { get; init; } = "Visible information";
+    public string WindowSizeTitle { get; init; } = "Window size";
+    public string WindowSizeHint { get; init; } = "Scales text, spacing and visible rows together.";
+    public string PresetCompact { get; init; } = "Compact";
+    public string PresetStandard { get; init; } = "Standard";
+    public string PresetLarge { get; init; } = "Large";
+    public string TransparencyTitle { get; init; } = "Transparency";
+    public string TransparencyHint { get; init; } = "More opacity improves readability.";
+    public string TransparentLabel { get; init; } = "Transparent";
+    public string OpaqueLabel { get; init; } = "Opaque";
+    public string TimerPageHint { get; init; } = "Tune timer alerts and readability.";
+    public string TimerAlertLabel { get; init; } = "Boss alert (minutes before respawn)";
+    public string TimerOpacityLabel { get; init; } = "Timer opacity";
     public string LanguageLabel { get; init; } = "Language";
     public string BreakdownTitle { get; init; } = "Breakdown — AION2 DPS Meter";
     public string HistoryTitle { get; init; } = "Fight history — AION2 DPS Meter";
@@ -475,11 +522,14 @@ public sealed class UiText
     private static readonly UiText De = new()
     {
         Code = "de", LanguageName = "Deutsch",
+        OverlayLive = "LIVE-KAMPF", GroupDps = "GRUPPEN-DPS", GroupHps = "GRUPPEN-HPS", PeakFiveSeconds = "Peak 5 Sek.",
+        ShowHealingInfo = "Heilung / HPS", ShowPeakDpsInfo = "Peak-DPS", ShowBossHpInfo = "Boss-LP", ShowGearInfo = "Gear-Infos",
+        CombinedOverlayMode = "Schaden + Heilung", CompactOverlayMode = "Nur DPS · kompakt", OverlayRank = "RANG", OverlayShare = "ANTEIL",
         MapLabel = "AION2-Hub",
         DiscordPresenceSection = "DISCORD-STATUS", DiscordPresenceEnabled = "Klasse, Level und Fraktion auf Discord anzeigen",
         DiscordPresenceHint = "Wird gemäß deinen Discord-Datenschutzeinstellungen in deiner Aktivität angezeigt und direkt an die Discord-Desktop-App gesendet. Wähle deine Fraktion unten aus; der AION-Mitschnitt liefert sie nicht zuverlässig.",
         DiscordFactionLabel = "Deine Fraktion", DiscordFactionUnknown = "Nicht festgelegt", DiscordFactionElyos = "Elyos", DiscordFactionAsmodian = "Asmodier",
-        CompareSelected = "2 vergleichen", CompareTitle = "Kampfvergleich", CompareSelectTwo = "Wähle genau zwei gespeicherte Kämpfe zum Vergleichen aus.",
+        CompareSelected = "2 vergleichen", CompareBest = "Mit Bestwert vergleichen", CompareBestUnavailable = "Kein früherer Lauf für diesen Boss und Charakter gefunden.", CompareSelectOne = "Wähle einen gespeicherten Kampf aus, um ihn mit deinem Bestwert zu vergleichen.", SessionTitle = "SESSION-STATISTIK", SessionFightsLabel = "KÄMPFE", SessionKillsLabel = "BOSS-KILLS", SessionDamageLabel = "SCHADEN", SessionDurationLabel = "KAMPFZEIT", SessionKillsPerHourLabel = "BOSS-KILLS / STUNDE", SessionDamagePerHourLabel = "SCHADEN / STUNDE", SessionUntrackedLabel = "Kinah, Abyss-Punkte und Drops werden noch nicht erfasst: Die Paketformate sind noch nicht identifiziert.", CompareTitle = "Kampfvergleich", CompareSelectTwo = "Wähle genau zwei gespeicherte Kämpfe zum Vergleichen aus.",
         CompareHint = "Wähle zwei Kämpfe mit Strg-Klick aus.", CompareMetric = "WERT", CompareDamage = "GESAMTSCHADEN", CompareDps = "GRUPPEN-DPS",
         CompareDuration = "DAUER", CompareHealing = "GESAMTHEILUNG", CompareDelta = "ÄNDERUNG",
         ClassNames = new Dictionary<Core.Events.GameClass, string>
@@ -563,7 +613,7 @@ public sealed class UiText
         YourFights = "Deine Kämpfe", SavedCount = "{0} gespeichert", ShownOf = "{0} von {1}", FilterAll = "Alle", FilterBosses = "Bosse", FilterKills = "Siege",
         ShowInOverlay = "Im Overlay anzeigen", TipShowInOverlay = "Diesen Kampf im Overlay anzeigen (Live-Modus kehrt beim nächsten Pull zurück)", HistoryEmpty = "Besiege einen Boss — der Kampf erscheint hier automatisch.",
         PlayersShort = "Sp.", JustNow = "gerade eben", MinutesAgo = "vor {0} Min.", HoursAgo = "vor {0} Std.", DeleteConfirm = "„{0}“ ({1}) löschen?", TipRefresh = "Aktualisieren", TipOpenFolder = "Ordner öffnen", TipDelete = "Ausgewählten Kampf löschen", TipOpenBreakdown = "Vollständige Auswertung öffnen", DamageWord = "Schaden",
-        SettingsTitle = "Einstellungen", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
+        SettingsTitle = "Einstellungen", NavOverlay = "Overlay", NavTimer = "Timer", NavFights = "Kampf & Verlauf", NavAppearance = "Darstellung", NavGeneral = "Allgemein", NavAccount = "Aetherion Premium", SettingsPageHint = "Alles Wichtige auf einen Blick, auch im Kampf.", SettingsKicker = "AETHERION • EINSTELLUNGEN", SettingsOverlayTitle = "Overlay anpassen", CombatOverlayLabel = "KAMPF-OVERLAY", OverlayViewTitle = "Ansicht", VisibleInfoTitle = "Sichtbare Informationen", WindowSizeTitle = "Fenstergröße", WindowSizeHint = "Skaliert Schrift, Abstände und Reihen gemeinsam.", PresetCompact = "Kompakt", PresetStandard = "Standard", PresetLarge = "Groß", TransparencyTitle = "Transparenz", TransparencyHint = "Mehr Deckkraft sorgt für gute Lesbarkeit.", TransparentLabel = "Durchsichtig", OpaqueLabel = "Deckend", TimerPageHint = "Passe Timer-Hinweise und Lesbarkeit an.", TimerAlertLabel = "Boss-Hinweis (Minuten vor Respawn)", TimerOpacityLabel = "Timer-Deckkraft", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
         LanguageLabel = "Sprache", BreakdownTitle = "Kampfauswertung — AION2 DPS Meter", HistoryTitle = "Kampfverlauf — AION2 DPS Meter",
         TipTargetMode = "Nur Boss / alle getroffenen Ziele", TipLock = "Position fixieren", TipSettings = "Einstellungen",
         TipOpacity = "Hintergrundtransparenz", TipHide = "Overlay ausblenden (Strg+Umschalt+D)", ModeBossOnly = "BOSS", ModeAll = "ALLE",
@@ -592,12 +642,15 @@ public sealed class UiText
     private static readonly UiText Ru = new()
     {
         Code = "ru",
+        OverlayLive = "БОЙ В РЕАЛЬНОМ ВРЕМЕНИ", GroupDps = "DPS ГРУППЫ", GroupHps = "HPS ГРУППЫ", PeakFiveSeconds = "Пик за 5 сек.",
+        ShowHealingInfo = "Лечение / HPS", ShowPeakDpsInfo = "Пиковый DPS", ShowBossHpInfo = "Здоровье босса", ShowGearInfo = "Экипировка",
+        CombinedOverlayMode = "Урон + лечение", CompactOverlayMode = "Только DPS · компактно", OverlayRank = "МЕСТО", OverlayShare = "ДОЛЯ",
         LanguageName = "Русский",
         MapLabel = "Хаб AION2",
         DiscordPresenceSection = "СТАТУС DISCORD", DiscordPresenceEnabled = "Показывать класс, уровень и фракцию в Discord",
         DiscordPresenceHint = "Отображается в вашей активности Discord согласно настройкам приватности и отправляется прямо в приложение Discord. Выберите фракцию ниже: захват AION не передаёт её надёжно.",
         DiscordFactionLabel = "Ваша фракция", DiscordFactionUnknown = "Не выбрана", DiscordFactionElyos = "Элийцы", DiscordFactionAsmodian = "Асмодиане",
-        CompareSelected = "Сравнить 2", CompareTitle = "Сравнение боёв", CompareSelectTwo = "Выберите ровно два сохранённых боя для сравнения.",
+        CompareSelected = "Сравнить 2", CompareBest = "Сравнить с рекордом", CompareBestUnavailable = "Для этого босса и персонажа нет предыдущего боя.", CompareSelectOne = "Выберите один бой для сравнения с личным рекордом.", SessionTitle = "СТАТИСТИКА СЕССИИ", SessionFightsLabel = "БОИ", SessionKillsLabel = "УБИЙСТВА БОССОВ", SessionDamageLabel = "УРОН", SessionDurationLabel = "ВРЕМЯ БОЯ", SessionKillsPerHourLabel = "УБИЙСТВА БОССОВ / ЧАС", SessionDamagePerHourLabel = "УРОН / ЧАС", SessionUntrackedLabel = "Кинах, очки Бездны и добыча пока не отслеживаются: форматы пакетов ещё не определены.", CompareTitle = "Сравнение боёв", CompareSelectTwo = "Выберите ровно два сохранённых боя для сравнения.",
         CompareHint = "Выберите два боя, удерживая Ctrl.", CompareMetric = "ПОКАЗАТЕЛЬ", CompareDamage = "ОБЩИЙ УРОН", CompareDps = "DPS ГРУППЫ",
         CompareDuration = "ДЛИТЕЛЬНОСТЬ", CompareHealing = "ОБЩЕЕ ЛЕЧЕНИЕ", CompareDelta = "ИЗМЕНЕНИЕ",
         ClassNames = new Dictionary<Core.Events.GameClass, string>
@@ -857,7 +910,7 @@ public sealed class UiText
         TipOpenBreakdown = "Открыть полный разбор",
         DamageWord = "урона",
 
-        SettingsTitle = "Настройки",
+        SettingsTitle = "Настройки", NavOverlay = "Оверлей", NavTimer = "Таймер", NavFights = "Бой и история", NavAppearance = "Внешний вид", NavGeneral = "Общие", NavAccount = "Aetherion Premium", SettingsPageHint = "Важные настройки всегда под рукой, даже во время боя.", SettingsKicker = "AETHERION • НАСТРОЙКИ", SettingsOverlayTitle = "Настроить оверлей", CombatOverlayLabel = "БОЕВОЙ ОВЕРЛЕЙ", OverlayViewTitle = "Вид", VisibleInfoTitle = "Видимая информация", WindowSizeTitle = "Размер окна", WindowSizeHint = "Масштаб текста, интервалов и отображаемых строк.", PresetCompact = "Компактный", PresetStandard = "Стандартный", PresetLarge = "Большой", TransparencyTitle = "Прозрачность", TransparencyHint = "Непрозрачность повышает читаемость.", TransparentLabel = "Прозрачный", OpaqueLabel = "Непрозрачный", TimerPageHint = "Настройте уведомления таймера и читаемость.", TimerAlertLabel = "Уведомление о боссе (минут до возрождения)", TimerOpacityLabel = "Прозрачность таймера",
         LanguageLabel = "Язык",
         BreakdownTitle = "Разбор боя",
         HistoryTitle = "История боёв",

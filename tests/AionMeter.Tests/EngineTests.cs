@@ -28,7 +28,7 @@ public class EngineTests
     }
 
     private static CombatTracker Tracker(TargetMode mode = TargetMode.BossOnly) =>
-        new(GameData.Empty, new MeterOptions { TargetMode = mode });
+        new(GameData.Empty, new MeterOptions { TargetMode = mode, MinSavedFightMs = 0 });
 
     private const uint Me = 100, Mate = 101, Boss = 500, Add = 501, Pet = 600;
 
@@ -235,6 +235,7 @@ public class EngineTests
         // We die and revive: the game reloads the same map, ids stay — not a new zone.
         t.Process(new ZoneChangedEvent(20_000, 600021, "Fire Temple", true, IsTeleport: false));
         t.Process(new DamageEvent(30_000, Me, Boss, 16040000, 100_000, HitFlags.None));
+        t.Process(new NpcHpEvent(30_100, Boss, 9_660_000, 9_860_000));
 
         var segment = Assert.Single(t.Segments());
         Assert.True(segment.IsActive);
@@ -364,6 +365,7 @@ public class EngineTests
         var t = Tracker();
         Setup(t);
         t.Process(new DamageEvent(1_000, Me, Boss, 16040000, 300_000, HitFlags.None));
+        t.Process(new NpcHpEvent(1_010, Boss, 119_700_000, 120_000_000));
         for (uint p = 0; p < 30; p++) t.Process(new HitNoticeEvent(1_050, 300 + p, Boss, 14030120));
         for (uint p = 0; p < 3; p++)
         {
@@ -414,6 +416,7 @@ public class EngineTests
         t.ImportCache(CacheWithBoss(10_000_000));
         t.Process(new NpcSeenEvent(500, Boss, 2300206, 5_220_000));
         t.Process(new DamageEvent(1_000, Me, Boss, 16040000, 1_000, HitFlags.None));
+        t.Process(new NpcHpEvent(1_100, Boss, 5_219_000, 5_220_000));
 
         var boss = t.Snapshot(null, 2_000)!.Boss!;
         Assert.Equal(2300206, boss.NpcCode);
@@ -435,6 +438,7 @@ public class EngineTests
         Assert.Null(t.Snapshot(null, 2_000)); // the live view starts empty
 
         t.Process(new DamageEvent(3_000, Mate, Boss, 11020000, 2_000_000, HitFlags.None));
+        t.Process(new CastEvent(3_050, Me, Boss, 16040000)); // the local player targets the boss without adding a damage row
         t.Process(new NpcHpEvent(3_100, Boss, 117_000_000, 0));
         var snap = t.Snapshot(null, 4_000)!;
         Assert.Equal("Borgrim", Assert.Single(snap.Combatants).Name);

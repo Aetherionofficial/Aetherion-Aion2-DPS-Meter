@@ -25,9 +25,9 @@ public static class SampleRenderer
 
     public static void Render(string path, string language, Options o)
     {
-        using var meter = CreateMeter(language, o.RowSize);
+        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 4 : 10);
         var start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 20_500; // a fight that is still going
-        var fight = new SampleFight(start, 20);
+        var fight = new SampleFight(start, 20, o.Window == "overlay" ? 4 : 9);
         fight.FeedUntil(meter.Tracker, start + 20_000);
         // A dungeon's time limit, 12:48 of its hour gone: the countdown in the overlay's top line.
         meter.Tracker.Process(new InstanceTimerEvent(start, 600092, 2, start - 768_000, start + 2_832_000));
@@ -49,7 +49,7 @@ public static class SampleRenderer
                 refresh = breakdown.ReloadNow;
                 break;
             case "history":
-                var history = new HistoryWindow(meter) { Width = 900, Height = 600 };
+                var history = new HistoryWindow(meter) { Width = o.Width ?? 900, Height = o.Height ?? 600 };
                 host = history;
                 refresh = history.Reload;
                 break;
@@ -59,6 +59,11 @@ public static class SampleRenderer
                 var timers = new BossTimersWindow(meter) { Width = o.Width ?? 780, Height = o.Height ?? 640 };
                 host = timers;
                 refresh = timers.ReloadNow;
+                break;
+            case "event-timers":
+                var eventTimers = new EventTimersWindow(meter.Settings) { Width = o.Width ?? 340, Height = o.Height ?? 460 };
+                host = eventTimers;
+                refresh = eventTimers.ReloadNow;
                 break;
             case "settings":
                 host = new SettingsWindow(meter) { Width = o.Width ?? 1040, Height = o.Height ?? 760 };
@@ -110,11 +115,11 @@ public static class SampleRenderer
         }
     }
 
-    private static MeterService CreateMeter(string language, int rowSize = 100)
+    private static MeterService CreateMeter(string language, int rowSize = 100, int maxRows = 10)
     {
         var settings = new AppSettings
         {
-            Transient = true, SaveHistory = false, MaxRows = 10, LayoutVersion = 99, Language = language, RowSize = rowSize,
+            Transient = true, SaveHistory = false, MaxRows = maxRows, LayoutVersion = 99, Language = language, RowSize = rowSize,
         };
         UiText.Use(settings.Language);
         var meter = new MeterService(settings, _ => new QuietSource());
@@ -209,19 +214,23 @@ public static class SampleRenderer
         private readonly List<GameEvent> _events = new();
         private int _next;
 
-        public SampleFight(long start, double seconds)
+        public SampleFight(long start, double seconds, int playerCount = 9)
         {
             var rnd = new Random(2305);
-            _events.Add(new SelfIdentifiedEvent(start, 2, "Sylvaen", 2305, GameClass.Elementalist));
-            foreach (var m in Party.Where(m => m.Id != 2)) _events.Add(new PlayerSeenEvent(start, m.Id, m.Name, 2305, m.Class));
+            var members = playerCount == 4
+                ? new[] { Party[0] with { Name = "Zerox" }, Party[6] with { Name = "Aelyra" }, Party[4] with { Name = "Noxx" }, Party[5] with { Name = "Mirea" } }
+                : Party;
+            var self = members[0];
+            _events.Add(new SelfIdentifiedEvent(start, self.Id, self.Name, 2305, self.Class));
+            foreach (var m in members.Where(m => m.Id != self.Id)) _events.Add(new PlayerSeenEvent(start, m.Id, m.Name, 2305, m.Class));
             // Your party's gear score and combat power come with the roster; the others (not in your party) have none.
-            _events.Add(new PartyRosterEvent(start, Party.Take(6)
+            _events.Add(new PartyRosterEvent(start, members.Take(6)
                 .Select(m => new PartyMemberInfo(m.Name, 2305, 45, 2700 + (int)m.Id * 61 % 400, 45_000 + (int)m.Id * 2_731 % 17_000, m.Class))
                 .ToList()));
             _events.Add(new NpcSeenEvent(start, Boss, SampleBossCode, BossHp));
 
             var hits = new List<DamageEvent>();
-            foreach (var m in Party)
+            foreach (var m in members)
             {
                 for (var t = m.JoinAt + 0.2 + rnd.NextDouble() * 0.4; t < seconds; t += 0.45 + rnd.NextDouble() * 0.5)
                 {
@@ -237,6 +246,10 @@ public static class SampleRenderer
                     hits.Add(new DamageEvent(start + (long)(t * 1000), m.Id, Boss, m.Skills[rnd.Next(m.Skills.Length)], (long)amount, flags));
                 }
             }
+            var healer = members.FirstOrDefault(m => m.Class == GameClass.Cleric);
+            if (healer is not null)
+                for (var t = 1.0; t <= seconds; t += 1.0)
+                    _events.Add(new HealEvent(start + (long)(t * 1000), healer.Id, self.Id, healer.Skills[0], 1_120, HitFlags.None));
             hits.Sort((a, b) => a.TimeMs.CompareTo(b.TimeMs));
 
             // The boss's HP follows the damage dealt, updated every half second like the game does.
@@ -251,6 +264,7 @@ public static class SampleRenderer
                 }
                 _events.Add(new NpcHpEvent(start + at, Boss, Math.Max(1, BossHp - dealt), BossHp));
             }
+            _events.Sort((a, b) => a.TimeMs.CompareTo(b.TimeMs));
         }
 
         /// <summary>Hit notices from <paramref name="players"/> made-up players whose damage the server never sends.</summary>

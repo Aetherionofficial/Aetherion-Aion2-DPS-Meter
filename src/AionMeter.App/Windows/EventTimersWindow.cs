@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using AionMeter.App.Services;
 
@@ -101,21 +102,26 @@ public sealed class EventTimersWindow : Window
         foreach (var spec in Schedule)
         {
             var name = new TextBlock { FontSize = 13, FontWeight = FontWeights.SemiBold, Foreground = Brush("#EDF2F8"), TextTrimming = TextTrimming.CharacterEllipsis };
-            var countdown = new TextBlock { FontSize = 16, FontFamily = new FontFamily("Consolas"), FontWeight = FontWeights.Bold, Foreground = Brush("#EDBD68"), HorizontalAlignment = HorizontalAlignment.Right };
-            var at = new TextBlock { FontSize = 10, Foreground = Brush("#8794A3"), HorizontalAlignment = HorizontalAlignment.Right };
-            var detail = new StackPanel { HorizontalAlignment = HorizontalAlignment.Right };
-            detail.Children.Add(countdown);
-            detail.Children.Add(at);
+            var countdown = new TextBlock { FontSize = 17, FontFamily = new FontFamily("Consolas"), FontWeight = FontWeights.Bold, Foreground = Brush("#EDBD68"), HorizontalAlignment = HorizontalAlignment.Right };
+            var at = new TextBlock { FontSize = 10, Foreground = Brush("#91A1AA") };
+            var label = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
+            label.Children.Add(name);
+            label.Children.Add(at);
             var row = new Grid();
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             row.ColumnDefinitions.Add(new ColumnDefinition());
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            row.Children.Add(name);
-            Grid.SetColumn(detail, 1);
-            row.Children.Add(detail);
+            var dot = new Ellipse { Width = 6, Height = 6, Fill = Brush("#45C2B0"), VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left };
+            row.Children.Add(dot);
+            Grid.SetColumn(label, 1);
+            row.Children.Add(label);
+            Grid.SetColumn(countdown, 2);
+            countdown.VerticalAlignment = VerticalAlignment.Center;
+            row.Children.Add(countdown);
             var card = new Border
             {
-                Background = Brush("#151C25"), BorderBrush = Brush("#2A3440"), BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(7), Padding = new Thickness(9, 6, 9, 6), Margin = new Thickness(0, 0, 0, 5), Child = row,
+                Background = Brush("#15212A"), BorderBrush = Brush("#263640"), BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(9), Padding = new Thickness(11, 9, 11, 9), Margin = new Thickness(0, 0, 0, 7), Child = row,
             };
             _rows.Add(new EventRow(card, name, countdown, at));
             _list.Children.Add(card);
@@ -153,9 +159,11 @@ public sealed class EventTimersWindow : Window
         _details.Children.Add(scroll);
         Grid.SetRow(source, 3);
         _details.Children.Add(source);
-        var body = new DockPanel();
-        DockPanel.SetDock(header, Dock.Top);
-        body.Children.Add(header);
+        var body = new Grid();
+        body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        body.Children.Add(new Border { BorderBrush = Brush("#263640"), BorderThickness = new Thickness(0, 0, 0, 1), Child = header });
+        Grid.SetRow(_details, 1);
         body.Children.Add(_details);
         Content = new Border
         {
@@ -196,6 +204,8 @@ public sealed class EventTimersWindow : Window
         foreach (var row in _rows.OrderBy(r => Schedule[_rows.IndexOf(r)].Next(now))) _list.Children.Remove(row.Card);
         foreach (var row in _rows.OrderBy(r => Schedule[_rows.IndexOf(r)].Next(now))) _list.Children.Add(row.Card);
     }
+
+    internal void ReloadNow() => RefreshRows();
 
     private static DateTimeOffset NextHourly(DateTimeOffset now, int minute)
     {
