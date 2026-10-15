@@ -5,7 +5,7 @@
         xmlns:vm="clr-namespace:AionMeter.App.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
-        Title="AION2 DPS Meter" Width="410" Height="700" MinWidth="300" MinHeight="360"
+        Title="AION2 DPS Meter" Width="410" Height="700" MinWidth="240" MinHeight="200"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" SizeChanged="Overlay_SizeChanged"
@@ -518,6 +518,8 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="FooterDetailsButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterDetailsLabel}" Click="Details_Click" />
                     <Button x:Name="FooterCompareButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterCompareLabel}" Click="Compare_Click" />
+                    <Button x:Name="FooterSettingsButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click"
+                            ToolTip="{Binding T.TipSettings}" AutomationProperties.Name="Einstellungen" />
                     <Button x:Name="FooterRankingButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterRankingLabel}" Click="Ranking_Click"
                             Background="#302B21" BorderBrush="#806D46" Foreground="#F0D48E" Margin="0" />
                 </StackPanel>
@@ -535,5 +537,10 @@
                 </ControlTemplate>
             </Thumb.Template>
         </Thumb>
+        <!-- Separate edge handles let users change the width or height without also changing the other dimension. -->
+        <Thumb x:Name="ResizeWidthGrip" Width="8" Height="72" HorizontalAlignment="Right" VerticalAlignment="Center"
+               Margin="0,0,1,0" Cursor="SizeWE" Tag="width" ToolTip="Breite ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+        <Thumb x:Name="ResizeHeightGrip" Width="72" Height="8" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+               Margin="0,0,0,1" Cursor="SizeNS" Tag="height" ToolTip="Höhe ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
     </Grid>
 </Window>

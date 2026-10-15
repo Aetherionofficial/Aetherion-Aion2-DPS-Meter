@@ -282,7 +282,10 @@ public partial class OverlayWindow : Window
     {
         LockButton.IsChecked = _settings.Locked;
         LockGlyph.Text = _settings.Locked ? "" : "";
-        ResizeGrip.Visibility = _settings.Locked ? Visibility.Collapsed : Visibility.Visible;
+        var visibility = _settings.Locked ? Visibility.Collapsed : Visibility.Visible;
+        ResizeGrip.Visibility = visibility;
+        ResizeWidthGrip.Visibility = visibility;
+        ResizeHeightGrip.Visibility = visibility;
     }
 
     private void UpdateModeLabel() =>
@@ -330,8 +333,9 @@ public partial class OverlayWindow : Window
 
     private void Resize_DragDelta(object sender, DragDeltaEventArgs e)
     {
-        Width = Math.Max(MinWidth, Width + e.HorizontalChange);
-        Height = Math.Max(MinHeight, Height + e.VerticalChange);
+        var axis = (sender as FrameworkElement)?.Tag as string;
+        if (axis != "height") Width = Math.Max(MinWidth, Width + e.HorizontalChange);
+        if (axis != "width") Height = Math.Max(MinHeight, Height + e.VerticalChange);
     }
 
     private void Resize_DragCompleted(object sender, DragCompletedEventArgs e) => SavePlacement();

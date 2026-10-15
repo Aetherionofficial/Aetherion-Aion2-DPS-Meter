@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101d29"/><stop offset=".55" stop-color="#080e15"/><stop offset="1" stop-color="#10131e"/></linearGradient>
+    <linearGradient id="hero" x2="1" y2=".2"><stop stop-color="#123239"/><stop offset=".55" stop-color="#142630"/><stop offset="1" stop-color="#1e1b2c"/></linearGradient>
+    <linearGradient id="cyan" x2="1"><stop stop-color="#45d8cb"/><stop offset="1" stop-color="#8bf3dc"/></linearGradient>
+    <linearGradient id="violet" x2="1"><stop stop-color="#836cff"/><stop offset="1" stop-color="#bc83ff"/></linearGradient>
+    <linearGradient id="danger" x2="1"><stop stop-color="#ff6878"/><stop offset="1" stop-color="#ffb45f"/></linearGradient>
+    <linearGradient id="portrait" x2=".9" y2="1"><stop stop-color="#233b4a"/><stop offset="1" stop-color="#151926"/></linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#8edacf" stroke-opacity=".035"/></pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity=".35"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <style>
+      text{font-family:Inter,"Segoe UI",Arial,sans-serif;fill:#e9f1f3}.muted{fill:#82949f}.dim{fill:#52636e}.tiny{font-size:10px;letter-spacing:1.5px;font-weight:700}.label{font-size:11px;letter-spacing:1.25px;font-weight:700}.body{font-size:13px}.small{font-size:11px}.num{font-family:"Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums;font-weight:700}.card{fill:#101923;stroke:#26343e;stroke-width:1}.inner{fill:#141f29;stroke:#263640;stroke-width:1}.pill{fill:#18252e;stroke:#283d46;stroke-width:1}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" rx="22" fill="url(#bg)"/>
+  <rect width="1600" height="1000" rx="22" fill="url(#grid)"/>
+  <circle cx="1300" cy="-120" r="500" fill="#356c74" opacity=".08"/>
+  <circle cx="1460" cy="840" r="350" fill="#7760c7" opacity=".055"/>
+  <rect x="1" y="1" width="1598" height="998" rx="22" fill="none" stroke="#263540"/>
+
+  <!-- brand rail -->
+  <rect x="0" y="0" width="88" height="1000" rx="22" fill="#0a1119"/>
+  <rect x="68" y="0" width="20" height="1000" fill="#0a1119"/>
+  <path d="M88 0v1000" stroke="#24333d"/>
+  <rect x="24" y="24" width="40" height="40" rx="13" fill="#14262e" stroke="#3f9f98"/>
+  <path d="M44 31 58 55H30Z" fill="none" stroke="url(#cyan)" stroke-width="3" stroke-linejoin="round"/><circle cx="44" cy="48" r="3" fill="#eafbf4"/>
+  <g fill="none" stroke="#82949f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="26" y="103" width="34" height="35" rx="10" fill="#153037" stroke="#4bd5c6"/><path d="M35 126v-12l8-5 8 5v12M40 126v-8h7v8" stroke="#70ead9"/>
+    <circle cx="43" cy="184" r="8"/><path d="M43 169v4m0 22v4m15-15h-4m-22 0h-4m26-11-3 3m-16 16-3 3m0-22 3 3m16 16 3 3"/>
+    <path d="M32 236h22v22H32zM37 231v10m12-10v10M37 247h12"/>
+    <path d="M32 301h22v21H32zM36 295v7m14-7v7M37 308h12m-12 6h8"/>
+    <path d="M32 367h22l-3 22H35zM37 373h12m-11 6h10"/>
+    <circle cx="43" cy="448" r="10"/><path d="M43 442v7l5 3"/>
+    <circle cx="43" cy="514" r="10"/><path d="M38 514h10m-5-5v10"/>
+  </g>
+  <circle cx="43" cy="103" r="3" fill="#5fe0d1" filter="url(#glow)"/>
+  <path d="M24 922h40" stroke="#26343e"/>
+  <circle cx="44" cy="956" r="15" fill="#17232e" stroke="#33434d"/><text x="44" y="960" text-anchor="middle" font-size="11" font-weight="700">S</text>
+
+  <!-- top bar -->
+  <text x="120" y="38" class="tiny" fill="#61d9cc">AETHERION <tspan class="muted">/ RAID COMMAND</tspan></text>
+  <text x="120" y="72" font-size="22" font-weight="750">Kampfzentrum</text>
+  <text x="120" y="94" class="small muted">Asmodae · Moslanwald · Gruppe 01</text>
+  <rect x="1170" y="28" width="164" height="40" rx="12" class="pill"/>
+  <circle cx="1190" cy="48" r="4" fill="#5fe0d1"/><text x="1203" y="52" class="small" font-weight="650">LIVE-ANALYSE</text>
+  <rect x="1346" y="28" width="112" height="40" rx="12" class="pill"/><text x="1402" y="52" text-anchor="middle" class="small muted">SESSION 02:18</text>
+  <circle cx="1490" cy="48" r="20" fill="#141e29" stroke="#2b3c46"/><path d="M1484 48h12m-6-6v12" stroke="#adc0c5" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="1540" cy="48" r="20" fill="#141e29" stroke="#2b3c46"/><path d="M1533 48a7 7 0 1 1 3 5m-3 0v-5h5" fill="none" stroke="#adc0c5" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M112 116H1568" stroke="#25343e"/>
+
+  <!-- encounter hero -->
+  <g filter="url(#shadow)">
+    <rect x="112" y="140" width="1456" height="188" rx="20" fill="url(#hero)" stroke="#2e4c51"/>
+    <rect x="112" y="140" width="1456" height="188" rx="20" fill="url(#grid)" opacity=".65"/>
+  </g>
+  <rect x="136" y="163" width="124" height="124" rx="17" fill="url(#portrait)" stroke="#3b5960"/>
+  <circle cx="198" cy="225" r="43" fill="#151e2a" stroke="#47626a" stroke-width="2"/>
+  <circle cx="198" cy="225" r="31" fill="none" stroke="#44cabb" stroke-opacity=".65" stroke-width="1.5"/>
+  <path d="M198 186 207 213 230 224 207 235 198 264 188 235 166 224 188 213Z" fill="#6fded0" opacity=".8"/>
+  <circle cx="198" cy="225" r="8" fill="#e6ffff" filter="url(#glow)"/>
+  <text x="286" y="178" class="tiny" fill="#72ded0">BOSS-BEGEGNUNG <tspan fill="#a7bac1">· PHASE 02 / 03</tspan></text>
+  <text x="286" y="211" font-size="27" font-weight="760">Verschlinger der Leere</text>
+  <text x="286" y="235" class="body muted">Uralter Wächter <tspan fill="#52636e">/</tspan> Instanz: Riss der Ewigkeit</text>
+  <rect x="286" y="257" width="692" height="12" rx="6" fill="#26363e"/>
+  <rect x="286" y="257" width="405" height="12" rx="6" fill="url(#danger)"/>
+  <circle cx="691" cy="263" r="5" fill="#ffe0c2"/>
+  <text x="286" y="294" class="small muted">BOSS-LEBEN</text><text x="978" y="294" text-anchor="end" class="num" font-size="15" fill="#ffb47d">58.4%</text>
+  <path d="M1010 165v138" stroke="#355057"/>
+  <text x="1040" y="182" class="tiny muted">KAMPFZEIT</text><text x="1040" y="220" class="num" font-size="30">06:42</text>
+  <text x="1040" y="252" class="small muted">Pull gestartet</text><text x="1040" y="273" class="small">21:14:08</text>
+  <rect x="1264" y="164" width="272" height="139" rx="16" fill="#0d191f" stroke="#27504d"/>
+  <text x="1286" y="190" class="tiny" fill="#64d8ca">MECHANIK-ALARM</text>
+  <circle cx="1296" cy="224" r="10" fill="#4c2b37"/><path d="M1296 218v7m0 4v.5" stroke="#ff8690" stroke-width="2" stroke-linecap="round"/>
+  <text x="1315" y="228" font-size="14" font-weight="700">Schattenbruch</text>
+  <text x="1286" y="256" class="small muted">Nächste Welle in</text><text x="1512" y="257" text-anchor="end" class="num" font-size="20" fill="#ff9b91">00:08</text>
+  <rect x="1286" y="273" width="228" height="5" rx="3" fill="#26363d"/><rect x="1286" y="273" width="181" height="5" rx="3" fill="url(#danger)"/>
+
+  <!-- metric strip -->
+  <g>
+    <rect x="112" y="350" width="348" height="101" rx="16" class="card"/><rect x="112" y="350" width="3" height="101" rx="1.5" fill="#56d6c8"/>
+    <text x="136" y="379" class="tiny muted">GRUPPEN-DPS</text><text x="136" y="423" class="num" font-size="32">184.7<tspan font-size="16" fill="#8ea2a9">K/s</tspan></text>
+    <path d="M355 422 368 408 380 414 394 391 409 397 425 373 440 380" fill="none" stroke="#5cddcf" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="476" y="350" width="348" height="101" rx="16" class="card"/><rect x="476" y="350" width="3" height="101" rx="1.5" fill="#8d7bff"/>
+    <text x="500" y="379" class="tiny muted">GRUPPEN-HPS</text><text x="500" y="423" class="num" font-size="32">26.3<tspan font-size="16" fill="#8ea2a9">K/s</tspan></text>
+    <path d="M718 421 734 416 747 419 763 395 780 401 795 384 810 390" fill="none" stroke="#aa8cff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="840" y="350" width="348" height="101" rx="16" class="card"/><rect x="840" y="350" width="3" height="101" rx="1.5" fill="#ffc36b"/>
+    <text x="864" y="379" class="tiny muted">PEAK DPS · 5 SEK.</text><text x="864" y="423" class="num" font-size="32">231.9<tspan font-size="16" fill="#8ea2a9">K/s</tspan></text>
+    <text x="1125" y="415" text-anchor="end" class="small" fill="#63d8c9">+8.2%</text>
+    <rect x="1204" y="350" width="364" height="101" rx="16" class="card"/><rect x="1204" y="350" width="3" height="101" rx="1.5" fill="#ff7582"/>
+    <text x="1228" y="379" class="tiny muted">GRUPPEN-UPTIME</text><text x="1228" y="423" class="num" font-size="32">91<tspan font-size="16" fill="#8ea2a9">%</tspan></text>
+    <text x="1536" y="415" text-anchor="end" class="small muted">2 Warnungen</text>
+  </g>
+
+  <!-- roster -->
+  <rect x="112" y="473" width="878" height="474" rx="18" class="card" filter="url(#shadow)"/>
+  <text x="138" y="510" font-size="17" font-weight="730">Gruppenleistung</text><text x="138" y="532" class="small muted">Schaden pro Spieler während dieses Kampfes</text>
+  <rect x="804" y="491" width="158" height="34" rx="10" class="pill"/><text x="883" y="513" text-anchor="middle" class="small">Alle Rollen⌄</text>
+  <path d="M136 552H966" stroke="#293842"/>
+  <text x="143" y="579" class="tiny muted">RANG</text><text x="216" y="579" class="tiny muted">SPIELER</text><text x="554" y="579" class="tiny muted">ANTEIL AM GRUPPEN-DPS</text><text x="940" y="579" text-anchor="end" class="tiny muted">DPS</text>
+  <rect x="132" y="596" width="838" height="62" rx="12" fill="#16262d" stroke="#2d5555"/>
+  <circle cx="162" cy="627" r="15" fill="#244c4a"/><text x="162" y="631" text-anchor="middle" font-size="10" font-weight="800" fill="#80f1dc">01</text>
+  <circle cx="205" cy="627" r="14" fill="#1d343a"/><path d="M205 616 211 627 205 638 199 627Z" fill="#61dacc"/>
+  <text x="230" y="623" font-size="14" font-weight="700">Aelyra</text><text x="230" y="642" class="tiny muted">GLADIATOR <tspan fill="#475b65">·</tspan> DU</text>
+  <rect x="554" y="625" width="262" height="5" rx="3" fill="#263941"/><rect x="554" y="625" width="262" height="5" rx="3" fill="url(#cyan)"/><text x="826" y="631" class="small muted">31%</text><text x="940" y="630" text-anchor="end" class="num" font-size="14">57.4K/s</text>
+  <circle cx="162" cy="698" r="14" fill="#1a2832"/><text x="162" y="702" text-anchor="middle" font-size="10" font-weight="800" fill="#9bacb4">02</text>
+  <circle cx="205" cy="698" r="13" fill="#28223d"/><path d="M205 688 213 698 205 708 197 698Z" fill="#a58aff"/>
+  <text x="230" y="694" font-size="14" font-weight="650">Noxx</text><text x="230" y="713" class="tiny muted">ASSASSIN <tspan fill="#475b65">·</tspan> DU</text>
+  <rect x="554" y="696" width="262" height="5" rx="3" fill="#263941"/><rect x="554" y="696" width="215" height="5" rx="3" fill="url(#violet)"/><text x="826" y="702" class="small muted">26%</text><text x="940" y="701" text-anchor="end" class="num" font-size="14">48.2K/s</text>
+  <circle cx="162" cy="769" r="14" fill="#1a2832"/><text x="162" y="773" text-anchor="middle" font-size="10" font-weight="800" fill="#9bacb4">03</text>
+  <circle cx="205" cy="769" r="13" fill="#203240"/><path d="M197 770q8-15 16 0-8 14-16 0Z" fill="#68b9fa"/>
+  <text x="230" y="765" font-size="14" font-weight="650">Mirea</text><text x="230" y="784" class="tiny muted">SORCERER <tspan fill="#475b65">·</tspan> DU</text>
+  <rect x="554" y="767" width="262" height="5" rx="3" fill="#263941"/><rect x="554" y="767" width="171" height="5" rx="3" fill="#56aef0"/><text x="826" y="773" class="small muted">21%</text><text x="940" y="772" text-anchor="end" class="num" font-size="14">38.9K/s</text>
+  <circle cx="162" cy="840" r="14" fill="#1a2832"/><text x="162" y="844" text-anchor="middle" font-size="10" font-weight="800" fill="#9bacb4">04</text>
+  <circle cx="205" cy="840" r="13" fill="#1d3330"/><path d="M205 830 213 840 205 850 197 840Z" fill="#74d6a2"/>
+  <text x="230" y="836" font-size="14" font-weight="650">Riven</text><text x="230" y="855" class="tiny muted">CLERIC <tspan fill="#475b65">·</tspan> HEAL</text>
+  <rect x="554" y="838" width="262" height="5" rx="3" fill="#263941"/><rect x="554" y="838" width="113" height="5" rx="3" fill="#71d3a0"/><text x="826" y="844" class="small muted">14%</text><text x="940" y="843" text-anchor="end" class="num" font-size="14" fill="#83dfaa">26.3K/s</text>
+  <path d="M136 884H966" stroke="#293842"/>
+  <circle cx="146" cy="914" r="4" fill="#58d6c8"/><text x="160" y="918" class="small muted">4 Spieler aktiv</text><text x="950" y="918" text-anchor="end" class="small muted">Sortiert nach Schaden <tspan fill="#5fd9cc">⌄</tspan></text>
+
+  <!-- right analysis column -->
+  <rect x="1008" y="473" width="560" height="243" rx="18" class="card" filter="url(#shadow)"/>
+  <text x="1034" y="510" font-size="17" font-weight="730">Kampfverlauf</text><text x="1034" y="532" class="small muted">DPS im Zeitverlauf <tspan fill="#4b5b65">·</tspan> 1-Sekunden-Auflösung</text>
+  <rect x="1398" y="491" width="144" height="32" rx="9" class="pill"/><text x="1470" y="512" text-anchor="middle" class="small muted">Gruppe⌄</text>
+  <path d="M1050 668H1532M1050 631H1532M1050 594H1532M1050 557H1532" stroke="#27353e" stroke-width="1"/>
+  <text x="1040" y="671" text-anchor="end" class="small dim">0</text><text x="1040" y="634" text-anchor="end" class="small dim">60K</text><text x="1040" y="597" text-anchor="end" class="small dim">120K</text><text x="1040" y="560" text-anchor="end" class="small dim">180K</text>
+  <path d="M1050 657 1090 649 1130 652 1170 622 1210 631 1250 599 1290 606 1330 579 1370 589 1410 553 1450 570 1490 543 1532 556V668H1050Z" fill="#51cfc1" opacity=".11"/>
+  <path d="M1050 657 1090 649 1130 652 1170 622 1210 631 1250 599 1290 606 1330 579 1370 589 1410 553 1450 570 1490 543 1532 556" fill="none" stroke="#65e0d1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1050 663 1090 661 1130 651 1170 655 1210 645 1250 649 1290 638 1330 641 1370 634 1410 638 1450 627 1490 632 1532 620" fill="none" stroke="#a58aff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+  <text x="1050" y="697" class="small dim">00:00</text><text x="1288" y="697" text-anchor="middle" class="small dim">03:20</text><text x="1532" y="697" text-anchor="end" class="small dim">06:42</text>
+
+  <rect x="1008" y="738" width="560" height="209" rx="18" class="card"/>
+  <text x="1034" y="775" font-size="17" font-weight="730">Team-Status</text><text x="1034" y="797" class="small muted">Buffs, Überleben und wichtige Events</text>
+  <rect x="1034" y="817" width="160" height="101" rx="13" class="inner"/>
+  <circle cx="1055" cy="842" r="7" fill="#ff7282"/><path d="M1055 837v6m0 3v.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><text x="1071" y="846" class="tiny muted">TODESFÄLLE</text><text x="1052" y="884" class="num" font-size="27">1</text><text x="1052" y="903" class="small muted">letzte 10 Minuten</text>
+  <rect x="1206" y="817" width="160" height="101" rx="13" class="inner"/>
+  <circle cx="1227" cy="842" r="7" fill="#8d7bff"/><text x="1243" y="846" class="tiny muted">TOP BUFF</text><text x="1224" y="876" font-size="13" font-weight="700">Kampfrausch</text><text x="1224" y="902" class="num" font-size="16" fill="#b69eff">84<tspan font-size="11" fill="#82949f">% uptime</tspan></text>
+  <rect x="1378" y="817" width="164" height="101" rx="13" class="inner"/>
+  <circle cx="1399" cy="842" r="7" fill="#ffc36b"/><text x="1415" y="846" class="tiny muted">LETZTES EVENT</text><text x="1396" y="876" font-size="13" font-weight="700">Schattenschlag</text><text x="1396" y="902" class="small muted">Riven <tspan fill="#556670">· vor 00:12</tspan></text>
+
+  <!-- footer -->
+  <text x="112" y="978" class="tiny dim">KONZEPTVORSCHAU <tspan fill="#38535a">/</tspan> BEISPIELWERTE <tspan fill="#38535a">/</tspan> AETHERION RAID COMMAND</text>
+  <text x="1568" y="978" text-anchor="end" class="tiny dim">DPS <tspan fill="#43515d">·</tspan> HEILUNG <tspan fill="#43515d">·</tspan> ÜBERLEBEN <tspan fill="#43515d">·</tspan> ANALYSE</text>
+</svg>

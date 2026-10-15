@@ -72,7 +72,7 @@ public sealed class AppSettings
     /// <summary>True: the leader's bar is full and the rest are sized against it. False: bars show share of party damage.</summary>
     public bool BarsRelativeToTop { get; set; } = true;
     public int MaxRows { get; set; } = 8;
-    public const int MinRowSize = 70, MaxRowSize = 100;
+    public const int MinRowSize = 50, MaxRowSize = 100;
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
     public int RowSize { get; set; } = 80;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>

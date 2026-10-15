@@ -9,6 +9,7 @@ public sealed class TrayIcon : IDisposable
 {
     private readonly NotifyIcon _icon;
     private readonly ToolStripMenuItem _toggle;
+    private readonly ToolStripMenuItem _dashboard;
     private readonly ToolStripMenuItem _clickThrough;
     private readonly ToolStripMenuItem _reset;
     private readonly ToolStripMenuItem _history;
@@ -38,6 +39,7 @@ public sealed class TrayIcon : IDisposable
         _updateSeparator = new ToolStripSeparator { Visible = false };
         _checkUpdates = new ToolStripMenuItem("", null, (_, _) => actions.CheckUpdates());
         _toggle = new ToolStripMenuItem("", null, (_, _) => actions.ToggleOverlay());
+        _dashboard = new ToolStripMenuItem("", null, (_, _) => actions.RaidCommand());
         _clickThrough = new ToolStripMenuItem("", null, (_, _) => actions.ToggleClickThrough());
         _reset = new ToolStripMenuItem("", null, (_, _) => actions.Reset());
         _history = new ToolStripMenuItem("", null, (_, _) => actions.History());
@@ -52,7 +54,7 @@ public sealed class TrayIcon : IDisposable
         _exit = new ToolStripMenuItem("", null, (_, _) => actions.Exit());
         menu.Items.AddRange([
             _update, _updateSeparator,
-            _toggle, _clickThrough, _reset, new ToolStripSeparator(),
+            _dashboard, _toggle, _clickThrough, _reset, new ToolStripSeparator(),
             _history, _timers, _eventTimers, _map, _settings, _discordSupport, _language, _demo, _replay, _checkUpdates, new ToolStripSeparator(),
             _exit,
         ]);
@@ -83,6 +85,7 @@ public sealed class TrayIcon : IDisposable
     {
         var t = UiText.Current;
         _toggle.Text = _overlayVisible ? t.TrayHide : t.TrayShow;
+        _dashboard.Text = "Aetherion Raid Command";
         _clickThrough.Text = t.HkClick;
         _reset.Text = t.HkReset;
         _history.Text = t.TrayHistory;
@@ -153,6 +156,7 @@ public sealed class TrayIcon : IDisposable
 
 public sealed record TrayActions(
     Action ToggleOverlay,
+    Action RaidCommand,
     Action ToggleClickThrough,
     Action Reset,
     Action History,

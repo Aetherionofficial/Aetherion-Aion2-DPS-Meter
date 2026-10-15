@@ -14,8 +14,7 @@ namespace AionMeter.App.Services;
 /// </summary>
 public static class SampleRenderer
 {
-    /// <param name="Window">overlay (default), overlay-update, overlay-crowd (a world boss whose crowd's damage never
-    /// arrives), breakdown, history, timers, settings, update or update-portable.</param>
+    /// <param name="Window">overlay (default), raid-command, overlay-update, overlay-crowd, breakdown, history, timers, settings, update or update-portable.</param>
     /// <param name="Width">Overlay width (default 560): narrow sizes show how the footer copes.</param>
     /// <param name="Tab">Breakdown tab: dps (default), accuracy, rotation or defense.</param>
     /// <param name="Backdrop">Behind the translucent overlay: game (a stand-in colour), dark (a navy gradient) or none (transparent).</param>
@@ -68,6 +67,11 @@ public static class SampleRenderer
             case "settings":
                 host = new SettingsWindow(meter) { Width = o.Width ?? 1040, Height = o.Height ?? 760 };
                 refresh = () => { };
+                break;
+            case "raid-command":
+                var command = new RaidCommandWindow(meter) { Width = o.Width ?? 1480, Height = o.Height ?? 920 };
+                host = command;
+                refresh = command.Refresh;
                 break;
             case "update" or "update-portable":
                 var release = SampleRelease(meter.Updates.Current);

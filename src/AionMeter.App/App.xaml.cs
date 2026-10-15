@@ -47,6 +47,7 @@ public partial class App : Application
     private DispatcherTimer? _timer;
     private DispatcherTimer? _licenseTimer;
     private bool _licenseCheckInProgress;
+    private RaidCommandWindow? _raidCommand;
     private HistoryWindow? _history;
     private SettingsWindow? _settingsWindow;
     private BossTimersWindow? _timersWindow;
@@ -164,15 +165,16 @@ public partial class App : Application
         _meter.StartCapture();
 
         _overlay = new OverlayWindow(_meter);
-        // Always show the main overlay on an explicit app launch. This avoids a silent background
-        // start when an older settings file has OverlayVisible=false; users can still hide it afterward.
+        // Create the native overlay handle for global hotkeys, then leave Raid Command as the primary surface.
         _overlay.Show();
+        _overlay.Hide();
 
         _hotkeys = new HotkeyManager(new WindowInteropHelper(_overlay).Handle);
         RegisterHotkeys();
 
         _tray = new TrayIcon(new TrayActions(
             ToggleOverlay: () => SetOverlayVisible(!_overlay.IsVisible),
+            RaidCommand: ShowRaidCommand,
             ToggleClickThrough: ToggleClickThrough,
             Reset: RestartMeter,
             History: ShowHistory,
@@ -191,10 +193,8 @@ public partial class App : Application
                 Log.Info("Exit chosen in the tray menu");
                 Shutdown();
             }));
+        ShowRaidCommand();
         SessionEnding += (_, end) => Log.Info($"Windows {end.ReasonSessionEnding}: closing");
-
-        // Keep the event countdowns available as a small, adjustable overlay from every start.
-        ShowEventTimers();
 
         // A new player's first start: without Npcap nothing can be measured — say so and offer the download.
         if (!LiveCapture.IsNpcapInstalled())
@@ -203,7 +203,7 @@ public partial class App : Application
         // Another start of the app asks this one to show the overlay.
         _showRequest = new EventWaitHandle(false, EventResetMode.AutoReset, ShowRequestName);
         _showWait = ThreadPool.RegisterWaitForSingleObject(_showRequest,
-            (_, _) => Dispatcher.BeginInvoke(() => SetOverlayVisible(true)), null, Timeout.Infinite, executeOnlyOnce: false);
+            (_, _) => Dispatcher.BeginInvoke(ShowRaidCommand), null, Timeout.Infinite, executeOnlyOnce: false);
 
         // New versions on GitHub: tray item, the overlay's update button and one notification per version.
         _meter.Updates.Changed += OnUpdatesChanged;
@@ -301,6 +301,7 @@ public partial class App : Application
         _meter.Tick();
         UpdateAutoVisibility();
         if (_overlay.IsVisible) _overlay.Refresh();
+        if (_raidCommand is { IsVisible: true }) _raidCommand.Refresh();
         if (++_ticks % 5 == 0)
         {
             _tray?.Update(_overlay.IsVisible, _meter.Settings.ClickThrough, _meter.DemoRunning ? "demo" : _meter.CaptureStatus.Message);
@@ -422,6 +423,30 @@ public partial class App : Application
         }
         _meter.Settings.OverlayVisible = visible;
         _meter.Settings.Save();
+    }
+
+    public bool OverlayVisible => _overlay.IsVisible;
+
+    public void ShowRaidCommand()
+    {
+        if (_raidCommand is { IsLoaded: true } existing)
+        {
+            if (!existing.IsVisible) existing.Show();
+            Activate(existing);
+            return;
+        }
+        _raidCommand = new RaidCommandWindow(_meter);
+        _raidCommand.Closed += (_, _) => _raidCommand = null;
+        _raidCommand.Show();
+        Activate(_raidCommand);
+    }
+
+    public void ShowCurrentBreakdown()
+    {
+        var snap = _meter.Tracker.Snapshot(null, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        if (snap is null || snap.Combatants.Count == 0) return;
+        var player = snap.Combatants.FirstOrDefault(c => c.IsSelf) ?? snap.Combatants[0];
+        ShowBreakdown(snap.Id, player.ActorId);
     }
 
     private void ToggleClickThrough()
@@ -568,16 +593,34 @@ public partial class App : Application
         if (_settingsWindow is { IsLoaded: true } existing)
         {
             if (!existing.IsVisible) existing.Show();
-            Activate(existing);
+            BringSettingsForward(existing);
             return;
         }
-        _settingsWindow = new SettingsWindow(_meter) { Owner = _overlay };
+        // The overlay is a non-activating topmost window. Keeping Settings owned by it can leave
+        // Settings underneath the overlay or hide it when the overlay auto-hides.
+        _overlay.Topmost = false;
+        _settingsWindow = new SettingsWindow(_meter) { Topmost = true, ShowActivated = true };
         _settingsWindow.Closed += (_, _) =>
         {
             _settingsWindow = null;
+            if (_overlay.IsLoaded) _overlay.Topmost = true;
         };
         _settingsWindow.Show();
-        Activate(_settingsWindow);
+        BringSettingsForward(_settingsWindow);
+    }
+
+    private static void BringSettingsForward(Window window)
+    {
+        window.Topmost = true;
+        if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
+        window.Activate();
+        window.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, () =>
+        {
+            if (!window.IsVisible) return;
+            window.Topmost = false;
+            window.Topmost = true;
+            window.Activate();
+        });
     }
 
     private static void OpenDiscordSupport()

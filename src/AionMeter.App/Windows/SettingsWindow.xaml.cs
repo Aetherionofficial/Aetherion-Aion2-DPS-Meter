@@ -176,7 +176,7 @@ public partial class SettingsWindow : Window
         if (sender is not Button { Tag: string preset }) return;
         (int rows, int size, double width, double height) = preset switch
         {
-            "compact" => (5, 70, 350, 560),
+            "compact" => (5, 50, 320, 360),
             "large" => (12, 90, 460, 780),
             _ => (8, 80, 400, 680),
         };
