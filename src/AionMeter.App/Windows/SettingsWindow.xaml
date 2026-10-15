@@ -2,12 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:s="clr-namespace:AionMeter.App.Services"
-        Title="{Binding SettingsTitle, Source={x:Static s:UiText.Current}}" Width="1040" Height="760" MinWidth="820" MinHeight="580"
-        WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="CanResize" Background="{StaticResource Bg0}"
+        Title="{Binding SettingsTitle, Source={x:Static s:UiText.Current}}" Width="785" Height="700" MinWidth="760" MinHeight="580"
+        WindowStyle="None" WindowStartupLocation="Manual" ResizeMode="CanResize" Background="{StaticResource Bg0}" Topmost="True"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         FontFamily="{StaticResource UiFont}" Foreground="{StaticResource Text}" FontSize="12.5">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="52" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" />
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" />
     </WindowChrome.WindowChrome>
     <Window.Resources>
         <Style x:Key="Section" TargetType="Border">
@@ -100,20 +100,18 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="52" />
+                <RowDefinition Height="0" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid Grid.ColumnSpan="2" Margin="20,0,8,0">
-                <TextBlock Text="{Binding SettingsTitle, Source={x:Static s:UiText.Current}}" FontFamily="{StaticResource TitleFont}"
-                           FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Grid Grid.ColumnSpan="2" Grid.RowSpan="3" Margin="20,8,8,0" VerticalAlignment="Top" Height="36">
                 <Button Style="{StaticResource IconButton}" Content="&#xE711;" Click="Cancel_Click" HorizontalAlignment="Right"
                         VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
 
             <Border Grid.Row="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
-                <StackPanel Margin="12,16">
-                    <TextBlock Text="AETHERION" Foreground="{StaticResource Gold}" FontWeight="SemiBold" FontSize="10" Margin="12,0,0,10" />
+                <StackPanel Margin="12,132,12,16">
+                    <TextBlock Text="AETHERION" Visibility="Collapsed" Foreground="{StaticResource Gold}" FontWeight="SemiBold" FontSize="10" Margin="12,0,0,10" />
                     <Button x:Name="NavOverlayButton" Style="{StaticResource SettingsNavButton}" Content="{Binding NavOverlay, Source={x:Static s:UiText.Current}}" Tag="overlay" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavTimer, Source={x:Static s:UiText.Current}}" Tag="timer" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavFights, Source={x:Static s:UiText.Current}}" Tag="fights" Click="SettingsNav_Click" />
@@ -126,7 +124,7 @@
 
             <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="20,0,20,0">
                 <StackPanel>
-                    <StackPanel Margin="0,12,0,18">
+                    <StackPanel Margin="0,20,0,48">
                         <TextBlock Text="{Binding SettingsKicker, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" FontWeight="Bold" FontSize="10" Margin="0,0,0,8" />
                         <TextBlock x:Name="PageTitle" Text="Overlay anpassen" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock x:Name="PageSubtitle" Text="{Binding SettingsPageHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" Margin="0,5,0,0" />
@@ -197,7 +195,7 @@
                                 <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,10" Text="{Binding TransparencyHint, Source={x:Static s:UiText.Current}}" />
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding TransparentLabel, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                    <Slider x:Name="OpacityValue" Style="{StaticResource GoldSlider}" Width="300" Minimum="0.72" Maximum="1" />
+                                    <Slider x:Name="OpacityValue" Style="{StaticResource GoldSlider}" Width="300" Minimum="0" Maximum="1" />
                                     <TextBlock Text="{Binding OpaqueLabel, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" VerticalAlignment="Center" Margin="12,0,0,0" />
                                 </StackPanel>
                             </StackPanel>
@@ -214,7 +212,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <TextBlock Text="{Binding RowSize, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
-                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="75" Maximum="100" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
+                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="85" Maximum="100" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
                                 <TextBlock x:Name="RowSizeText" VerticalAlignment="Center" Margin="10,0,0,0" />
                             </StackPanel>
                             <TextBlock Style="{StaticResource Hint}" Margin="190,2,0,0" Text="{Binding RowSizeHint, Source={x:Static s:UiText.Current}}" />
@@ -400,7 +398,7 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Style="{StaticResource Hint}" Margin="4,0,4,16" Text="{Binding Disclaimer, Source={x:Static s:UiText.Current}}" />
+                    <TextBlock x:Name="DisclaimerText" Style="{StaticResource Hint}" Margin="4,0,4,16" Text="{Binding Disclaimer, Source={x:Static s:UiText.Current}}" Visibility="Collapsed" />
                 </StackPanel>
             </ScrollViewer>
 

@@ -45,7 +45,8 @@ public partial class OverlayWindow : Window
         EnsureOnScreen();
 
         OpacitySlider.Value = _settings.BackgroundOpacity;
-        FrameBackground.Opacity = _settings.BackgroundOpacity;
+        ApplyBackgroundOpacity(_settings.BackgroundOpacity);
+        ApplyResponsiveLayout();
         ApplyLock();
         ApplyRowSize(_settings.RowSize);
         ApplyOverlayDisplayOptions();
@@ -136,9 +137,11 @@ public partial class OverlayWindow : Window
             : unnamed ? "Names appear after the next loading screen"
             : status.Message;
         // Footer reads like the card's caption; capture problems take its place so they are never missed.
-        var footer = _settings.ShowPeakDps && _vm.HasData
-            ? $"{_vm.Footer} · {UiText.Current.PeakFiveSeconds} {_vm.PartyPeakDps}"
-            : _vm.Footer;
+        var footer = _vm.MostDamageUnsent && _settings.OverlayRanking == OverlayRanking.Damage
+            ? _vm.Footer
+            : _settings.ShowPeakDps && _vm.HasData
+                ? $"{UiText.Current.Players(_vm.Rows.Count)} · {UiText.Current.PeakFiveSeconds} {_vm.PartyPeakDps}"
+                : UiText.Current.Players(_vm.Rows.Count);
         FooterText.Text = status.State is CaptureState.Capturing && _vm.HasData
             ? (unnamed ? footer + " · " + UiText.Current.NamesLater : footer)
             : _vm.Status;
@@ -191,7 +194,7 @@ public partial class OverlayWindow : Window
     public void ApplyAppearance()
     {
         OpacitySlider.Value = _settings.BackgroundOpacity;
-        FrameBackground.Opacity = _settings.BackgroundOpacity;
+        ApplyBackgroundOpacity(_settings.BackgroundOpacity);
         ApplyRowSize(_settings.RowSize);
         ApplyOverlayDisplayOptions();
         UpdateModeLabel();
@@ -204,6 +207,13 @@ public partial class OverlayWindow : Window
         Grid.SetColumnSpan(GroupDpsCard, showHealing ? 1 : 3);
     }
 
+    private void ApplyBackgroundOpacity(double opacity)
+    {
+        FrameBackground.Opacity = Math.Clamp(opacity, 0, 1);
+        Frame.BorderBrush = opacity <= 0.001 ? Brushes.Transparent : (Brush)FindResource("CardFrame");
+        SignatureLine.Visibility = opacity <= 0.001 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
     /// <summary>
     /// Row size in percent of the original. The height follows it exactly; text, emblems and the number columns shrink
     /// more gently (square root), so the smallest rows stay readable and the names get the room the numbers give up.
@@ -212,10 +222,10 @@ public partial class OverlayWindow : Window
     {
         var k = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize) / 100.0;
         var f = Math.Sqrt(k);
-        var height = Math.Round(56 * k);
+        var height = Math.Round(68 * k);
         Resources["RowHeight"] = height;
-        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(7 * k)));
-        Resources["RowNameFont"] = Math.Round(14 * f, 1);
+        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(8 * k)));
+        Resources["RowNameFont"] = Math.Round(13 * f, 1);
         Resources["RowGearFont"] = Math.Round(12 * f, 1);
         Resources["RowNumberFont"] = Math.Round(13.5 * f, 1);
         Resources["RowSubFont"] = Math.Round(12 * f, 1);
@@ -235,7 +245,7 @@ public partial class OverlayWindow : Window
     {
         if (ColumnLabels.ActualWidth <= 0) return;
         var columns = ColumnLabels.ColumnDefinitions;
-        const double fixedColumns = 34 + 30 + 82 + 58;
+        const double fixedColumns = 28 + 28 + 78 + 42;
         var max = Math.Max(30, Math.Floor(ColumnLabels.ActualWidth - fixedColumns - 28));
         if (Resources["NameMaxWidth"] is double current && Math.Abs(current - max) < 1) return;
         Resources["NameMaxWidth"] = max;
@@ -326,6 +336,18 @@ public partial class OverlayWindow : Window
 
     private void Resize_DragCompleted(object sender, DragCompletedEventArgs e) => SavePlacement();
 
+    private void Overlay_SizeChanged(object sender, SizeChangedEventArgs e) => ApplyResponsiveLayout();
+
+    public void ApplyResponsiveLayout()
+    {
+        // Keep footer actions clear of the corner resize handle at narrow sizes.
+        if (FooterDetailsButton is null) return;
+        FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
+        FooterCompareButton.Visibility = Width >= 390 ? Visibility.Visible : Visibility.Collapsed;
+        FooterRankingButton.Visibility = Width >= 440 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void OpenBreakdown(uint actorId)
     {
         if (_saved is { } saved) AppHost.Current.ShowBreakdown(saved.View, actorId);
@@ -371,6 +393,8 @@ public partial class OverlayWindow : Window
         var target = _vm.Rows.FirstOrDefault(r => r.IsSelf) ?? _vm.Rows[0];
         OpenBreakdown(target.ActorId);
     }
+
+    private void Compare_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowHistory();
 
     private void Mode_Click(object sender, RoutedEventArgs e)
     {
@@ -612,6 +636,11 @@ public partial class OverlayWindow : Window
         if (!_drag.JustDragged) AppHost.Current.ShowAionMap();
     }
 
+    private void Wakayashi_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_drag.JustDragged) AppHost.Current.ShowWakayashi();
+    }
+
     private void Events_Click(object sender, RoutedEventArgs e)
     {
         if (!_drag.JustDragged) AppHost.Current.ShowEventTimers();
@@ -666,7 +695,7 @@ public partial class OverlayWindow : Window
     private void Opacity_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (FrameBackground is null) return;
-        FrameBackground.Opacity = e.NewValue;
+        ApplyBackgroundOpacity(e.NewValue);
         _settings.BackgroundOpacity = Math.Round(e.NewValue, 2);
     }
 

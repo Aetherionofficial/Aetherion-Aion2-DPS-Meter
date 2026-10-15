@@ -39,11 +39,11 @@ public sealed class AppSettings
     };
 
     // Overlay window
-    public double OverlayLeft { get; set; } = 80;
-    public double OverlayTop { get; set; } = 160;
+    public double OverlayLeft { get; set; } = 125;
+    public double OverlayTop { get; set; } = 129;
     public double OverlayWidth { get; set; } = 470;
-    public double OverlayHeight { get; set; } = 420;
-    public double BackgroundOpacity { get; set; } = 0.94;
+    public double OverlayHeight { get; set; } = 630;
+    public double BackgroundOpacity { get; set; } = 0.96;
     public bool Locked { get; set; }
     public bool ClickThrough { get; set; }
     public bool OverlayVisible { get; set; } = true;
@@ -61,18 +61,18 @@ public sealed class AppSettings
     public double BossTimersHeight { get; set; } = 500;
 
     // Event timer overlay
-    public double EventTimersLeft { get; set; } = 26;
-    public double EventTimersTop { get; set; } = 110;
-    public double EventTimersWidth { get; set; } = 380;
+    public double EventTimersLeft { get; set; } = 616;
+    public double EventTimersTop { get; set; } = 225;
+    public double EventTimersWidth { get; set; } = 330;
     public double EventTimersHeight { get; set; } = 440;
-    public double EventTimersOpacity { get; set; } = 0.76;
+    public double EventTimersOpacity { get; set; } = 0.94;
 
     // Meter
     public TargetMode TargetMode { get; set; } = TargetMode.BossOnly;
     /// <summary>True: the leader's bar is full and the rest are sized against it. False: bars show share of party damage.</summary>
     public bool BarsRelativeToTop { get; set; } = true;
     public int MaxRows { get; set; } = 10;
-    public const int MinRowSize = 75, MaxRowSize = 100;
+    public const int MinRowSize = 85, MaxRowSize = 100;
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
     public int RowSize { get; set; } = 100;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
@@ -121,7 +121,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 8;
+    private const int CurrentLayout = 10;
 
     public static AppSettings Load()
     {
@@ -157,10 +157,23 @@ public sealed class AppSettings
                 if (s.LayoutVersion < 8)
                 {
                     // v8 keeps the overlay readable over bright game scenes and prevents gear details colliding with row bars.
-                    s.BackgroundOpacity = Math.Max(s.BackgroundOpacity, 0.92);
                     // Older default layouts reserved a large empty list area; keep user-sized layouts but compact the old default.
                     if (s.OverlayHeight >= 620) s.OverlayHeight = 420;
                     s.RowSize = Math.Max(s.RowSize, MinRowSize);
+                }
+                if (s.LayoutVersion < 9)
+                {
+                    // v9 removes the cramped row-size range while preserving the user's transparency preference.
+                    s.RowSize = Math.Max(s.RowSize, MinRowSize);
+                }
+                if (s.LayoutVersion < 10)
+                {
+                    // v10 matches the reference composition: taller live card, narrow event schedule, settings on the right.
+                    if (s.OverlayHeight <= 540) s.OverlayHeight = 630;
+                    if (Math.Abs(s.EventTimersLeft - 26) < 1) s.EventTimersLeft = 616;
+                    if (Math.Abs(s.EventTimersTop - 110) < 1) s.EventTimersTop = 225;
+                    if (Math.Abs(s.EventTimersWidth - 380) < 1) s.EventTimersWidth = 330;
+                    if (Math.Abs(s.EventTimersOpacity - 0.76) < 0.02) s.EventTimersOpacity = 0.94;
                 }
                 s.Language = UiText.Normalize(s.Language);
                 s.LayoutVersion = CurrentLayout;

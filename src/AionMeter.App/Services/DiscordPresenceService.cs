@@ -49,6 +49,11 @@ public sealed class DiscordPresenceService : IDisposable
                         {
                             large_image = "download",
                             large_text = "Aetherion DPS Meter"
+                        },
+                        // Discord renders this as a clickable button on the activity card.
+                        buttons = new[]
+                        {
+                            new { label = "Aetherion Discord", url = "https://discord.gg/mostwantedde" }
                         }
                     }
                 },

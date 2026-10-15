@@ -52,6 +52,7 @@ public partial class App : Application
     private BossTimersWindow? _timersWindow;
     private EventTimersWindow? _eventTimersWindow;
     private MapWindow? _mapWindow;
+    private WakayashiWindow? _wakayashiWindow;
     private readonly Dictionary<object, BreakdownWindow> _breakdowns = new();
     private int _ticks;
 
@@ -74,7 +75,7 @@ public partial class App : Application
         if (ArgValue(e.Args, "--render-sample") is { } samplePath)
         {
             Log.Enabled = false;
-            // --render-sample <out.png | folder with --animate> [--lang ru] [--window …] [--width N] [--height N] [--tab …]
+            // --render-sample <out.png | folder with --animate> [--lang ru] [--window …] [--width N] [--height N] [--tab …] [--opacity 0..1]
             // [--backdrop game|dark|none] [--scale 1.5] [--row-size 50..100] [--animate <seconds> [--fps 10]]
             var options = new SampleRenderer.Options(
                 ArgValue(e.Args, "--window") ?? "overlay",
@@ -84,7 +85,9 @@ public partial class App : Application
                 ArgValue(e.Args, "--backdrop") ?? "game",
                 double.TryParse(ArgValue(e.Args, "--scale"), System.Globalization.NumberStyles.Float,
                     System.Globalization.CultureInfo.InvariantCulture, out var scale) ? scale : 1.5,
-                int.TryParse(ArgValue(e.Args, "--row-size"), out var rowSize) ? rowSize : 100);
+                int.TryParse(ArgValue(e.Args, "--row-size"), out var rowSize) ? rowSize : 100,
+                double.TryParse(ArgValue(e.Args, "--opacity"), System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out var opacity) ? opacity : null);
             var language = ArgValue(e.Args, "--lang") ?? "en";
             if (double.TryParse(ArgValue(e.Args, "--animate"), System.Globalization.NumberStyles.Float,
                     System.Globalization.CultureInfo.InvariantCulture, out var seconds))
@@ -530,6 +533,18 @@ public partial class App : Application
         _mapWindow.Show();
     }
 
+    public void ShowWakayashi()
+    {
+        if (_wakayashiWindow is { IsLoaded: true })
+        {
+            Activate(_wakayashiWindow);
+            return;
+        }
+        _wakayashiWindow = new WakayashiWindow();
+        _wakayashiWindow.Closed += (_, _) => _wakayashiWindow = null;
+        _wakayashiWindow.Show();
+    }
+
     /// <summary>Tray notification (and a chime) shortly before a tracked boss respawns.</summary>
     private void CheckBossAlerts()
     {
@@ -555,7 +570,10 @@ public partial class App : Application
             return;
         }
         _settingsWindow = new SettingsWindow(_meter);
-        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        _settingsWindow.Closed += (_, _) =>
+        {
+            _settingsWindow = null;
+        };
         _settingsWindow.Show();
     }
 

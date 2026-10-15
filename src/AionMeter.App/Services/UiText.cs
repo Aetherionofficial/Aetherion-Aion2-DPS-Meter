@@ -33,6 +33,9 @@ public sealed class UiText
     public string GroupDps { get; init; } = "PARTY DPS";
     public string GroupHps { get; init; } = "PARTY HPS";
     public string PeakFiveSeconds { get; init; } = "Peak 5s";
+    public string FooterDetailsLabel { get; init; } = "Fight details";
+    public string FooterCompareLabel { get; init; } = "Compare";
+    public string FooterRankingLabel { get; init; } = "Switch DPS / HPS";
     public string ShowHealingInfo { get; init; } = "Healing / HPS";
     public string ShowPeakDpsInfo { get; init; } = "Peak DPS";
     public string ShowBossHpInfo { get; init; } = "Boss HP";
@@ -191,6 +194,9 @@ public sealed class UiText
     public string HoursShort { get; init; } = "h";
     public string MinutesShort { get; init; } = "min";
     public string EventTimersTitle { get; init; } = "Event schedule";
+    public string EventOverlayTitle => Code switch { "de" => "Timer in deiner Nähe", "ru" => "Таймер рядом", _ => "Nearby timers" };
+    public string EventOverlayKicker => Code switch { "de" => "ZEITPLAN", "ru" => "РАСПИСАНИЕ", _ => "SCHEDULE" };
+    public string EventOverlayHint => Code switch { "de" => "Wichtige Events und Bosse — kompakt sortiert.", "ru" => "Важные события и боссы — кратко по времени.", _ => "Important events and bosses, sorted by time." };
     public string EventTimersHint { get; init; } = "Live countdowns use the local clock. Recurring schedules are community-reported; confirm notices in game. Field-boss timers come directly from the game via Boss timers.";
     public string EventRift { get; init; } = "Spacetime Rift";
     public string EventShugo { get; init; } = "Shugo Festival";
@@ -522,7 +528,7 @@ public sealed class UiText
     private static readonly UiText De = new()
     {
         Code = "de", LanguageName = "Deutsch",
-        OverlayLive = "LIVE-KAMPF", GroupDps = "GRUPPEN-DPS", GroupHps = "GRUPPEN-HPS", PeakFiveSeconds = "Peak 5 Sek.",
+        OverlayLive = "LIVE-KAMPF", GroupDps = "GRUPPEN-DPS", GroupHps = "GRUPPEN-HPS", PeakFiveSeconds = "Peak 5 Sek.", FooterDetailsLabel = "Kampfdetails", FooterCompareLabel = "Vergleich", FooterRankingLabel = "DPS / HPS wechseln",
         ShowHealingInfo = "Heilung / HPS", ShowPeakDpsInfo = "Peak-DPS", ShowBossHpInfo = "Boss-LP", ShowGearInfo = "Gear-Infos",
         CombinedOverlayMode = "Schaden + Heilung", CompactOverlayMode = "Nur DPS · kompakt", OverlayRank = "RANG", OverlayShare = "ANTEIL",
         MapLabel = "AION2-Hub",
@@ -781,6 +787,7 @@ public sealed class UiText
         Ended = "Завершён",
         OpenWorld = "Открытый мир",
         OpenFight = "Разбор боя",
+        FooterDetailsLabel = "Детали боя", FooterCompareLabel = "Сравнение", FooterRankingLabel = "Сменить DPS / HPS",
         Fights = "Бои",
         NamesLater = "ники появятся после загрузки локации",
         YourPlace = "Ваше место в этом бою",

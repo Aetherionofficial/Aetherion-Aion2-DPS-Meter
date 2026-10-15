@@ -21,11 +21,11 @@ public static class SampleRenderer
     /// <param name="Backdrop">Behind the translucent overlay: game (a stand-in colour), dark (a navy gradient) or none (transparent).</param>
     /// <param name="RowSize">Overlay row size in percent (Settings → Overlay → Row size).</param>
     public sealed record Options(string Window = "overlay", int? Width = null, int? Height = null, string? Tab = null,
-        string Backdrop = "game", double Scale = 1.5, int RowSize = 100);
+        string Backdrop = "game", double Scale = 1.5, int RowSize = 100, double? BackgroundOpacity = null);
 
     public static void Render(string path, string language, Options o)
     {
-        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 4 : 10);
+        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 4 : 10, o.BackgroundOpacity);
         var start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 20_500; // a fight that is still going
         var fight = new SampleFight(start, 20, o.Window == "overlay" ? 4 : 9);
         fight.FeedUntil(meter.Tracker, start + 20_000);
@@ -77,7 +77,8 @@ public static class SampleRenderer
                 break;
             default:
                 if (o.Window == "overlay-update") meter.Updates.Preview(SampleRelease(meter.Updates.Current)); // with the footer's update banner
-                var overlay = new OverlayWindow(meter) { Width = o.Width ?? 560, Height = o.Height ?? 820 };
+                var overlay = new OverlayWindow(meter) { Width = o.Width ?? 470, Height = o.Height ?? 630 };
+                overlay.ApplyResponsiveLayout();
                 host = overlay;
                 refresh = overlay.Refresh;
                 break;
@@ -91,7 +92,7 @@ public static class SampleRenderer
     /// </summary>
     public static void Animate(string folder, string language, Options o, double seconds, int fps)
     {
-        using var meter = CreateMeter(language, o.RowSize);
+        using var meter = CreateMeter(language, o.RowSize, backgroundOpacity: o.BackgroundOpacity);
         WaitForPortraits(meter);
         var start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 600_000;
         var fight = new SampleFight(start, seconds);
@@ -99,7 +100,7 @@ public static class SampleRenderer
         OverlayWindow.ClockOverride = () => clock;
         try
         {
-            var overlay = new OverlayWindow(meter) { Width = o.Width ?? 500, Height = o.Height ?? 760 };
+            var overlay = new OverlayWindow(meter) { Width = o.Width ?? 470, Height = o.Height ?? 630 };
             Directory.CreateDirectory(folder);
             var frames = (int)Math.Round(seconds * fps);
             for (var f = 0; f <= frames; f++)
@@ -115,11 +116,12 @@ public static class SampleRenderer
         }
     }
 
-    private static MeterService CreateMeter(string language, int rowSize = 100, int maxRows = 10)
+    private static MeterService CreateMeter(string language, int rowSize = 100, int maxRows = 10, double? backgroundOpacity = null)
     {
         var settings = new AppSettings
         {
             Transient = true, SaveHistory = false, MaxRows = maxRows, LayoutVersion = 99, Language = language, RowSize = rowSize,
+            BackgroundOpacity = Math.Clamp(backgroundOpacity ?? 0.96, 0, 1),
         };
         UiText.Use(settings.Language);
         var meter = new MeterService(settings, _ => new QuietSource());

@@ -39,10 +39,11 @@ public sealed class EventTimersWindow : Window
     public EventTimersWindow(AppSettings settings)
     {
         _settings = settings;
-        Width = Math.Clamp(settings.EventTimersWidth, 300, 650);
-        Height = Math.Clamp(settings.EventTimersHeight, 280, 760);
-        Left = settings.EventTimersLeft;
-        Top = settings.EventTimersTop;
+        var workArea = SystemParameters.WorkArea;
+        Width = Math.Min(Math.Clamp(settings.EventTimersWidth, 300, 650), workArea.Width - 16);
+        Height = Math.Min(Math.Clamp(settings.EventTimersHeight, 280, 760), workArea.Height - 16);
+        Left = Math.Clamp(settings.EventTimersLeft, workArea.Left + 8, workArea.Right - Width - 8);
+        Top = Math.Clamp(settings.EventTimersTop, workArea.Top + 8, workArea.Bottom - Height - 8);
         MinWidth = 300;
         MinHeight = 280;
         WindowStartupLocation = WindowStartupLocation.Manual;
@@ -77,33 +78,55 @@ public sealed class EventTimersWindow : Window
             Cursor = Cursors.Hand,
         };
         close.Click += (_, _) => Close();
-        _title.Text = UiText.Current.EventTimersTitle;
-        _title.FontSize = 16;
+        _title.Text = UiText.Current.EventOverlayTitle;
+        _title.FontSize = 13.5;
         _title.FontWeight = FontWeights.Bold;
         _title.Foreground = Brush("#EDF2F8");
         _title.VerticalAlignment = VerticalAlignment.Center;
         _title.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); };
-        var header = new Grid { Margin = new Thickness(18, 14, 14, 8) };
+        var kicker = new TextBlock { Text = UiText.Current.EventOverlayKicker, FontSize = 9, FontWeight = FontWeights.Bold, Foreground = Brush("#91A1AA"), Margin = new Thickness(0, 0, 0, 3) };
+        var titlePanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        titlePanel.Children.Add(kicker);
+        titlePanel.Children.Add(_title);
+        var opacityLabel = new TextBlock { Text = UiText.Current.EventOpacity, Foreground = Brush("#98A5B4"), FontSize = 9, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 4, 0) };
+        _opacitySlider.Minimum = 0;
+        _opacitySlider.Maximum = 1;
+        _opacitySlider.Value = Opacity;
+        _opacitySlider.Width = 64;
+        _opacitySlider.VerticalAlignment = VerticalAlignment.Center;
+        _opacitySlider.ToolTip = UiText.Current.EventOpacity;
+        _opacitySlider.ValueChanged += (_, _) => Opacity = _opacitySlider.Value;
+        var opacityBar = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(5, 0, 2, 0) };
+        opacityLabel.HorizontalAlignment = HorizontalAlignment.Center;
+        opacityLabel.Margin = new Thickness(0, 0, 0, -2);
+        opacityBar.Children.Add(opacityLabel);
+        opacityBar.Children.Add(_opacitySlider);
+        var header = new Grid { Margin = new Thickness(16, 9, 8, 8), MinHeight = 42 };
         header.ColumnDefinitions.Add(new ColumnDefinition());
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        header.Children.Add(_title);
-        Grid.SetColumn(collapse, 1);
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        header.Children.Add(titlePanel);
+        Grid.SetColumn(opacityBar, 1);
+        header.Children.Add(opacityBar);
+        Grid.SetColumn(collapse, 2);
         header.Children.Add(collapse);
-        Grid.SetColumn(close, 2);
+        Grid.SetColumn(close, 3);
         header.Children.Add(close);
 
         _hint.Text = UiText.Current.EventTimersHint;
-        _hint.FontSize = 11;
+        _hint.Text = UiText.Current.EventOverlayHint;
+        _hint.FontSize = 10;
         _hint.TextWrapping = TextWrapping.Wrap;
         _hint.Foreground = Brush("#98A5B4");
-        _hint.Margin = new Thickness(18, 2, 18, 12);
+        _hint.Margin = new Thickness(16, 7, 16, 8);
 
         foreach (var spec in Schedule)
         {
-            var name = new TextBlock { FontSize = 13, FontWeight = FontWeights.SemiBold, Foreground = Brush("#EDF2F8"), TextTrimming = TextTrimming.CharacterEllipsis };
-            var countdown = new TextBlock { FontSize = 17, FontFamily = new FontFamily("Consolas"), FontWeight = FontWeights.Bold, Foreground = Brush("#EDBD68"), HorizontalAlignment = HorizontalAlignment.Right };
-            var at = new TextBlock { FontSize = 10, Foreground = Brush("#91A1AA") };
+            var name = new TextBlock { FontSize = 11.5, FontWeight = FontWeights.SemiBold, Foreground = Brush("#EDF2F8"), TextTrimming = TextTrimming.CharacterEllipsis };
+            var countdown = new TextBlock { FontSize = 15, FontFamily = new FontFamily("Consolas"), FontWeight = FontWeights.Bold, Foreground = Brush("#EDBD68"), HorizontalAlignment = HorizontalAlignment.Right };
+            var at = new TextBlock { FontSize = 9, Foreground = Brush("#91A1AA") };
             var label = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
             label.Children.Add(name);
             label.Children.Add(at);
@@ -121,7 +144,7 @@ public sealed class EventTimersWindow : Window
             var card = new Border
             {
                 Background = Brush("#15212A"), BorderBrush = Brush("#263640"), BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(9), Padding = new Thickness(11, 9, 11, 9), Margin = new Thickness(0, 0, 0, 7), Child = row,
+                CornerRadius = new CornerRadius(8), Padding = new Thickness(9, 6, 9, 6), Margin = new Thickness(0, 0, 0, 5), Child = row,
             };
             _rows.Add(new EventRow(card, name, countdown, at));
             _list.Children.Add(card);
@@ -132,32 +155,15 @@ public sealed class EventTimersWindow : Window
             Text = UiText.Current.EventSource, FontSize = 9, TextWrapping = TextWrapping.Wrap,
             Foreground = Brush("#718093"), Margin = new Thickness(14, 2, 14, 8),
         };
-        var opacityLabel = new TextBlock
-        {
-            Text = UiText.Current.EventOpacity, Foreground = Brush("#98A5B4"), FontSize = 10,
-            VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0),
-        };
-        _opacitySlider.Minimum = 0.35;
-        _opacitySlider.Maximum = 1;
-        _opacitySlider.Value = Opacity;
-        _opacitySlider.Width = 94;
-        _opacitySlider.VerticalAlignment = VerticalAlignment.Center;
-        _opacitySlider.ToolTip = UiText.Current.EventOpacity;
-        _opacitySlider.ValueChanged += (_, _) => Opacity = _opacitySlider.Value;
-        var opacityBar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(14, 0, 14, 7) };
-        opacityBar.Children.Add(opacityLabel);
-        opacityBar.Children.Add(_opacitySlider);
-        _details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         _details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         _details.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         _details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        _details.Children.Add(opacityBar);
-        Grid.SetRow(_hint, 1);
+        Grid.SetRow(_hint, 0);
         _details.Children.Add(_hint);
-        var scroll = new ScrollViewer { Content = _list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Margin = new Thickness(14, 0, 14, 0) };
-        Grid.SetRow(scroll, 2);
+        var scroll = new ScrollViewer { Content = _list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Margin = new Thickness(12, 0, 12, 0) };
+        Grid.SetRow(scroll, 1);
         _details.Children.Add(scroll);
-        Grid.SetRow(source, 3);
+        Grid.SetRow(source, 2);
         _details.Children.Add(source);
         var body = new Grid();
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -190,15 +196,15 @@ public sealed class EventTimersWindow : Window
     {
         var now = DateTimeOffset.Now;
         var t = UiText.Current;
-        _title.Text = t.EventTimersTitle;
-        _hint.Text = t.EventTimersHint;
+        _title.Text = t.EventOverlayTitle;
+        _hint.Text = t.EventOverlayHint;
         foreach (var row in _rows)
         {
             var spec = Schedule[_rows.IndexOf(row)];
             row.Name.Text = spec.Name(t);
             var next = spec.Next(now);
             var left = next - now;
-            row.Countdown.Text = left.TotalDays >= 1 ? $"{(int)left.TotalDays}d {left:hh\\:mm\\:ss}" : left.ToString(@"hh\:mm\:ss");
+            row.Countdown.Text = left.TotalDays >= 1 ? $"{(int)left.TotalDays}d {left:hh\\:mm}" : left.ToString(@"hh\:mm");
             row.At.Text = string.Format(t.EventAt, next.ToLocalTime().ToString("ddd HH:mm", t.Culture));
         }
         foreach (var row in _rows.OrderBy(r => Schedule[_rows.IndexOf(r)].Next(now))) _list.Children.Remove(row.Card);

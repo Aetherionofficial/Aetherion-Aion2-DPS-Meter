@@ -1,0 +1,39 @@
+<Window x:Class="AionMeter.App.Windows.WakayashiWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="Aetherion — Wakayashi.gg" Width="1360" Height="860" MinWidth="760" MinHeight="520"
+        WindowStartupLocation="CenterScreen" Background="#12151E" Foreground="#F0F1F5"
+        FontFamily="Segoe UI" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#191F2C" BorderBrush="#394155" BorderThickness="0,0,0,1">
+            <DockPanel Margin="14,0">
+                <TextBlock Text="AETHERION  ·  WAKAYASHI.GG" Foreground="#ECCB82" FontSize="15" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="0,0,24,0" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BackButton" Content="‹" Width="36" Height="30" Margin="0,0,6,0" Click="Back_Click"
+                            Background="#252D3D" Foreground="White" BorderBrush="#46516A" ToolTip="Zurück" />
+                    <Button x:Name="ForwardButton" Content="›" Width="36" Height="30" Margin="0,0,6,0" Click="Forward_Click"
+                            Background="#252D3D" Foreground="White" BorderBrush="#46516A" ToolTip="Vorwärts" />
+                    <Button Content="⟳" Width="36" Height="30" Margin="0,0,12,0" Click="Reload_Click"
+                            Background="#252D3D" Foreground="White" BorderBrush="#46516A" ToolTip="Neu laden" />
+                </StackPanel>
+                <Button DockPanel.Dock="Right" Content="Im Browser öffnen" Padding="12,5" Click="OpenBrowser_Click"
+                        Background="#252D3D" Foreground="#ECCB82" BorderBrush="#806D46" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <Border x:Name="RuntimeNotice" Grid.Row="1" Background="#382A18" BorderBrush="#806D46" BorderThickness="0,0,0,1"
+                Padding="14,9" Visibility="Collapsed">
+            <TextBlock x:Name="RuntimeMessage" TextWrapping="Wrap" />
+        </Border>
+
+        <wv2:WebView2 x:Name="Browser" Grid.Row="2" />
+    </Grid>
+</Window>

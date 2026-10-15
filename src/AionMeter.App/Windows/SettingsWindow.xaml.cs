@@ -19,6 +19,9 @@ public partial class SettingsWindow : Window
     {
         _meter = meter;
         InitializeComponent();
+        var workArea = SystemParameters.WorkArea;
+        Left = Math.Max(workArea.Left + 8, workArea.Right - Width - workArea.Width * 0.085);
+        Top = Math.Max(workArea.Top + 8, Math.Min(workArea.Top + workArea.Height * 0.09, workArea.Bottom - Height - 8));
         Controls.DragAnywhere.Attach(this);
         Load();
         _ = RefreshLicenseStatusAsync();
@@ -128,6 +131,7 @@ public partial class SettingsWindow : Window
             HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection };
         foreach (var section in allSections)
             section.Visibility = visible.Contains(section) ? Visibility.Visible : Visibility.Collapsed;
+        DisclaimerText.Visibility = page == "general" ? Visibility.Visible : Visibility.Collapsed;
 
         PageTitle.Text = page switch
         {
@@ -147,7 +151,7 @@ public partial class SettingsWindow : Window
         if (sender is not Button { Tag: string preset }) return;
         (int rows, int size) = preset switch
         {
-            "compact" => (5, 75),
+            "compact" => (5, 85),
             "large" => (15, 100),
             _ => (10, 90),
         };

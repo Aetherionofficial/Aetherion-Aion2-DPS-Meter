@@ -8,8 +8,8 @@ namespace AionMeter.App.Windows;
 /// <summary>AION 2 guides and map, displayed inside Aetherion using the system WebView2 runtime.</summary>
 public partial class MapWindow : Window
 {
-    private const string PortalUrl = "https://wakayashi.gg/aion2";
     private const string MapUrl = "https://questlog.gg/aion-2/de/map";
+    private const string OfficialNewsUrl = "https://aion2.plaync.com/en-us/board/update/list";
     public MapWindow()
     {
         InitializeComponent();
@@ -30,13 +30,25 @@ public partial class MapWindow : Window
             };
             Browser.CoreWebView2.NavigationCompleted += (_, _) => UpdateNavigationButtons();
             Browser.CoreWebView2.HistoryChanged += (_, _) => UpdateNavigationButtons();
-            Browser.Source = new Uri(PortalUrl);
+            Browser.Source = new Uri(MapUrl);
+
+            // The official NC updates board is the source of truth. Keeping it live in its
+            // own pane means newly published patch notes appear without shipping app updates.
+            await NewsBrowser.EnsureCoreWebView2Async();
+            NewsBrowser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
+            NewsBrowser.CoreWebView2.Settings.IsStatusBarEnabled = false;
+            NewsBrowser.CoreWebView2.NewWindowRequested += (_, args) =>
+            {
+                args.Handled = true;
+                NewsBrowser.CoreWebView2.Navigate(args.Uri);
+            };
+            NewsBrowser.Source = new Uri(OfficialNewsUrl);
         }
         catch (Exception ex)
         {
             RuntimeNotice.Visibility = Visibility.Visible;
-            RuntimeMessage.Text = "Die AION2-Seite konnte nicht eingebettet geladen werden. Prüfe deine Internetverbindung oder installiere die Microsoft Edge WebView2 Runtime. " + ex.Message;
-            Log.Error("Could not initialize the embedded AION2 hub", ex);
+            RuntimeMessage.Text = "Die Questlog-Karte oder das offizielle AION2-Updates-Board konnte nicht eingebettet geladen werden. Prüfe deine Internetverbindung oder installiere die Microsoft Edge WebView2 Runtime. " + ex.Message;
+            Log.Error("Could not initialize the embedded AION2 map and news hub", ex);
         }
     }
 
@@ -59,19 +71,29 @@ public partial class MapWindow : Window
 
     private void Reload_Click(object sender, RoutedEventArgs e) => Browser.Reload();
 
-    private void Portal_Click(object sender, RoutedEventArgs e) => Browser.Source = new Uri(PortalUrl);
-
-    private void Map_Click(object sender, RoutedEventArgs e) => Browser.Source = new Uri(MapUrl);
+    private void OpenWakayashi_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowWakayashi();
 
     private void OpenBrowser_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            Process.Start(new ProcessStartInfo(Browser.Source?.AbsoluteUri ?? PortalUrl) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(Browser.Source?.AbsoluteUri ?? MapUrl) { UseShellExecute = true });
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
             Log.Error("Could not open the AION2 map in the browser", ex);
+        }
+    }
+
+    private void OpenNewsBrowser_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(OfficialNewsUrl) { UseShellExecute = true });
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            Log.Error("Could not open the official AION2 update board", ex);
         }
     }
 }

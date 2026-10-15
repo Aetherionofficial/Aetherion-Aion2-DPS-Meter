@@ -5,10 +5,10 @@
         xmlns:vm="clr-namespace:AionMeter.App.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
-        Title="AION2 DPS Meter" Width="470" Height="420" MinWidth="320" MinHeight="260"
+        Title="AION2 DPS Meter" Width="470" Height="630" MinWidth="320" MinHeight="260"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
-        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" SizeChanged="Overlay_SizeChanged"
         FontFamily="{StaticResource UiFont}">
     <Window.Resources>
         <c:VisibleIf x:Key="VisibleIf" />
@@ -24,9 +24,9 @@
         <GridLength x:Key="ColGlyphWidth">26</GridLength>
         <Thickness x:Key="ColGap">10,0,0,0</Thickness>
         <sys:Double x:Key="NameMaxWidth">220</sys:Double>
-        <sys:Double x:Key="RowHeight">56</sys:Double>
-        <Thickness x:Key="RowMargin">0,0,0,7</Thickness>
-        <sys:Double x:Key="RowNameFont">14</sys:Double>
+        <sys:Double x:Key="RowHeight">68</sys:Double>
+        <Thickness x:Key="RowMargin">0,0,0,8</Thickness>
+        <sys:Double x:Key="RowNameFont">13</sys:Double>
         <sys:Double x:Key="RowGearFont">12</sys:Double>
         <sys:Double x:Key="RowNumberFont">13.5</sys:Double>
         <sys:Double x:Key="RowSubFont">12</sys:Double>
@@ -146,8 +146,8 @@
         </LinearGradientBrush>
 
         <LinearGradientBrush x:Key="HpFill" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#B9303A" Offset="0" />
-            <GradientStop Color="#EE5A5E" Offset="1" />
+            <GradientStop Color="#B96445" Offset="0" />
+            <GradientStop Color="#F0BB63" Offset="1" />
         </LinearGradientBrush>
 
         <Style x:Key="FooterLink" TargetType="Button">
@@ -162,6 +162,35 @@
                         <ContentPresenter x:Name="P" VerticalAlignment="Center" />
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#FFE3A6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FooterAction" TargetType="Button">
+            <Setter Property="Foreground" Value="#CBD4D7" />
+            <Setter Property="Background" Value="#19252D" />
+            <Setter Property="BorderBrush" Value="#30414A" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="9.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="9,5" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="#26343B" />
                                 <Setter Property="Foreground" Value="#FFE3A6" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -225,57 +254,49 @@
         <DataTemplate x:Key="RowTemplate" DataType="{x:Type vm:RowViewModel}">
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
-                <!-- track -->
-                <Border x:Name="Track" CornerRadius="9" Background="#15202A" BorderBrush="#202D37" BorderThickness="1" />
-                <!-- your own row -->
-                <Border CornerRadius="4" BorderThickness="1" BorderBrush="#B3F2C25A"
+                <Border x:Name="Track" CornerRadius="6" Background="#151D28" BorderBrush="#202D39" BorderThickness="1" />
+                <Border CornerRadius="6" BorderThickness="1" BorderBrush="#A6D9B56A"
                         Visibility="{Binding IsSelf, Converter={StaticResource VisibleIf}}" />
-
-                <Grid Margin="10,0,12,0">
+                <Grid Margin="9,0,11,2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="34" />
-                        <ColumnDefinition Width="30" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="28" /><ColumnDefinition Width="28" /><ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
-                    <!-- Place: plain digits, the top three in medal colours -->
-                    <Border Width="24" Height="24" CornerRadius="12" Background="{Binding RankBackground}"
+                    <Border Width="21" Height="21" CornerRadius="5" Background="{Binding RankBackground}"
                             BorderBrush="{Binding RankBorder}" BorderThickness="1" VerticalAlignment="Center">
                         <TextBlock Text="{Binding RankText}" FontFamily="{StaticResource NumberFont}" FontSize="{DynamicResource RowRankFont}"
                                    FontWeight="Bold" Foreground="{Binding RankForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-
                     <c:ClassGlyph Grid.Column="1" Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}"
-                                  Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
-
-                    <!-- As wide as the longest name, up to what the other columns leave (OverlayWindow.FitNames) -->
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="2,0,8,8">
+                                  Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="2,0,8,0">
                         <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="SemiBold"
                                    Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="{DynamicResource NameMaxWidth}" />
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding GearScore, StringFormat=GS {0}}" FontSize="9" Foreground="#A5B1BA"
-                                       Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}" />
-                            <TextBlock Text="{Binding CombatPower, StringFormat=CP {0}}" FontSize="9" Foreground="#8FDBD0" Margin="6,0,0,0"
+                            <TextBlock Text="{Binding ClassLabel}" FontSize="8.5" Foreground="#A4B0BE" />
+                            <TextBlock Text="{Binding CombatPower, StringFormat=CP {0}}" FontSize="8.5" Foreground="#84CFC2" Margin="6,0,0,0"
                                        Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}" />
+                            <TextBlock Text="{Binding GearScore, StringFormat=GS {0}}" FontSize="8.5" Foreground="#A5B1BA" Margin="6,0,0,0"
+                                       Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}" />
                         </StackPanel>
                     </StackPanel>
-
-                    <TextBlock Grid.Column="3" Text="{Binding Dps}" FontFamily="{StaticResource NumberFont}" FontSize="12.5" FontWeight="Bold"
-                               Foreground="#E8EDF0" VerticalAlignment="Center" Margin="0,0,14,0"
-                               ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <TextBlock Grid.Column="4" Text="{Binding Share}" FontFamily="{StaticResource NumberFont}" FontSize="11"
-                               Foreground="#B8C4CA" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,14,0">
+                        <TextBlock Text="{Binding Dps}" FontFamily="{StaticResource NumberFont}" FontSize="12" FontWeight="Bold"
+                                   Foreground="#F0F2F5" HorizontalAlignment="Right"
+                                   ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}" />
+                        <TextBlock Text="{Binding Share}" FontFamily="{StaticResource NumberFont}" FontSize="9"
+                                   Foreground="#AEB8C5" HorizontalAlignment="Right" />
+                    </StackPanel>
+                    <Border Grid.ColumnSpan="5" Height="3" Margin="0,0,0,-2" VerticalAlignment="Bottom" Background="#293943" />
+                    <Border Grid.ColumnSpan="5" Height="3" Margin="0,0,0,-2" VerticalAlignment="Bottom"
+                            Background="#DDBA69" Opacity="0.95" RenderTransformOrigin="0,0.5">
+                        <Border.RenderTransform><ScaleTransform ScaleX="{Binding Fill}" /></Border.RenderTransform>
+                    </Border>
                 </Grid>
-                <Border Height="2" Margin="10,0,10,4" VerticalAlignment="Bottom" Background="{Binding AccentBrush}"
-                        RenderTransformOrigin="0,0.5">
-                    <Border.RenderTransform><ScaleTransform ScaleX="{Binding Fill}" /></Border.RenderTransform>
-                </Border>
             </Grid>
             <DataTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="Track" Property="Background" Value="#26FFFFFF" />
+                    <Setter TargetName="Track" Property="Background" Value="#202C38" />
                 </Trigger>
                 <DataTrigger Binding="{Binding IsSelf}" Value="True">
                     <Setter TargetName="NameText" Property="Foreground" Value="{StaticResource SelfGold}" />
@@ -284,18 +305,28 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Grid Margin="8">
-        <!-- Card -->
-        <Border x:Name="Frame" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource CardFrame}">
+    <Grid Margin="6">
+        <Border x:Name="Frame" CornerRadius="7" BorderThickness="1" BorderBrush="{StaticResource CardFrame}">
             <Border.Background>
-                <SolidColorBrush x:Name="FrameBackground" Color="#0B0F17" Opacity="0.92" />
+                <SolidColorBrush x:Name="FrameBackground" Color="#08121B" Opacity="0.92" />
             </Border.Background>
             <Border.Effect>
                 <DropShadowEffect BlurRadius="14" ShadowDepth="0" Opacity="0.5" Color="Black" />
             </Border.Effect>
         </Border>
 
-        <Grid x:Name="CardBody" Margin="12,12,12,10">
+        <!-- Aetherion signature line: a small warm-to-teal sweep anchors the card without cluttering the fight data. -->
+        <Border x:Name="SignatureLine" Height="2" Margin="12,6,12,0" VerticalAlignment="Top" IsHitTestVisible="False">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#F3C56A" Offset="0" />
+                    <GradientStop Color="#E5A84F" Offset="0.48" />
+                    <GradientStop Color="#45C2B0" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <Grid x:Name="CardBody" Margin="10,10,10,9">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -306,15 +337,18 @@
 
             <!-- The one top line: the fight's title on the left (the toolbar while the mouse is over the overlay), the state
                  and the timer on the right -->
-            <Grid x:Name="Header" Background="Transparent" Height="34">
+            <Grid x:Name="Header" Background="Transparent" Height="40">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                    <StackPanel x:Name="FightTitlePanel">
-                    <TextBlock Text="{Binding T.OverlayLive}" FontSize="9" FontWeight="Bold" Foreground="#8FA3AD" />
-                    <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="15" FontWeight="Bold"
+                    <StackPanel x:Name="FightTitlePanel" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#27D7B1" CornerRadius="1" Width="3" Height="10" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding T.OverlayLive}" FontSize="8" FontWeight="Bold" Foreground="#83D9C7" />
+                    </StackPanel>
+                    <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="16" FontWeight="ExtraBold"
                            Foreground="#EEF0F5" TextTrimming="CharacterEllipsis"
                            VerticalAlignment="Center" Margin="0,1,10,0" Effect="{StaticResource TextShadow}" Background="Transparent"
                            MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
@@ -329,6 +363,7 @@
                             ToolTip="{Binding T.SwitchLanguage}" />
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
+                    <Button Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE787;" Click="Events_Click" ToolTip="{Binding T.EventTimersTitle}" />
                     <Button x:Name="RestartButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" />
@@ -336,12 +371,13 @@
                         <TextBlock x:Name="LockGlyph" Text="&#xE785;" />
                     </ToggleButton>
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="{Binding T.TipSettings}" />
-                    <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0.72" Maximum="1" Margin="5,0,3,0"
+                    <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0" Maximum="1" Margin="5,0,3,0"
                             ValueChanged="Opacity_Changed" VerticalAlignment="Center" ToolTip="{Binding T.TipOpacity}" />
                     <Button Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="Hide_Click" ToolTip="{Binding T.TipHide}" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Effect="{StaticResource TextShadow}">
+                <Border Grid.Column="1" Background="#AD111D27" BorderBrush="#344651" BorderThickness="1" CornerRadius="4" Padding="8,5" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Effect="{StaticResource TextShadow}">
                     <TextBlock x:Name="PartnerBadge" Text="✦ PARTNER" Visibility="Collapsed" Foreground="{StaticResource Gold}"
                                FontWeight="Bold" FontSize="9" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <!-- The game's time limit for this instance: stays in view while the toolbar shows, like the clock -->
@@ -369,30 +405,31 @@
                                 </Style>
                             </Ellipse.Style>
                         </Ellipse>
-                        <TextBlock Text="{Binding HeaderLabel}" Foreground="{Binding HeaderBrush}" FontSize="9.5" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding HeaderLabel}" Foreground="#B5C0CC" FontSize="9" FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="13.5"
-                               Foreground="#EEF0F5" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="13.5"
+                               Foreground="#F2C56B" VerticalAlignment="Center" />
                 </StackPanel>
+                </Border>
             </Grid>
 
-            <!-- Boss health -->
-            <Grid Grid.Row="1" Height="28" Margin="0,5,0,3" Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
-                <Border CornerRadius="4" Background="#2A1418" />
-                <Border CornerRadius="4" Background="{StaticResource HpFill}" RenderTransformOrigin="0,0.5">
+            <!-- Encounter identity and boss health, in one compact tactical strip -->
+            <Grid Grid.Row="1" Height="38" Margin="0,5,0,3" Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
+                <Border CornerRadius="4" Background="#A1111A23" BorderBrush="#2C3D47" BorderThickness="1" />
+                <Border Height="3" VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="{StaticResource HpFill}" RenderTransformOrigin="0,0.5">
                     <Border.RenderTransform>
                         <ScaleTransform ScaleX="{Binding BossHpFraction}" />
                     </Border.RenderTransform>
                 </Border>
-                <Grid Margin="8,0">
+                <Grid Margin="9,0">
                     <Grid.Effect>
                         <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.9" Color="Black" />
                     </Grid.Effect>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="BOSS-LEBEN" FontSize="8" FontWeight="Bold" Foreground="#FFE0A0" />
+                        <TextBlock Text="{Binding T.ShowBossHpInfo}" FontSize="8" FontWeight="Bold" Foreground="#D7A65B" />
                         <TextBlock Text="{Binding BossHpText}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10"
-                                   Foreground="White" />
+                                   Foreground="#CBD4D4" />
                     </StackPanel>
                     <TextBlock Text="{Binding BossPercent}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10.5"
                                Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Right" />
@@ -400,16 +437,16 @@
             </Grid>
 
             <!-- Group output at a glance -->
-            <Grid Grid.Row="2" Margin="0,7,0,4">
+            <Grid Grid.Row="2" Height="76" Margin="0,10,0,6">
                 <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="8" /><ColumnDefinition /></Grid.ColumnDefinitions>
-                <Border x:Name="GroupDpsCard" Background="#15202A" BorderBrush="#263640" BorderThickness="1" CornerRadius="9" Padding="12,8">
-                    <StackPanel><TextBlock Text="{Binding T.GroupDps}" FontSize="9" FontWeight="Bold" Foreground="#8FA3AD" />
-                        <TextBlock Text="{Binding PartyDps}" FontFamily="{StaticResource NumberFont}" FontSize="21" FontWeight="Bold" Foreground="#EAF0F3" />
+                <Border x:Name="GroupDpsCard" Background="#151F29" BorderBrush="#263640" BorderThickness="1" CornerRadius="8" Padding="10,7">
+                    <StackPanel><StackPanel Orientation="Horizontal"><Border Background="#F0BD61" Width="3" Height="9" Margin="0,0,6,0" /><TextBlock Text="{Binding T.GroupDps}" FontSize="8" FontWeight="Bold" Foreground="#A7BAC0" /></StackPanel>
+                        <TextBlock Text="{Binding PartyDps}" FontFamily="{StaticResource NumberFont}" FontSize="22" FontWeight="ExtraBold" Foreground="#F2F5EF" />
                     </StackPanel>
                 </Border>
-                <Border x:Name="GroupHpsCard" Grid.Column="2" Background="#10211F" BorderBrush="#1B5049" BorderThickness="1" CornerRadius="9" Padding="12,8">
-                    <StackPanel><TextBlock Text="{Binding T.GroupHps}" FontSize="9" FontWeight="Bold" Foreground="#75C8B7" />
-                        <TextBlock Text="{Binding PartyHps}" FontFamily="{StaticResource NumberFont}" FontSize="21" FontWeight="Bold" Foreground="#EAF0F3" /></StackPanel>
+                <Border x:Name="GroupHpsCard" Grid.Column="2" Background="#10211F" BorderBrush="#1B5049" BorderThickness="1" CornerRadius="8" Padding="10,7">
+                    <StackPanel><StackPanel Orientation="Horizontal"><Border Background="#43D7B4" Width="3" Height="9" Margin="0,0,6,0" /><TextBlock Text="{Binding T.GroupHps}" FontSize="8" FontWeight="Bold" Foreground="#76CDBA" /></StackPanel>
+                        <TextBlock Text="{Binding PartyHps}" FontFamily="{StaticResource NumberFont}" FontSize="22" FontWeight="ExtraBold" Foreground="#E5F8F1" /></StackPanel>
                 </Border>
             </Grid>
 
@@ -424,19 +461,19 @@
                      OverlayWindow.FitNames how wide the rows' columns are -->
                 <Grid x:Name="ColumnLabels" Height="0" Margin="10,0,12,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="34" />
-                        <ColumnDefinition Width="30" />
+                     <ColumnDefinition Width="28" />
+                     <ColumnDefinition Width="28" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                 </Grid>
 
-                <Grid Grid.Row="0" Margin="0,0,10,3">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="34" /><ColumnDefinition Width="30" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                    <TextBlock Text="{Binding T.OverlayRank}" FontSize="8" FontWeight="Bold" Foreground="#899BA5" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="3" Text="DPS" FontSize="8" FontWeight="Bold" Foreground="#899BA5" Margin="0,0,14,0" />
-                    <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="8" FontWeight="Bold" Foreground="#899BA5" VerticalAlignment="Center" />
+                <Grid Grid.Row="0" Margin="0,0,10,4">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="28" /><ColumnDefinition Width="28" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBlock Grid.ColumnSpan="3" Text="RANG · SPIELER" FontSize="8" FontWeight="Bold" Foreground="#899BA5" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="DPS" FontSize="8" FontWeight="Bold" Foreground="#758B94" Margin="0,0,14,0" />
+                    <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="8" FontWeight="Bold" Foreground="#758B94" VerticalAlignment="Center" />
                 </Grid>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">
@@ -464,40 +501,36 @@
                     <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE711;" Click="UpdateBannerClose_Click" Margin="4,0,8,0"
                             VerticalAlignment="Center" ToolTip="{Binding T.UpdateLater}" />
                 </Grid>
-                <Grid>
+                <Grid Margin="0,0,0,5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding Status}">
-                        <Ellipse Width="5" Height="5" Fill="{Binding StatusBrush}" Margin="0,0,6,0" />
+                    <StackPanel x:Name="FooterStatus" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding Status}">
                         <TextBlock x:Name="FooterText" FontSize="11" Foreground="#A9B1C0" TextTrimming="CharacterEllipsis"
                                    Effect="{StaticResource TextShadow}" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0">
-                        <!-- Boss timers: always visible, shows the next respawn -->
-                        <Button Style="{StaticResource TimersPill}" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" Margin="10,0,0,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE121;" FontFamily="{StaticResource IconFont}" FontSize="11" Margin="0,1,5,0" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding TimersLabel}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource FooterLink}" Content="{Binding T.OpenFight}" Click="Details_Click" Effect="{StaticResource TextShadow}" />
-                        <Button Style="{StaticResource FooterLink}" Click="Segments_Click" Effect="{StaticResource TextShadow}">
-                            <TextBlock><Run Text="{Binding T.Fights, Mode=OneWay}" /><Run Text=" " /><Run Text="&#xE70D;" FontFamily="{StaticResource IconFont}" FontSize="8" /></TextBlock>
-                        </Button>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,35,0">
+                        <Ellipse Width="5" Height="5" Fill="#45C2B0" Margin="0,0,5,0" />
+                        <TextBlock Text="LIVE" FontSize="9" FontWeight="Bold" Foreground="#A9B9BC" />
                     </StackPanel>
                 </Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="FooterDetailsButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterDetailsLabel}" Click="Details_Click" />
+                    <Button x:Name="FooterCompareButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterCompareLabel}" Click="Compare_Click" />
+                    <Button x:Name="FooterRankingButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterRankingLabel}" Click="Ranking_Click"
+                            Background="#302B21" BorderBrush="#806D46" Foreground="#F0D48E" Margin="0" />
+                </StackPanel>
             </StackPanel>
         </Grid>
 
         <!-- Resize grip -->
-        <Thumb x:Name="ResizeGrip" Width="22" Height="22" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,3,3"
-               Cursor="SizeNWSE" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
+        <Thumb x:Name="ResizeGrip" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+               Cursor="SizeNWSE" ToolTip="Fenstergröße ändern · am Eck ziehen" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
             <Thumb.Template>
                 <ControlTemplate TargetType="Thumb">
-                    <Border Background="Transparent">
-                    <Path Data="M19 2 L2 19 M19 10 L10 19" Stroke="#99FFFFFF" StrokeThickness="1.4" />
+                    <Border x:Name="GripBack" Background="#D9111922" BorderBrush="#75D9B56A" BorderThickness="1" CornerRadius="8">
+                    <Path Data="M23 5 L5 23 M23 13 L13 23" Stroke="#FFFFD47A" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
                     </Border>
                 </ControlTemplate>
             </Thumb.Template>

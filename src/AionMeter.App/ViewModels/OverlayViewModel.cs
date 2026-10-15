@@ -144,8 +144,11 @@ public sealed class RowViewModel : ObservableObject
             Raise(nameof(TileBorder));
             Raise(nameof(GlowColor));
             UpdateNameBrush();
+            Raise(nameof(ClassLabel));
         }
     }
+
+    public string ClassLabel => UiText.Current.ClassName(_class);
 
     private void UpdateNameBrush()
     {
@@ -460,6 +463,8 @@ public sealed class OverlayViewModel : ObservableObject
             var heading = cb.IsUnknownSummons ? T.UnknownSummonsTip : $"#{i + 1} {cb.Name} · {T.ClassName(cb.Class)}";
             row.Tooltip = $"{heading}\n" +
                           $"{T.RowDamage} {Format.Grouped(cb.Damage)} ({Format.Share(cb.Share)}) · DPS {Format.Compact(cb.Dps)} · 5s burst {Format.Compact(cb.BurstDps)}\n" +
+                          (ShowGear && GearFits && (cb.GearScore > 0 || cb.CombatPower > 0)
+                              ? $"GS {cb.GearScore:#,0} · CP {Format.Power(cb.CombatPower)}\n" : "") +
                           $"{T.IdleDpsHint}\n" +
                           $"{T.HealShort} {Format.Grouped(cb.Healing)}\n" +
                           $"{T.RowHits} {cb.Hits} · {T.RowCrit} {Format.Percent(cb.CritRate)} · {T.RowMax} {Format.Grouped(cb.MaxHit)}";
