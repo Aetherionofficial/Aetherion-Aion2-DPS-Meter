@@ -42,8 +42,8 @@ public sealed class AppSettings
     public double OverlayLeft { get; set; } = 80;
     public double OverlayTop { get; set; } = 160;
     public double OverlayWidth { get; set; } = 470;
-    public double OverlayHeight { get; set; } = 640;
-    public double BackgroundOpacity { get; set; } = 0.9;
+    public double OverlayHeight { get; set; } = 420;
+    public double BackgroundOpacity { get; set; } = 0.94;
     public bool Locked { get; set; }
     public bool ClickThrough { get; set; }
     public bool OverlayVisible { get; set; } = true;
@@ -72,7 +72,7 @@ public sealed class AppSettings
     /// <summary>True: the leader's bar is full and the rest are sized against it. False: bars show share of party damage.</summary>
     public bool BarsRelativeToTop { get; set; } = true;
     public int MaxRows { get; set; } = 10;
-    public const int MinRowSize = 50, MaxRowSize = 100;
+    public const int MinRowSize = 75, MaxRowSize = 100;
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
     public int RowSize { get; set; } = 100;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
@@ -121,7 +121,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 7;
+    private const int CurrentLayout = 8;
 
     public static AppSettings Load()
     {
@@ -153,6 +153,14 @@ public sealed class AppSettings
                     // v7 = dashboard-style combat card with boss health, party DPS/HPS tiles and roomier player rows.
                     s.OverlayWidth = Math.Max(s.OverlayWidth, 470);
                     s.OverlayHeight = Math.Max(s.OverlayHeight, 620);
+                }
+                if (s.LayoutVersion < 8)
+                {
+                    // v8 keeps the overlay readable over bright game scenes and prevents gear details colliding with row bars.
+                    s.BackgroundOpacity = Math.Max(s.BackgroundOpacity, 0.92);
+                    // Older default layouts reserved a large empty list area; keep user-sized layouts but compact the old default.
+                    if (s.OverlayHeight >= 620) s.OverlayHeight = 420;
+                    s.RowSize = Math.Max(s.RowSize, MinRowSize);
                 }
                 s.Language = UiText.Normalize(s.Language);
                 s.LayoutVersion = CurrentLayout;
