@@ -644,19 +644,18 @@ public partial class App : Application
         var available = updates.Available;
         _tray?.SetUpdate(available?.Version.ToString(3));
         if (available is null || available.Version == _announcedUpdate) return;
-        var t = UiText.Current;
         if (updates.AutoInstall && !updates.DownloadFailed)
         {
-            // It installs itself: one notice once it is downloaded, nothing to click.
+            // It installs itself after download; once ready, offer an immediate update window too.
             if (updates.Downloaded?.Version != available.Version) return; // still downloading
             _announcedUpdate = available.Version;
             if (!_checkingByHand)
-                _tray?.ShowBalloon(t.UpdateTitle, string.Format(t.UpdateReadyBalloon, available.Version.ToString(3)), InstallUpdateNow);
+                ShowUpdate(available);
             return;
         }
         _announcedUpdate = available.Version;
         if (_checkingByHand) return; // the one who asked gets the update window instead
-        _tray?.ShowBalloon(t.UpdateTitle, string.Format(t.UpdateBalloon, available.Version.ToString(3)), () => ShowUpdate());
+        ShowUpdate(available);
     }
 
     private readonly long _startedAt = Environment.TickCount64;

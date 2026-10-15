@@ -58,6 +58,27 @@ public partial class UpdateWindow : Window
         UpdateButton.IsEnabled = SkipButton.IsEnabled = false;
         DownloadBar.Visibility = State.Visibility = Visibility.Visible;
         State.Text = string.Format(t.UpdateDownloading, 0);
+
+        // Installed copies may already have a verified installer downloading in the background.
+        // Use that package instead of downloading a second copy when the startup prompt is opened.
+        if (_useInstaller && _updater.Downloaded?.Version == Release.Version)
+        {
+            try
+            {
+                State.Text = t.UpdateStarting;
+                _updater.InstallDownloaded();
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or Win32Exception)
+            {
+                Log.Error("Prepared update could not start", ex);
+                State.Text = string.Format(t.UpdateFailed, ex.Message);
+                DownloadBar.Visibility = Visibility.Collapsed;
+                UpdateButton.IsEnabled = SkipButton.IsEnabled = true;
+            }
+            return;
+        }
+
         _download = new CancellationTokenSource();
         var progress = new Progress<double>(f =>
         {

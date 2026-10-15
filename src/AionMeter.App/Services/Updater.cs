@@ -24,7 +24,7 @@ public enum UpdateCheckResult
 /// </summary>
 public sealed class Updater : IDisposable
 {
-    private static readonly TimeSpan FirstCheckDelay = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan FirstCheckDelay = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan CheckInterval = TimeSpan.FromHours(2);
     private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\{AE1B2590-0A93-4500-9CB1-0F543771957A}_is1"; // AppId in installer/AION2DpsMeter.iss
 
