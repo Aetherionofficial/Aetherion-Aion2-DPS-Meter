@@ -52,7 +52,7 @@ public static class SupabaseAccessService
         var responseText = code is null
             ? "<h2>Aetherion-Anmeldung fehlgeschlagen</h2><p>Du kannst dieses Browserfenster schließen und es erneut versuchen.</p>"
             : "<h2>Aetherion-Anmeldung abgeschlossen</h2><p>Du kannst dieses Browserfenster schließen und zur App zurückkehren.</p>";
-        var bytes = Encoding.UTF8.GetBytes($"<!doctype html><meta charset='utf-8'><title>Aetherion</title><body style='font:16px Segoe UI;background:#12151e;color:#fff;padding:3em'>{responseText}</body>");
+        var bytes = Encoding.UTF8.GetBytes($"<!doctype html><meta charset='utf-8'><title>Aetherion</title><body style='font:16px Segoe UI;background:#0a0b0d;color:#f4f0eb;padding:3em'>{responseText}</body>");
         context.Response.ContentType = "text/html; charset=utf-8";
         context.Response.ContentLength64 = bytes.Length;
         await context.Response.OutputStream.WriteAsync(bytes, cancellationToken);

@@ -60,7 +60,7 @@ public static class ChatCopy
             StaysOpen = true,
             Child = new Border
             {
-                Background = new SolidColorBrush(Color.FromArgb(0xF2, 0x14, 0x18, 0x24)),
+                Background = new SolidColorBrush(Color.FromArgb(0xF2, 0x0A, 0x0B, 0x0D)),
                 BorderBrush = (Brush)Application.Current.FindResource("Gold"),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(7),

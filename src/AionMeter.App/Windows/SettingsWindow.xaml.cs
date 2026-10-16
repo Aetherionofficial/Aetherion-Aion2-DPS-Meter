@@ -125,7 +125,7 @@ public partial class SettingsWindow : Window
         }
         if (button is not null)
         {
-            button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xC9, 0xA4, 0x5C));
+            button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xFF, 0x74, 0x1F));
             button.Foreground = (System.Windows.Media.Brush)FindResource("GoldBright");
             if (button.Template.FindName("Marker", button) is FrameworkElement marker)
                 marker.Visibility = Visibility.Visible;

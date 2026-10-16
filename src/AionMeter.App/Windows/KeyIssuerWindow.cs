@@ -28,12 +28,12 @@ public sealed class KeyIssuerWindow : Window
         Height = 690;
         MinWidth = 540;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        Background = new SolidColorBrush(Color.FromRgb(18, 21, 30));
+        Background = new SolidColorBrush(Color.FromRgb(10, 11, 13));
         Foreground = Brushes.White;
         FontFamily = new FontFamily("Segoe UI");
         var panel = new StackPanel { Margin = new Thickness(24) };
         Content = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = panel };
-        panel.Children.Add(new TextBlock { Text = "AETHERION • KEY-VERWALTUNG", FontSize = 21, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(236, 190, 93)) });
+        panel.Children.Add(new TextBlock { Text = "AETHERION • KEY-VERWALTUNG", FontSize = 21, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(255, 155, 74)) });
         panel.Children.Add(new TextBlock { Text = "Nur für den Eigentümer. Behalte owner-private.pem geheim und sichere davon ein Backup.", TextWrapping = TextWrapping.Wrap, Foreground = Brushes.Orange, Margin = new Thickness(0, 8, 0, 16) });
         AddField(panel, "Installations-ID des Nutzers", _machine);
         _kind.Items.Add("Kunden-Key");
@@ -51,7 +51,7 @@ public sealed class KeyIssuerWindow : Window
         AddField(panel, "Partner-Code (15 % Rabatt)", _code);
         _kind.SelectionChanged += (_, _) => UpdatePartnerFields();
         UpdatePartnerFields();
-        var issue = new Button { Content = "Signierten Key erstellen", Padding = new Thickness(12, 8, 12, 8), Margin = new Thickness(0, 6, 0, 8), HorizontalAlignment = HorizontalAlignment.Left, Background = new SolidColorBrush(Color.FromRgb(236, 190, 93)), Foreground = Brushes.Black, FontWeight = FontWeights.SemiBold };
+        var issue = new Button { Content = "Signierten Key erstellen", Style = (Style)Application.Current.FindResource("PrimaryButton"), Padding = new Thickness(12, 8, 12, 8), Margin = new Thickness(0, 6, 0, 8), HorizontalAlignment = HorizontalAlignment.Left, FontWeight = FontWeights.SemiBold };
         issue.Click += Issue_Click;
         panel.Children.Add(issue);
         _status.Margin = new Thickness(0, 0, 0, 8);
@@ -60,11 +60,11 @@ public sealed class KeyIssuerWindow : Window
         panel.Children.Add(new TextBlock { Text = "Key — komplett kopieren und dem Nutzer senden", Margin = new Thickness(0, 0, 0, 6) });
         _output.Padding = new Thickness(8);
         panel.Children.Add(_output);
-        var copy = new Button { Content = "Key kopieren", Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 8, 0, 0), HorizontalAlignment = HorizontalAlignment.Left };
+        var copy = new Button { Content = "Key kopieren", Style = (Style)Application.Current.FindResource("GhostButton"), Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 8, 0, 0), HorizontalAlignment = HorizontalAlignment.Left };
         copy.Click += (_, _) => { if (!string.IsNullOrWhiteSpace(_output.Text)) Clipboard.SetText(_output.Text); };
         panel.Children.Add(copy);
         panel.Children.Add(new Separator { Margin = new Thickness(0, 18, 0, 12) });
-        panel.Children.Add(new TextBlock { Text = "KEY SPERREN", FontSize = 15, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(236, 190, 93)) });
+        panel.Children.Add(new TextBlock { Text = "KEY SPERREN", FontSize = 15, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(255, 155, 74)) });
         panel.Children.Add(new TextBlock { Text = "Key-ID aus issued-keys.csv eintragen. Die signierte Sperrliste muss anschließend auf deinen konfigurierten Sperrlisten-Server hochgeladen werden.", TextWrapping = TextWrapping.Wrap, Foreground = Brushes.LightGray, Margin = new Thickness(0, 6, 0, 8) });
         AddField(panel, "Lizenz-ID (32 Zeichen)", _revokeId);
         var revoke = new Button { Content = "Key sperren und Sperrliste signieren", Padding = new Thickness(10, 7, 10, 7), HorizontalAlignment = HorizontalAlignment.Left, Background = new SolidColorBrush(Color.FromRgb(113, 40, 44)), Foreground = Brushes.White };
@@ -77,6 +77,9 @@ public sealed class KeyIssuerWindow : Window
         panel.Children.Add(new TextBlock { Text = label, Margin = new Thickness(0, 6, 0, 4), Foreground = Brushes.LightGray });
         control.Padding = new Thickness(8, 6, 8, 6);
         control.Margin = new Thickness(0, 0, 0, 4);
+        control.Background = (Brush)Application.Current.FindResource("Bg2");
+        control.Foreground = (Brush)Application.Current.FindResource("Text");
+        control.BorderBrush = (Brush)Application.Current.FindResource("Line");
         panel.Children.Add(control);
     }
 

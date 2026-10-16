@@ -206,7 +206,7 @@ public static class RankBrushes
 public sealed class OverlayViewModel : ObservableObject
 {
     private static readonly Brush LiveRed = Frozen(Color.FromRgb(0xEF, 0x4D, 0x56));
-    private static readonly Brush SavedGold = Frozen(Color.FromRgb(0xC9, 0xA4, 0x5C));
+    private static readonly Brush SavedGold = Frozen(Color.FromRgb(0xFF, 0x74, 0x1F));
     private static readonly Brush Dim = Frozen(Color.FromRgb(0x8A, 0x93, 0xA8));
 
     private string _title = UiText.Current.WaitingTitle;

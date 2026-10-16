@@ -1,20 +1,20 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Classic gold palette (AionFlex-like) -->
-    <Color x:Key="Bg0Color">#0B0F17</Color>
-    <Color x:Key="Bg1Color">#111726</Color>
-    <Color x:Key="Bg2Color">#19203A</Color>
-    <Color x:Key="LineColor">#2A3350</Color>
-    <Color x:Key="GoldColor">#C9A45C</Color>
-    <Color x:Key="GoldBrightColor">#ECCB82</Color>
-    <Color x:Key="GoldDimColor">#6E5A33</Color>
-    <Color x:Key="TextColor">#F1E9D8</Color>
-    <Color x:Key="TextDimColor">#A3ACBF</Color>
-    <Color x:Key="TextMuteColor">#6B7590</Color>
+    <!-- Clean ember-orange accents on a near-black charcoal base. -->
+    <Color x:Key="Bg0Color">#0A0B0D</Color>
+    <Color x:Key="Bg1Color">#111315</Color>
+    <Color x:Key="Bg2Color">#191B1E</Color>
+    <Color x:Key="LineColor">#2A2D31</Color>
+    <Color x:Key="GoldColor">#FF741F</Color>
+    <Color x:Key="GoldBrightColor">#FF9B4A</Color>
+    <Color x:Key="GoldDimColor">#82421C</Color>
+    <Color x:Key="TextColor">#F4F0EB</Color>
+    <Color x:Key="TextDimColor">#B7B1AA</Color>
+    <Color x:Key="TextMuteColor">#807971</Color>
     <Color x:Key="RedColor">#EF4D56</Color>
     <Color x:Key="GreenColor">#3DD68C</Color>
-    <Color x:Key="AmberColor">#F5B544</Color>
+    <Color x:Key="AmberColor">#FFB547</Color>
 
     <SolidColorBrush x:Key="Bg0" Color="{StaticResource Bg0Color}" />
     <SolidColorBrush x:Key="Bg1" Color="{StaticResource Bg1Color}" />
@@ -33,16 +33,16 @@
     <SolidColorBrush x:Key="HoverFill" Color="#14FFFFFF" />
 
     <LinearGradientBrush x:Key="GoldFrame" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#8C7340" Offset="0" />
-        <GradientStop Color="#3A3222" Offset="0.45" />
-        <GradientStop Color="#3A3222" Offset="0.7" />
-        <GradientStop Color="#8C7340" Offset="1" />
+        <GradientStop Color="#A34D1A" Offset="0" />
+        <GradientStop Color="#392315" Offset="0.45" />
+        <GradientStop Color="#392315" Offset="0.7" />
+        <GradientStop Color="#A34D1A" Offset="1" />
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="GoldTopLine" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="#00C9A45C" Offset="0" />
-        <GradientStop Color="#FFE7C67F" Offset="0.5" />
-        <GradientStop Color="#00C9A45C" Offset="1" />
+        <GradientStop Color="#00FF741F" Offset="0" />
+        <GradientStop Color="#FFFFB56D" Offset="0.5" />
+        <GradientStop Color="#00FF741F" Offset="1" />
     </LinearGradientBrush>
 
     <FontFamily x:Key="NumberFont">Bahnschrift</FontFamily>
@@ -92,7 +92,7 @@
     <Style x:Key="Chip" TargetType="ButtonBase">
         <Setter Property="Foreground" Value="{StaticResource Gold}" />
         <Setter Property="BorderBrush" Value="{StaticResource GoldDim}" />
-        <Setter Property="Background" Value="#1AC9A45C" />
+        <Setter Property="Background" Value="#1AFF741F" />
         <Setter Property="FontFamily" Value="{StaticResource NumberFont}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="11" />
@@ -194,7 +194,7 @@
         </Setter>
     </Style>
 
-    <!-- Slim gold slider (opacity) -->
+    <!-- Slim orange slider (opacity) -->
     <Style x:Key="SliderThumb" TargetType="Thumb">
         <Setter Property="Template">
             <Setter.Value>
@@ -336,7 +336,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#22C9A45C" />
+                            <Setter TargetName="Bd" Property="Background" Value="#22FF741F" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Check" Property="Visibility" Value="Visible" />

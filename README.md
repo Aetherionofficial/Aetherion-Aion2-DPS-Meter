@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Aetherionofficial/MostWanted-DPS/releases/latest"><img alt="Download the latest release" src="https://img.shields.io/github/v/release/Aetherionofficial/MostWanted-DPS?label=download&color=c9a45c&style=for-the-badge"></a>
+  <a href="https://github.com/Aetherionofficial/MostWanted-DPS/releases/latest"><img alt="Download the latest release" src="https://img.shields.io/github/v/release/Aetherionofficial/MostWanted-DPS?label=download&color=ff741f&style=for-the-badge"></a>
   <img alt="Windows 10 / 11, 64-bit" src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-2b3a67?style=for-the-badge">
   <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-3dd68c?style=for-the-badge"></a>
 </p>
@@ -251,16 +251,12 @@ dotnet test tests/AionMeter.Tests
 src/AionMeter.App/bin/Release/net10.0-windows/AION2DpsMeter.exe
 ```
 
-**Releases:** bump `<Version>` in `src/AionMeter.App/AionMeter.App.csproj`, then run `.\build-release.ps1`. It writes to
-`dist\` the installer (needs [Inno Setup 7](https://jrsoftware.org/isdl.php); script `installer/AION2DpsMeter.iss`),
-the portable zip, the source zip, and copies of the installer and zip under fixed names (`AION2DpsMeter-Setup.exe`,
-`AION2DpsMeter-win-x64.zip`) so that `releases/latest/download/<name>` always gives the newest version. Publish them
-together as a GitHub release tagged `v<version>` (not a pre-release: the update check reads `/releases/latest` and needs
-the `*Setup*.exe` asset).
-
-```powershell
-gh release create v<version> dist\AION2DpsMeter-Setup-v<version>.exe dist\AION2DpsMeter-Setup.exe dist\AION2DpsMeter-v<version>-win-x64.zip dist\AION2DpsMeter-win-x64.zip dist\AION2DpsMeter-v<version>-source.zip --title "AION2 DPS Meter <version>" --notes-file notes.md
-```
+**Releases:** bump `<Version>` in `src/AionMeter.App/AionMeter.App.csproj` and add matching release notes. Pushing the tag
+`v<version>` runs the Windows release workflow, which builds the installer (using
+[Inno Setup 7](https://jrsoftware.org/isdl.php); script `installer/AION2DpsMeter.iss`) and portable zip, then publishes
+versioned and fixed-name assets. To build locally, run `.\build-release.ps1`; it writes the installer when Inno Setup 7
+is installed, the portable zip and fixed-name copies to `dist\`. Releases must not be pre-releases: the update check
+reads `/releases/latest` and requires the `*Setup*.exe` asset.
 
 **Screenshots and video:** `tools/make-site-kit.ps1` renders the pictures in this README, English and Russian
 screenshots, a social preview and the fight animation (MP4 / GIF, needs ffmpeg) into `site-kit\` and

@@ -4,7 +4,7 @@ using System.Windows.Media;
 namespace AionMeter.App.Controls;
 
 /// <summary>
-/// A boss portrait in a round gold frame (history, breakdown). Without a picture it shows a dim skull, so lists stay
+/// A boss portrait in a round orange frame (history, breakdown). Without a picture it shows a dim skull, so lists stay
 /// aligned while portraits download or for fights that have none. Size it with Width/Height.
 /// </summary>
 public sealed class BossPortrait : FrameworkElement
@@ -24,12 +24,12 @@ public sealed class BossPortrait : FrameworkElement
         "M12 3 C7 3 4 6.5 4 11 C4 14 5.5 15.5 7 16.5 L7 19 L9.5 19 L9.5 17.5 L11 17.5 L11 19 L13 19 L13 17.5 L14.5 17.5 L14.5 19 " +
         "L17 19 L17 16.5 C18.5 15.5 20 14 20 11 C20 6.5 17 3 12 3 Z M8.8 9.8 A1.9 1.9 0 1 0 8.81 9.8 Z M15.2 9.8 A1.9 1.9 0 1 0 15.21 9.8 Z"));
 
-    private static readonly Brush Coin = Frozen(new RadialGradientBrush(Color.FromRgb(0x3C, 0x34, 0x26), Color.FromRgb(0x14, 0x12, 0x0E))
+    private static readonly Brush Coin = Frozen(new RadialGradientBrush(Color.FromRgb(0x32, 0x1D, 0x12), Color.FromRgb(0x14, 0x12, 0x0E))
         { GradientOrigin = new Point(0.45, 0.35) });
-    private static readonly Pen Ring = Frozen(new Pen(new SolidColorBrush(Color.FromRgb(0xD7, 0xAE, 0x5C)), 1.6));
-    private static readonly Pen DimRing = Frozen(new Pen(new SolidColorBrush(Color.FromArgb(0x90, 0xD7, 0xAE, 0x5C)), 1.2));
+    private static readonly Pen Ring = Frozen(new Pen(new SolidColorBrush(Color.FromRgb(0xFF, 0x74, 0x1F)), 1.6));
+    private static readonly Pen DimRing = Frozen(new Pen(new SolidColorBrush(Color.FromArgb(0x90, 0xFF, 0x74, 0x1F)), 1.2));
     private static readonly Pen InnerShade = Frozen(new Pen(new SolidColorBrush(Color.FromArgb(0x70, 0, 0, 0)), 1));
-    private static readonly Brush SkullFill = Frozen(new SolidColorBrush(Color.FromArgb(0xB0, 0xEC, 0xCB, 0x82)));
+    private static readonly Brush SkullFill = Frozen(new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0x9B, 0x4A)));
 
     public BossPortrait()
     {

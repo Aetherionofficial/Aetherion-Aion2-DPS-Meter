@@ -28,7 +28,7 @@ public partial class BreakdownWindow : Window
         public string PlaceText => Place > 0 ? Place.ToString() : "·";
         public Brush NameBrush => IsSelf ? SelfBrush : Brushes.WhiteSmoke;
         public FontWeight NameWeight => IsSelf ? FontWeights.Bold : FontWeights.Normal;
-        private static readonly Brush SelfBrush = new SolidColorBrush(Color.FromRgb(0xEC, 0xCB, 0x82));
+        private static readonly Brush SelfBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0x9B, 0x4A));
     }
 
     public sealed record HealingItem(string Name, Brush Swatch, ImageSource? Icon, string Events, string Amount, string Tooltip);

@@ -40,7 +40,7 @@ public sealed class TimelineChart : FrameworkElement
         max = NiceCeiling(max);
 
         var grid = new Pen(new SolidColorBrush(Color.FromArgb(0x22, 0xFF, 0xFF, 0xFF)), 1);
-        var labelBrush = new SolidColorBrush(Color.FromRgb(0x6B, 0x75, 0x90));
+        var labelBrush = new SolidColorBrush(Color.FromRgb(0x80, 0x79, 0x71));
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
         for (var i = 0; i <= 4; i++)

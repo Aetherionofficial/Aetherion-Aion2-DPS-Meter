@@ -22,13 +22,13 @@ public sealed class ActivationWindow : Window
         Topmost = true;
         ShowActivated = true;
         ResizeMode = ResizeMode.NoResize;
-        Background = new SolidColorBrush(Color.FromRgb(18, 21, 30));
-        Foreground = Brushes.White;
+        Background = (Brush)Application.Current.FindResource("Bg0");
+        Foreground = (Brush)Application.Current.FindResource("Text");
         FontFamily = new FontFamily("Segoe UI");
 
         var panel = new StackPanel { Margin = new Thickness(26) };
         Content = panel;
-        panel.Children.Add(new TextBlock { Text = "AETHERION", FontSize = 24, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(236, 190, 93)) });
+        panel.Children.Add(new TextBlock { Text = "AETHERION", FontSize = 24, FontWeight = FontWeights.Bold, Foreground = (Brush)Application.Current.FindResource("GoldBright") });
         panel.Children.Add(new TextBlock
         {
             Text = "Melde dich mit Discord an und löse deinen Key ein. Keys erhältst du nach dem Kauf über ein Ticket auf unserem Discord.",
@@ -39,6 +39,7 @@ public sealed class ActivationWindow : Window
         _discordButton = new Button
         {
             Content = "Mit Discord anmelden / Konto aktualisieren",
+            Style = (Style)Application.Current.FindResource("PrimaryButton"),
             Padding = new Thickness(12, 10, 12, 10),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             FontWeight = FontWeights.SemiBold,
@@ -55,11 +56,16 @@ public sealed class ActivationWindow : Window
         panel.Children.Add(new TextBlock { Text = "Lizenz-Key", Margin = new Thickness(0, 0, 0, 6) });
         _licenseKey.Height = 38;
         _licenseKey.Padding = new Thickness(8);
+        _licenseKey.Background = (Brush)Application.Current.FindResource("Bg2");
+        _licenseKey.Foreground = (Brush)Application.Current.FindResource("Text");
+        _licenseKey.BorderBrush = (Brush)Application.Current.FindResource("Line");
+        _licenseKey.CaretBrush = (Brush)Application.Current.FindResource("Gold");
         _licenseKey.ToolTip = "AETH-…";
         panel.Children.Add(_licenseKey);
         _redeemButton = new Button
         {
             Content = "Key einlösen",
+            Style = (Style)Application.Current.FindResource("PrimaryButton"),
             Padding = new Thickness(12, 8, 12, 8),
             HorizontalAlignment = HorizontalAlignment.Right,
             MinWidth = 130,
@@ -68,7 +74,14 @@ public sealed class ActivationWindow : Window
         _redeemButton.Click += RedeemButton_Click;
         panel.Children.Add(_redeemButton);
 
-        var ticket = new Button { Content = "Key im Discord-Ticket kaufen / anfragen", Padding = new Thickness(8, 6, 8, 6), HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 10, 0, 0) };
+        var ticket = new Button
+        {
+            Content = "Key im Discord-Ticket kaufen / anfragen",
+            Style = (Style)Application.Current.FindResource("GhostButton"),
+            Padding = new Thickness(8, 6, 8, 6),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 10, 0, 0),
+        };
         ticket.Click += (_, _) => Process.Start(new ProcessStartInfo("https://discord.gg/mostwantedde") { UseShellExecute = true });
         panel.Children.Add(ticket);
     }

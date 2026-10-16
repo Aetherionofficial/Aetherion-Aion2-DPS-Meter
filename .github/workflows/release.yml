@@ -1,0 +1,48 @@
+name: Windows release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Install Inno Setup 7
+        run: choco install innosetup --yes --no-progress
+      - name: Restore and build release assets
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content "src/AionMeter.App/AionMeter.App.csproj"
+          $version = $project.Project.PropertyGroup.Version
+          if ($env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Release tag $env:GITHUB_REF_NAME does not match project version $version"
+          }
+          dotnet restore "src/AionMeter.App/AionMeter.App.csproj" --runtime win-x64
+          if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed" }
+          .\build-release.ps1 -Version $version
+          if (-not (Test-Path "dist/Aetherion-DPS-Meter-Setup-v$version.exe")) {
+            throw "Inno Setup 7 did not produce the installer"
+          }
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Aetherion DPS Meter ${{ github.ref_name }}
+          body_path: RELEASE_NOTES_${{ github.ref_name }}.md
+          files: |
+            dist/Aetherion-DPS-Meter-Setup-v*.exe
+            dist/Aetherion-DPS-Meter-Setup.exe
+            dist/Aetherion-DPS-Meter-v*-win-x64.zip
+            dist/Aetherion-DPS-Meter-win-x64.zip
+          draft: false
+          prerelease: false

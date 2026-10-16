@@ -7,8 +7,8 @@ namespace AionMeter.App.Windows;
 
 public sealed class FarmGuideWindow : Window
 {
-    private static readonly Brush Surface = new SolidColorBrush(Color.FromRgb(25, 31, 44));
-    private static readonly Brush Gold = new SolidColorBrush(Color.FromRgb(236, 190, 93));
+    private static readonly Brush Surface = new SolidColorBrush(Color.FromRgb(17, 19, 21));
+    private static readonly Brush Gold = new SolidColorBrush(Color.FromRgb(255, 155, 74));
     private readonly StackPanel _content = new();
 
     public FarmGuideWindow()
@@ -19,7 +19,7 @@ public sealed class FarmGuideWindow : Window
         MinWidth = 560;
         MinHeight = 480;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        Background = new SolidColorBrush(Color.FromRgb(18, 21, 30));
+        Background = new SolidColorBrush(Color.FromRgb(10, 11, 13));
         Foreground = Brushes.White;
         FontFamily = new FontFamily("Segoe UI");
         var root = new DockPanel { Margin = new Thickness(22) };
@@ -47,7 +47,7 @@ public sealed class FarmGuideWindow : Window
 
     private void AddCard(string title, string body)
     {
-        var card = new Border { Background = Surface, BorderBrush = new SolidColorBrush(Color.FromRgb(54, 62, 80)), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8), Padding = new Thickness(14), Margin = new Thickness(0, 0, 0, 10) };
+        var card = new Border { Background = Surface, BorderBrush = new SolidColorBrush(Color.FromRgb(48, 39, 31)), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8), Padding = new Thickness(14), Margin = new Thickness(0, 0, 0, 10) };
         var panel = new StackPanel();
         panel.Children.Add(new TextBlock { Text = title, Foreground = Gold, FontSize = 14, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
         panel.Children.Add(new TextBlock { Text = body, TextWrapping = TextWrapping.Wrap, LineHeight = 21 });

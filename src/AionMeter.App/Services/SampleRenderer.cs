@@ -17,7 +17,7 @@ public static class SampleRenderer
     /// <param name="Window">overlay (default), raid-command, overlay-update, overlay-crowd, breakdown, history, timers, settings, update or update-portable.</param>
     /// <param name="Width">Overlay width (default 560): narrow sizes show how the footer copes.</param>
     /// <param name="Tab">Breakdown tab: dps (default), accuracy, rotation or defense.</param>
-    /// <param name="Backdrop">Behind the translucent overlay: game (a stand-in colour), dark (a navy gradient) or none (transparent).</param>
+    /// <param name="Backdrop">Behind the translucent overlay: game (a stand-in colour), dark (a charcoal gradient) or none (transparent).</param>
     /// <param name="RowSize">Overlay row size in percent (Settings → Overlay → Row size).</param>
     public sealed record Options(string Window = "overlay", int? Width = null, int? Height = null, string? Tab = null,
         string Backdrop = "game", double Scale = 1.5, int RowSize = 100, double? BackgroundOpacity = null);
@@ -184,7 +184,7 @@ public static class SampleRenderer
         {
             "none" => null,
             "dark" => new LinearGradientBrush(
-                new GradientStopCollection { new(Color.FromRgb(0x24, 0x31, 0x52), 0), new(Color.FromRgb(0x11, 0x17, 0x29), 0.55), new(Color.FromRgb(0x07, 0x09, 0x10), 1) },
+                new GradientStopCollection { new(Color.FromRgb(0x32, 0x1D, 0x12), 0), new(Color.FromRgb(0x11, 0x13, 0x15), 0.55), new(Color.FromRgb(0x0A, 0x0B, 0x0D), 1) },
                 new Point(0, 0), new Point(1, 1)),
             _ => new SolidColorBrush(Color.FromRgb(0x2B, 0x3A, 0x2E)), // a stand-in for the game
         };

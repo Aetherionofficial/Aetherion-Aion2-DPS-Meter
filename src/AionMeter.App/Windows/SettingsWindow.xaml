@@ -11,16 +11,16 @@
     </WindowChrome.WindowChrome>
     <Window.Resources>
         <Style x:Key="Section" TargetType="Border">
-            <Setter Property="Background" Value="#141E27" />
-            <Setter Property="BorderBrush" Value="#26343E" />
+            <Setter Property="Background" Value="#151719" />
+            <Setter Property="BorderBrush" Value="#30271F" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14,10" />
             <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
         <Style x:Key="OverlayCard" TargetType="Border">
-            <Setter Property="Background" Value="#111A24" />
-            <Setter Property="BorderBrush" Value="#263747" />
+            <Setter Property="Background" Value="#121416" />
+            <Setter Property="BorderBrush" Value="#30271F" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="11" />
             <Setter Property="Padding" Value="16,14" />
@@ -69,7 +69,7 @@
         </Style>
         <Style x:Key="OverlayModeButton" TargetType="ToggleButton">
             <Setter Property="Foreground" Value="{StaticResource TextDim}" />
-            <Setter Property="Background" Value="#1A2831" />
+            <Setter Property="Background" Value="#211811" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="10,8" />
@@ -84,12 +84,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#28271F" />
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#9B7B43" />
+                                <Setter TargetName="Surface" Property="Background" Value="#332216" />
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#A34D1A" />
                                 <Setter Property="Foreground" Value="{StaticResource GoldBright}" />
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#665C42" />
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#7A4626" />
                                 <Setter Property="Foreground" Value="{StaticResource Text}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -130,7 +130,7 @@
             <Border Grid.Row="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
                 <StackPanel Margin="16,24,14,16">
                     <StackPanel Orientation="Horizontal" Margin="4,0,0,28">
-                        <Border Width="34" Height="34" CornerRadius="10" Background="#25251F" BorderBrush="#5B5038" BorderThickness="1">
+                        <Border Width="34" Height="34" CornerRadius="10" Background="#211811" BorderBrush="#704020" BorderThickness="1">
                             <TextBlock Text="A" Foreground="{StaticResource GoldBright}" FontSize="20" FontWeight="Bold"
                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>

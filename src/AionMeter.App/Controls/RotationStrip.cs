@@ -11,7 +11,7 @@ namespace AionMeter.App.Controls;
 
 /// <summary>
 /// Every cast in order as tiles that wrap onto new lines. Tile size follows the hit's damage relative to the
-/// biggest hit; a gold ring marks critical hits. Drawn directly for speed — a long fight has thousands of casts.
+/// biggest hit; an orange ring marks critical hits. Drawn directly for speed — a long fight has thousands of casts.
 /// </summary>
 public sealed class RotationStrip : FrameworkElement
 {
@@ -84,8 +84,8 @@ public sealed class RotationStrip : FrameworkElement
     {
         dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-        var gold = new Pen(new SolidColorBrush(Color.FromRgb(0xEC, 0xCB, 0x82)), 2);
-        var label = new SolidColorBrush(Color.FromRgb(0xA3, 0xAC, 0xBF));
+        var accent = new Pen(new SolidColorBrush(Color.FromRgb(0xFF, 0x9B, 0x4A)), 2);
+        var label = new SolidColorBrush(Color.FromRgb(0xB7, 0xB1, 0xAA));
         var white = Brushes.White;
 
         foreach (var (rect, index) in _layout)
@@ -100,11 +100,11 @@ public sealed class RotationStrip : FrameworkElement
                 dc.PushClip(new RectangleGeometry(rect, 6, 6));
                 dc.DrawImage(icon, rect);
                 dc.Pop();
-                dc.DrawRoundedRectangle(null, crit ? gold : new Pen(new SolidColorBrush(Color.FromArgb(0x60, 0, 0, 0)), 1), rect, 6, 6);
+                dc.DrawRoundedRectangle(null, crit ? accent : new Pen(new SolidColorBrush(Color.FromArgb(0x60, 0, 0, 0)), 1), rect, 6, 6);
             }
             else
             {
-                dc.DrawRoundedRectangle(brush, crit ? gold : new Pen(new SolidColorBrush(Color.FromArgb(0x50, 0, 0, 0)), 1), rect, 6, 6);
+                dc.DrawRoundedRectangle(brush, crit ? accent : new Pen(new SolidColorBrush(Color.FromArgb(0x50, 0, 0, 0)), 1), rect, 6, 6);
                 var initials = Initials(_skillName(cast.SkillCode));
                 var t = new FormattedText(initials, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, FaceBold, rect.Width * 0.36, white, dpi);
                 dc.DrawText(t, new Point(rect.X + (rect.Width - t.Width) / 2, rect.Y + (rect.Height - t.Height) / 2));

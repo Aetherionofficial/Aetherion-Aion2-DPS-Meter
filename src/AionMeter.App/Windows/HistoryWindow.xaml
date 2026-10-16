@@ -31,7 +31,7 @@
                                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource HoverFill}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#26C9A45C" />
+                                <Setter TargetName="Bd" Property="Background" Value="#26FF741F" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
