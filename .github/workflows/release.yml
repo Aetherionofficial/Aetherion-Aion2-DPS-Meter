@@ -28,8 +28,8 @@ jobs:
       - name: Restore and build release assets
         shell: pwsh
         run: |
-          [xml]$project = Get-Content "src/AionMeter.App/AionMeter.App.csproj"
-          $version = $project.Project.PropertyGroup.Version.ToString().Trim()
+          $version = (Select-Xml -Path "src/AionMeter.App/AionMeter.App.csproj" -XPath "//Version").Node.InnerText | Select-Object -First 1
+          $version = $version.Trim()
           if ($env:GITHUB_REF_NAME -ne "v$version") {
             throw "Release tag $env:GITHUB_REF_NAME does not match project version $version"
           }
