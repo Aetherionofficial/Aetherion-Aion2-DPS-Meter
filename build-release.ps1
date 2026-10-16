@@ -28,11 +28,17 @@ function New-Zip([string]$folder, [string]$zipPath) {
 
 # Inno Setup 7's compiler: on PATH or in its per-user / per-machine install folder.
 function Find-Iscc {
+    # Prefer the explicitly installed Inno Setup 7. GitHub's Windows runners may
+    # also have Inno Setup 6 on PATH, which cannot compile the 64-bit SetupArchitecture directive.
+    $inno7 = @(
+        "$env:LOCALAPPDATA\Programs\Inno Setup 7",
+        "$env:USERPROFILE\AppData\Local\Programs\Inno Setup 7",
+        "$env:ProgramFiles\Inno Setup 7",
+        "${env:ProgramFiles(x86)}\Inno Setup 7"
+    ) | ForEach-Object { Join-Path $_ "ISCC.exe" } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($inno7) { return $inno7 }
     $cmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }
-    "$env:LOCALAPPDATA\Programs\Inno Setup 7", "$env:USERPROFILE\AppData\Local\Programs\Inno Setup 7",
-    "$env:ProgramFiles\Inno Setup 7", "${env:ProgramFiles(x86)}\Inno Setup 7" |
-        ForEach-Object { Join-Path $_ "ISCC.exe" } | Where-Object { Test-Path $_ } | Select-Object -First 1
 }
 
 # Inno Setup writes an installer's version strings in place and pads them with spaces ("AION2 DPS Meter        …").
