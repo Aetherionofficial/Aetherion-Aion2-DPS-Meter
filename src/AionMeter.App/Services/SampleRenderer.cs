@@ -24,7 +24,8 @@ public static class SampleRenderer
 
     public static void Render(string path, string language, Options o)
     {
-        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 4 : 10, o.BackgroundOpacity);
+        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 4 : 10, o.BackgroundOpacity,
+            o.Window == "settings" ? new Core.Capture.CaptureStatus(Core.Capture.CaptureState.WaitingForGame, "AION2 is not running") : null);
         var start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 20_500; // a fight that is still going
         var fight = new SampleFight(start, 20, o.Window == "overlay" ? 4 : 9);
         fight.FeedUntil(meter.Tracker, start + 20_000);
@@ -65,7 +66,9 @@ public static class SampleRenderer
                 refresh = eventTimers.ReloadNow;
                 break;
             case "settings":
-                host = new SettingsWindow(meter) { Width = o.Width ?? 1040, Height = o.Height ?? 760 };
+                var settings = new SettingsWindow(meter) { Width = o.Width ?? 1040, Height = o.Height ?? 760 };
+                if (o.Tab is { } settingsPage) settings.ShowSettingsPageForPreview(settingsPage);
+                host = settings;
                 refresh = () => { };
                 break;
             case "raid-command":
@@ -83,6 +86,7 @@ public static class SampleRenderer
                 if (o.Window == "overlay-update") meter.Updates.Preview(SampleRelease(meter.Updates.Current)); // with the footer's update banner
                 var overlay = new OverlayWindow(meter) { Width = o.Width ?? 470, Height = o.Height ?? 630 };
                 overlay.ApplyResponsiveLayout();
+                overlay.ShowToolbarPreview();
                 host = overlay;
                 refresh = overlay.Refresh;
                 break;
@@ -120,7 +124,8 @@ public static class SampleRenderer
         }
     }
 
-    private static MeterService CreateMeter(string language, int rowSize = 100, int maxRows = 10, double? backgroundOpacity = null)
+    private static MeterService CreateMeter(string language, int rowSize = 100, int maxRows = 10, double? backgroundOpacity = null,
+        Core.Capture.CaptureStatus? sampleStatus = null)
     {
         var settings = new AppSettings
         {
@@ -128,7 +133,7 @@ public static class SampleRenderer
             BackgroundOpacity = Math.Clamp(backgroundOpacity ?? 0.96, 0, 1),
         };
         UiText.Use(settings.Language);
-        var meter = new MeterService(settings, _ => new QuietSource());
+        var meter = new MeterService(settings, _ => new QuietSource(sampleStatus));
         meter.StartCapture(); // the footer reads "Capturing", as it does in the game
         meter.Portraits.Get(SampleBossCode); // first run only; then it comes from the cache
         return meter;
@@ -137,9 +142,10 @@ public static class SampleRenderer
     /// <summary>A capture that reports what a working one does and produces nothing: the script feeds the fight.</summary>
     private sealed class QuietSource : Core.Capture.IEventSource
     {
+        public QuietSource(Core.Capture.CaptureStatus? status = null) => Status = status ?? new(Core.Capture.CaptureState.Capturing, "Capturing · 127.0.0.1");
         public event Action<GameEvent>? EventDecoded { add { } remove { } }
         public event Action<Core.Capture.CaptureStatus>? StatusChanged { add { } remove { } }
-        public Core.Capture.CaptureStatus Status { get; } = new(Core.Capture.CaptureState.Capturing, "Capturing · 127.0.0.1");
+        public Core.Capture.CaptureStatus Status { get; }
         public void Start() { }
         public void Stop() { }
         public void Dispose() { }
@@ -186,7 +192,11 @@ public static class SampleRenderer
             "dark" => new LinearGradientBrush(
                 new GradientStopCollection { new(Color.FromRgb(0x32, 0x1D, 0x12), 0), new(Color.FromRgb(0x11, 0x13, 0x15), 0.55), new(Color.FromRgb(0x0A, 0x0B, 0x0D), 1) },
                 new Point(0, 0), new Point(1, 1)),
-            _ => new SolidColorBrush(Color.FromRgb(0x2B, 0x3A, 0x2E)), // a stand-in for the game
+            // A warm charcoal stand-in keeps preview shots aligned with the ember/silver brand instead of tinting
+            // a transparent overlay green. The actual game remains visible behind the overlay at runtime.
+            _ => new LinearGradientBrush(
+                new GradientStopCollection { new(Color.FromRgb(0x2A, 0x17, 0x11), 0), new(Color.FromRgb(0x1B, 0x13, 0x11), 0.5), new(Color.FromRgb(0x09, 0x09, 0x0B), 1) },
+                new Point(0, 0), new Point(1, 1)),
         };
     }
 

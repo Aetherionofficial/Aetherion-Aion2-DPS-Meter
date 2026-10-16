@@ -130,10 +130,12 @@ public sealed class RowViewModel : ObservableObject
             fill.GradientStops.Add(new GradientStop(Color.FromArgb(0xC8, (byte)(v.R * 0.72), (byte)(v.G * 0.72), (byte)(v.B * 0.72)), 1));
             FillBrush = Freeze(fill);
             DpsBrush = Freeze(new SolidColorBrush(Lighten(v, 0.55)));
+            // Keep the overlay's progress wash in the app's ember palette; class identity stays on the narrow strip/icon.
+            var ember = Color.FromRgb(0xF0, 0x6A, 0x22);
             var soft = new LinearGradientBrush { StartPoint = new System.Windows.Point(0, 0), EndPoint = new System.Windows.Point(1, 0) };
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, v.R, v.G, v.B), 0));
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x20, v.R, v.G, v.B), 0.6));
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x08, v.R, v.G, v.B), 1));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, ember.R, ember.G, ember.B), 0));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x20, ember.R, ember.G, ember.B), 0.6));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x08, ember.R, ember.G, ember.B), 1));
             SoftFillBrush = Freeze(soft);
             AccentBrush = Freeze(new SolidColorBrush(Lighten(v, 0.1)));
             Raise(nameof(SoftFillBrush));
@@ -172,18 +174,18 @@ public static class RankBrushes
 {
     private static readonly (Brush Bg, Brush Fg, Brush Border)[] Medals =
     [
-        (Gradient(0xF6, 0xDB, 0x8E, 0xC9, 0x9A, 0x45), Solid(0x1A, 0x14, 0x0A), Solid(0xFF, 0xEB, 0xB0)), // gold
-        (Gradient(0xEE, 0xF2, 0xF7, 0xA7, 0xB2, 0xC1), Solid(0x12, 0x16, 0x1F), Solid(0xFF, 0xFF, 0xFF)), // silver
-        (Gradient(0xE9, 0xA8, 0x7A, 0xA8, 0x63, 0x3B), Solid(0x1A, 0x0F, 0x08), Solid(0xF5, 0xC3, 0x9E)), // bronze
+        (Gradient(0xF2, 0x8A, 0x45, 0xC9, 0x55, 0x20), Solid(0x18, 0x10, 0x0B), Solid(0xFF, 0xB0, 0x79)), // ember
+        (Gradient(0xEE, 0xF2, 0xF7, 0xA7, 0xB2, 0xC1), Solid(0x12, 0x12, 0x16), Solid(0xFF, 0xFF, 0xFF)), // silver
+        (Gradient(0xC9, 0x55, 0x20, 0x78, 0x39, 0x1F), Solid(0xF0, 0xF1, 0xF2), Solid(0xF5, 0x9A, 0x62)), // deep ember
     ];
 
     private static readonly (Brush Bg, Brush Fg, Brush Border) Plain =
-        (Solid(0x1A, 0x20, 0x30), Solid(0xF3, 0xE6, 0xC8), Solid(0x6B, 0x75, 0x90));
+        (Solid(0x1B, 0x19, 0x1A), Solid(0xE5, 0xE7, 0xEA), Solid(0x49, 0x3B, 0x39));
 
     public static (Brush Bg, Brush Fg, Brush Border) For(int rank) => rank is >= 1 and <= 3 ? Medals[rank - 1] : Plain;
 
-    private static readonly Brush[] MedalText = [Solid(0xF2, 0xC2, 0x5A), Solid(0xD3, 0xDB, 0xE6), Solid(0xE0, 0x9A, 0x66)];
-    private static readonly Brush PlainText = Solid(0xE4, 0xE8, 0xF0);
+    private static readonly Brush[] MedalText = [Solid(0xFF, 0xAC, 0x72), Solid(0xD3, 0xDB, 0xE6), Solid(0xE0, 0x9A, 0x66)];
+    private static readonly Brush PlainText = Solid(0xE5, 0xE7, 0xEA);
 
     /// <summary>A place written as plain text: medal colours for the top three.</summary>
     public static Brush TextFor(int rank) => rank is >= 1 and <= 3 ? MedalText[rank - 1] : PlainText;
@@ -206,7 +208,8 @@ public static class RankBrushes
 public sealed class OverlayViewModel : ObservableObject
 {
     private static readonly Brush LiveRed = Frozen(Color.FromRgb(0xEF, 0x4D, 0x56));
-    private static readonly Brush SavedGold = Frozen(Color.FromRgb(0xFF, 0x74, 0x1F));
+    private static readonly Brush SavedGold = Frozen(Color.FromRgb(0xE5, 0xE7, 0xEA));
+    private static readonly Brush LiveEmber = Frozen(Color.FromRgb(0xF0, 0x6A, 0x22));
     private static readonly Brush Dim = Frozen(Color.FromRgb(0x8A, 0x93, 0xA8));
 
     private string _title = UiText.Current.WaitingTitle;
@@ -490,7 +493,7 @@ public sealed class OverlayViewModel : ObservableObject
         (HeaderLabel, HeaderBrush) = kind switch
         {
             "live" when !HasData => (Spaced(T.WaitingLabel), Dim),
-            "live" when IsActive => (Spaced(T.LiveFight), LiveRed),
+            "live" when IsActive => (Spaced(T.LiveFight), LiveEmber),
             "live" => (Spaced(T.LastFight), Dim),
             "saved" => (Spaced(T.SavedFight) + "   " + when, SavedGold),
             _ => (Spaced(T.ThisSession) + "   " + when, SavedGold),

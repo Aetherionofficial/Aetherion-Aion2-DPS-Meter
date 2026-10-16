@@ -195,7 +195,7 @@ public sealed class UiText
     public string MinutesShort { get; init; } = "min";
     public string EventTimersTitle { get; init; } = "Event schedule";
     public string EventOverlayTitle => Code switch { "de" => "Timer in deiner Nähe", "ru" => "Таймер рядом", _ => "Nearby timers" };
-    public string EventOverlayKicker => Code switch { "de" => "ZEITPLAN", "ru" => "РАСПИСАНИЕ", _ => "SCHEDULE" };
+    public string EventOverlayKicker => "AETHERION";
     public string EventOverlayHint => Code switch { "de" => "Wichtige Events und Bosse — kompakt sortiert.", "ru" => "Важные события и боссы — кратко по времени.", _ => "Important events and bosses, sorted by time." };
     public string EventTimersHint { get; init; } = "Live countdowns use the local clock. Recurring schedules are community-reported; confirm notices in game. Field-boss timers come directly from the game via Boss timers.";
     public string EventRift { get; init; } = "Spacetime Rift";
@@ -475,6 +475,35 @@ public sealed class UiText
     public string RecordHint { get; init; } = "Recordings contain your own game traffic only, including character names. Keep them private.";
     public string StatusPrefix { get; init; } = "Status: ";
     public string NpcapMissing { get; init; } = "Npcap not installed";
+    public string ConnectionCheckTitle { get; init; } = "CONNECTION CHECK";
+    public string RunConnectionCheck { get; init; } = "Check now";
+    public string CopySupportReport { get; init; } = "Copy support summary";
+    public string ConnectionCheckHint { get; init; } = "The copied summary contains technical status only; no character names or packet recordings.";
+    public string DiagnosticGame { get; init; } = "AION2 process";
+    public string DiagnosticNpcap { get; init; } = "Npcap driver";
+    public string DiagnosticCapture { get; init; } = "Network capture";
+    public string DiagnosticPackets { get; init; } = "Game traffic";
+    public string DiagnosticDecoded { get; init; } = "Combat data";
+    public string DiagnosticOverlay { get; init; } = "Overlay";
+    public string CheckDetected { get; init; } = "Detected";
+    public string CheckNotDetected { get; init; } = "Not detected";
+    public string CheckInstalled { get; init; } = "Installed";
+    public string CheckMissing { get; init; } = "Missing";
+    public string CheckCapturing { get; init; } = "Connected";
+    public string CheckCaptureError { get; init; } = "Needs attention";
+    public string CheckWaiting { get; init; } = "Waiting for AION2";
+    public string CheckStarting { get; init; } = "Starting";
+    public string CheckStopped { get; init; } = "Stopped";
+    public string CheckPacketCount { get; init; } = "{0:#,0} packets received";
+    public string CheckWaitingPackets { get; init; } = "No game packets yet";
+    public string CheckEventCount { get; init; } = "{0:#,0} game events decoded";
+    public string CheckWaitingCombat { get; init; } = "Waiting for the first combat event";
+    public string CheckNameKnown { get; init; } = "Character identified";
+    public string CheckNameUnknown { get; init; } = "No character name yet";
+    public string CheckOverlayVisible { get; init; } = "Visible";
+    public string CheckOverlayHidden { get; init; } = "Hidden";
+    public string SupportReportCopied { get; init; } = "Technical summary copied. It contains no names or packet data.";
+    public string ClipboardUnavailable { get; init; } = "Clipboard unavailable. Please try again.";
     public string NpcapNeeded { get; init; } =
         "AION2 DPS Meter reads the game's own network traffic through Npcap, a free capture driver — and it is not installed yet.\n\n" +
         "Install it from npcap.com with the default options (ExitLag and other ping boosters work with them too), then start the meter again.\n\n" +
@@ -630,7 +659,7 @@ public sealed class UiText
         YourFights = "Deine Kämpfe", SavedCount = "{0} gespeichert", ShownOf = "{0} von {1}", FilterAll = "Alle", FilterBosses = "Bosse", FilterKills = "Siege",
         ShowInOverlay = "Im Overlay anzeigen", TipShowInOverlay = "Diesen Kampf im Overlay anzeigen (Live-Modus kehrt beim nächsten Pull zurück)", HistoryEmpty = "Besiege einen Boss — der Kampf erscheint hier automatisch.",
         PlayersShort = "Sp.", JustNow = "gerade eben", MinutesAgo = "vor {0} Min.", HoursAgo = "vor {0} Std.", DeleteConfirm = "„{0}“ ({1}) löschen?", TipRefresh = "Aktualisieren", TipOpenFolder = "Ordner öffnen", TipDelete = "Ausgewählten Kampf löschen", TipOpenBreakdown = "Vollständige Auswertung öffnen", DamageWord = "Schaden",
-        SettingsTitle = "Einstellungen", NavOverlay = "Overlay", NavTimer = "Timer", NavFights = "Kampf & Verlauf", NavAppearance = "Darstellung", NavGeneral = "Allgemein", NavAccount = "Aetherion Premium", SettingsPageHint = "Alles Wichtige auf einen Blick, auch im Kampf.", SettingsKicker = "AETHERION • EINSTELLUNGEN", SettingsOverlayTitle = "Overlay anpassen", CombatOverlayLabel = "KAMPF-OVERLAY", OverlayViewTitle = "Ansicht", VisibleInfoTitle = "Sichtbare Informationen", WindowSizeTitle = "Fenstergröße", WindowSizeHint = "Schmale Hochformate verdecken weniger vom Spiel; am Eck kannst du fein nachjustieren.", PresetCompact = "Kompakt", PresetStandard = "Standard", PresetLarge = "Groß", TransparencyTitle = "Transparenz", TransparencyHint = "Mehr Deckkraft sorgt für gute Lesbarkeit.", TransparentLabel = "Durchsichtig", OpaqueLabel = "Deckend", TimerPageHint = "Passe Timer-Hinweise und Lesbarkeit an.", TimerAlertLabel = "Boss-Hinweis (Minuten vor Respawn)", TimerOpacityLabel = "Timer-Deckkraft", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
+        SettingsTitle = "Einstellungen", NavOverlay = "Overlay", NavTimer = "Timer", NavFights = "Kampf & Verlauf", NavAppearance = "Darstellung", NavGeneral = "Allgemein", NavAccount = "Aetherion Premium", SettingsPageHint = "Alles Wichtige auf einen Blick, auch im Kampf.", SettingsKicker = "AETHERION • EINSTELLUNGEN", SettingsOverlayTitle = "Overlay anpassen", CombatOverlayLabel = "KAMPF-OVERLAY", OverlayViewTitle = "Ansicht", VisibleInfoTitle = "Sichtbare Informationen", WindowSizeTitle = "Fenstergröße", WindowSizeHint = "Schmale Hochformate verdecken weniger vom Spiel; am Eck kannst du fein nachjustieren.", PresetCompact = "Kompakt", PresetStandard = "Standard", PresetLarge = "Groß", TransparencyTitle = "Transparenz", TransparencyHint = "Mehr Deckkraft sorgt für gute Lesbarkeit.", TransparentLabel = "Durchsichtig", OpaqueLabel = "Deckend", TimerPageHint = "Passe Timer-Hinweise und Lesbarkeit an.", TimerAlertLabel = "Boss-Hinweis (Minuten vor Respawn)", TimerOpacityLabel = "Timer-Hintergrund", SecLanguage = "SPRACHE", SecAccount = "KONTO", LanguageHint = "Oberfläche, Fertigkeits- und Monsternamen. Wird sofort angewendet.", SecOverlay = "OVERLAY",
         LanguageLabel = "Sprache", BreakdownTitle = "Kampfauswertung — AION2 DPS Meter", HistoryTitle = "Kampfverlauf — AION2 DPS Meter",
         TipTargetMode = "Nur Boss / alle getroffenen Ziele", TipLock = "Position fixieren", TipSettings = "Einstellungen",
         TipOpacity = "Hintergrundtransparenz", TipHide = "Overlay ausblenden (Strg+Umschalt+D)", ModeBossOnly = "BOSS", ModeAll = "ALLE",
@@ -641,6 +670,10 @@ public sealed class UiText
         HistoryHint = "Gespeicherte Kämpfe bleiben im Overlay auswählbar (Kämpfe-Menü oder Mausrad über dem Titel) und im Kampfverlauf.", HistoryInfo = "{0} Kämpfe gespeichert in {1}",
         SecCapture = "ERFASSUNG", NetworkAdapter = "Netzwerkadapter", AdapterAuto = "Automatisch (empfohlen)", AdapterHint = "Erkennt automatisch den Adapter der AION-2-Verbindung (Loopback für Ping-Booster). Nur ändern, wenn dein VPN ihn verbirgt.",
         RecordPackets = "Spielpakete als .pcap aufzeichnen (Parser-Diagnose)", RecordHint = "Aufzeichnungen enthalten nur deinen eigenen Spielverkehr, einschließlich Charakternamen. Halte sie privat.", StatusPrefix = "Status: ", NpcapMissing = "Npcap nicht installiert",
+        ConnectionCheckTitle = "VERBINDUNGSCHECK", RunConnectionCheck = "Jetzt prüfen", CopySupportReport = "Supportbericht kopieren",
+        ConnectionCheckHint = "Der Bericht enthält nur technische Statuswerte, keine Charakternamen oder Paketmitschnitte.", DiagnosticGame = "AION2-Prozess", DiagnosticNpcap = "Npcap-Treiber", DiagnosticCapture = "Netzwerkerfassung", DiagnosticPackets = "Spielverkehr", DiagnosticDecoded = "Kampfdaten", DiagnosticOverlay = "Overlay",
+        CheckDetected = "Erkannt", CheckNotDetected = "Nicht erkannt", CheckInstalled = "Installiert", CheckMissing = "Fehlt", CheckCapturing = "Verbunden", CheckCaptureError = "Prüfung erforderlich", CheckWaiting = "Wartet auf AION2", CheckStarting = "Startet", CheckStopped = "Gestoppt",
+        CheckPacketCount = "{0:#,0} Pakete empfangen", CheckWaitingPackets = "Noch keine Spielpakete", CheckEventCount = "{0:#,0} Spielereignisse erkannt", CheckWaitingCombat = "Wartet auf das erste Kampfereignis", CheckNameKnown = "Charakter erkannt", CheckNameUnknown = "Noch kein Charaktername", CheckOverlayVisible = "Sichtbar", CheckOverlayHidden = "Ausgeblendet", SupportReportCopied = "Technischer Bericht kopiert. Er enthält keine Namen oder Paketdaten.", ClipboardUnavailable = "Zwischenablage nicht verfügbar. Bitte erneut versuchen.",
         NpcapNeeded = "AION2 DPS Meter liest den Netzwerkverkehr des Spiels über Npcap, einen kostenlosen Erfassungstreiber. Er ist noch nicht installiert.\n\nInstalliere Npcap von npcap.com mit den Standardeinstellungen und starte das Meter erneut.\n\nDownloadseite jetzt öffnen?",
         SecHotkeys = "TASTENKÜRZEL", HkToggle = "Overlay anzeigen / ausblenden", HkReset = "Meter neu starten", HkClick = "Klickdurchlässigkeit", HotkeysHint = "Format: Strg+Umschalt+D, Alt+F9 … Wird nach dem Speichern angewendet.",
         SecData = "DATEN", DownloadIcons = "Fertigkeitssymbole und Boss-Porträts herunterladen", IconsHint = "Fertigkeitssymbole: offizieller AION-2-CDN (assets.playnccdn.com). Boss-Porträts: MetaBot.GG. Jedes Bild wird einmal geladen und dann zwischengespeichert.",
@@ -930,7 +963,7 @@ public sealed class UiText
         TipOpenBreakdown = "Открыть полный разбор",
         DamageWord = "урона",
 
-        SettingsTitle = "Настройки", NavOverlay = "Оверлей", NavTimer = "Таймер", NavFights = "Бой и история", NavAppearance = "Внешний вид", NavGeneral = "Общие", NavAccount = "Aetherion Premium", SettingsPageHint = "Важные настройки всегда под рукой, даже во время боя.", SettingsKicker = "AETHERION • НАСТРОЙКИ", SettingsOverlayTitle = "Настроить оверлей", CombatOverlayLabel = "БОЕВОЙ ОВЕРЛЕЙ", OverlayViewTitle = "Вид", VisibleInfoTitle = "Видимая информация", WindowSizeTitle = "Размер окна", WindowSizeHint = "Узкий высокий формат меньше закрывает игру; размер можно точно настроить за уголок.", PresetCompact = "Компактный", PresetStandard = "Стандартный", PresetLarge = "Большой", TransparencyTitle = "Прозрачность", TransparencyHint = "Непрозрачность повышает читаемость.", TransparentLabel = "Прозрачный", OpaqueLabel = "Непрозрачный", TimerPageHint = "Настройте уведомления таймера и читаемость.", TimerAlertLabel = "Уведомление о боссе (минут до возрождения)", TimerOpacityLabel = "Прозрачность таймера",
+        SettingsTitle = "Настройки", NavOverlay = "Оверлей", NavTimer = "Таймер", NavFights = "Бой и история", NavAppearance = "Внешний вид", NavGeneral = "Общие", NavAccount = "Aetherion Premium", SettingsPageHint = "Важные настройки всегда под рукой, даже во время боя.", SettingsKicker = "AETHERION • НАСТРОЙКИ", SettingsOverlayTitle = "Настроить оверлей", CombatOverlayLabel = "БОЕВОЙ ОВЕРЛЕЙ", OverlayViewTitle = "Вид", VisibleInfoTitle = "Видимая информация", WindowSizeTitle = "Размер окна", WindowSizeHint = "Узкий высокий формат меньше закрывает игру; размер можно точно настроить за уголок.", PresetCompact = "Компактный", PresetStandard = "Стандартный", PresetLarge = "Большой", TransparencyTitle = "Прозрачность", TransparencyHint = "Непрозрачность повышает читаемость.", TransparentLabel = "Прозрачный", OpaqueLabel = "Непрозрачный", TimerPageHint = "Настройте уведомления таймера и читаемость.", TimerAlertLabel = "Уведомление о боссе (минут до возрождения)", TimerOpacityLabel = "Фон таймера",
         LanguageLabel = "Язык",
         BreakdownTitle = "Разбор боя",
         HistoryTitle = "История боёв",
@@ -978,6 +1011,35 @@ public sealed class UiText
         RecordHint = "В записи только ваш игровой трафик, включая ники. Не публикуйте их.",
         StatusPrefix = "Статус: ",
         NpcapMissing = "Npcap не установлен",
+        ConnectionCheckTitle = "ПРОВЕРКА ПОДКЛЮЧЕНИЯ",
+        RunConnectionCheck = "Проверить",
+        CopySupportReport = "Копировать отчёт поддержки",
+        ConnectionCheckHint = "В отчёт входят только технические статусы, без имён персонажей и сетевых записей.",
+        DiagnosticGame = "Процесс AION2",
+        DiagnosticNpcap = "Драйвер Npcap",
+        DiagnosticCapture = "Сетевой захват",
+        DiagnosticPackets = "Трафик игры",
+        DiagnosticDecoded = "Данные боя",
+        DiagnosticOverlay = "Оверлей",
+        CheckDetected = "Обнаружен",
+        CheckNotDetected = "Не обнаружен",
+        CheckInstalled = "Установлен",
+        CheckMissing = "Отсутствует",
+        CheckCapturing = "Подключено",
+        CheckCaptureError = "Нужно проверить",
+        CheckWaiting = "Ожидание AION2",
+        CheckStarting = "Запускается",
+        CheckStopped = "Остановлен",
+        CheckPacketCount = "Получено пакетов: {0:#,0}",
+        CheckWaitingPackets = "Игровых пакетов пока нет",
+        CheckEventCount = "Распознано игровых событий: {0:#,0}",
+        CheckWaitingCombat = "Ожидание первого события боя",
+        CheckNameKnown = "Персонаж распознан",
+        CheckNameUnknown = "Имя персонажа пока не получено",
+        CheckOverlayVisible = "Видимый",
+        CheckOverlayHidden = "Скрытый",
+        SupportReportCopied = "Технический отчёт скопирован. В нём нет имён или сетевых данных.",
+        ClipboardUnavailable = "Буфер обмена недоступен. Попробуйте ещё раз.",
         NpcapNeeded =
             "AION2 DPS Meter читает сетевой трафик игры через Npcap — бесплатный драйвер захвата, а он ещё не установлен.\n\n" +
             "Установите его с npcap.com с настройками по умолчанию (с ними работают и ExitLag, и другие ускорители пинга), затем запустите метр снова.\n\n" +

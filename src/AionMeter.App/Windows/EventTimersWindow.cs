@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using AionMeter.App.Services;
@@ -34,6 +36,9 @@ public sealed class EventTimersWindow : Window
     private readonly AppSettings _settings;
     private readonly Grid _details = new();
     private readonly Slider _opacitySlider = new();
+    private readonly Border _frame = new();
+    private readonly SolidColorBrush _surfaceBrush = Brush("#F20A0D12");
+    private readonly SolidColorBrush _cardBrush = Brush("#CC201719");
     private bool _collapsed;
 
     public EventTimersWindow(AppSettings settings)
@@ -53,13 +58,14 @@ public sealed class EventTimersWindow : Window
         Background = Brushes.Transparent;
         ShowInTaskbar = false;
         Topmost = true;
-        Opacity = Math.Clamp(settings.EventTimersOpacity, 0.35, 1.0);
+        Opacity = 1; // Fade only the surface: the controls and text must remain visible at minimum opacity.
+        ApplySurfaceOpacity(settings.EventTimersOpacity);
         DataContext = UiText.Current;
 
         var collapse = new Button
         {
             Content = "−", Width = 28, Height = 28, FontSize = 18,
-            Background = Brushes.Transparent, Foreground = Brush("#B7B1AA"), BorderThickness = new Thickness(0),
+            Background = Brushes.Transparent, Foreground = Brush("#AAB6C4"), BorderThickness = new Thickness(0),
             Cursor = Cursors.Hand, ToolTip = UiText.Current.EventCompact,
         };
         collapse.Click += (_, _) =>
@@ -74,40 +80,55 @@ public sealed class EventTimersWindow : Window
         var close = new Button
         {
             Content = "×", Width = 30, Height = 30, FontSize = 20,
-            Background = Brushes.Transparent, Foreground = Brush("#B7B1AA"), BorderThickness = new Thickness(0),
+            Background = Brushes.Transparent, Foreground = Brush("#AAB6C4"), BorderThickness = new Thickness(0),
             Cursor = Cursors.Hand,
         };
         close.Click += (_, _) => Close();
         _title.Text = UiText.Current.EventOverlayTitle;
         _title.FontSize = 13.5;
         _title.FontWeight = FontWeights.Bold;
-        _title.Foreground = Brush("#F4F0EB");
+        _title.Foreground = Brush("#E5E7EA");
         _title.VerticalAlignment = VerticalAlignment.Center;
-        _title.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); };
-        var kicker = new TextBlock { Text = UiText.Current.EventOverlayKicker, FontSize = 9, FontWeight = FontWeights.Bold, Foreground = Brush("#807971"), Margin = new Thickness(0, 0, 0, 3) };
-        var titlePanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        var kicker = new TextBlock { Text = UiText.Current.EventOverlayKicker, FontSize = 9, FontWeight = FontWeights.Bold, Foreground = Brush("#F28A45"), Margin = new Thickness(0, 0, 0, 3) };
+        var titlePanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Background = Brushes.Transparent };
         titlePanel.Children.Add(kicker);
         titlePanel.Children.Add(_title);
-        var opacityLabel = new TextBlock { Text = UiText.Current.EventOpacity, Foreground = Brush("#B7B1AA"), FontSize = 9, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 4, 0) };
+        var brandMark = new Image
+        {
+            Source = new BitmapImage(new Uri("pack://application:,,,/Assets/aetherion-mark.png")),
+            Width = 31, Height = 31, Stretch = Stretch.Uniform, Margin = new Thickness(0, 0, 8, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            ToolTip = "Aetherion",
+        };
+        var brandTitle = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Background = Brushes.Transparent };
+        brandTitle.Children.Add(brandMark);
+        brandTitle.Children.Add(titlePanel);
+        var opacityLabel = new TextBlock { Text = UiText.Current.EventOpacity, Foreground = Brush("#C3C5C9"), FontSize = 9, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 4, 0) };
         _opacitySlider.Minimum = 0;
         _opacitySlider.Maximum = 1;
-        _opacitySlider.Value = Opacity;
+        _opacitySlider.Value = _surfaceBrush.Opacity;
         _opacitySlider.Width = 64;
         _opacitySlider.VerticalAlignment = VerticalAlignment.Center;
         _opacitySlider.ToolTip = UiText.Current.EventOpacity;
-        _opacitySlider.ValueChanged += (_, _) => Opacity = _opacitySlider.Value;
+        _opacitySlider.ValueChanged += (_, _) => ApplySurfaceOpacity(_opacitySlider.Value);
         var opacityBar = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(5, 0, 2, 0) };
         opacityLabel.HorizontalAlignment = HorizontalAlignment.Center;
         opacityLabel.Margin = new Thickness(0, 0, 0, -2);
         opacityBar.Children.Add(opacityLabel);
         opacityBar.Children.Add(_opacitySlider);
-        var header = new Grid { Margin = new Thickness(16, 9, 8, 8), MinHeight = 42 };
+        var header = new Grid { Margin = new Thickness(16, 9, 8, 8), MinHeight = 42, Background = Brushes.Transparent };
+        header.MouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ChangedButton != MouseButton.Left || IsInteractiveHeaderSource(e.OriginalSource as DependencyObject, header)) return;
+            try { DragMove(); e.Handled = true; }
+            catch (InvalidOperationException) { /* The mouse was released before WPF began the drag. */ }
+        };
         header.ColumnDefinitions.Add(new ColumnDefinition());
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        header.Children.Add(titlePanel);
+        header.Children.Add(brandTitle);
         Grid.SetColumn(opacityBar, 1);
         header.Children.Add(opacityBar);
         Grid.SetColumn(collapse, 2);
@@ -119,14 +140,14 @@ public sealed class EventTimersWindow : Window
         _hint.Text = UiText.Current.EventOverlayHint;
         _hint.FontSize = 10;
         _hint.TextWrapping = TextWrapping.Wrap;
-        _hint.Foreground = Brush("#B7B1AA");
+        _hint.Foreground = Brush("#B8BBC0");
         _hint.Margin = new Thickness(16, 7, 16, 8);
 
         foreach (var spec in Schedule)
         {
-            var name = new TextBlock { FontSize = 11.5, FontWeight = FontWeights.SemiBold, Foreground = Brush("#F4F0EB"), TextTrimming = TextTrimming.CharacterEllipsis };
-            var countdown = new TextBlock { FontSize = 15, FontFamily = new FontFamily("Consolas"), FontWeight = FontWeights.Bold, Foreground = Brush("#FF9B4A"), HorizontalAlignment = HorizontalAlignment.Right };
-            var at = new TextBlock { FontSize = 9, Foreground = Brush("#807971") };
+            var name = new TextBlock { FontSize = 11.5, FontWeight = FontWeights.SemiBold, Foreground = Brush("#E5E7EA"), TextTrimming = TextTrimming.CharacterEllipsis };
+            var countdown = new TextBlock { FontSize = 15, FontFamily = new FontFamily("Consolas"), FontWeight = FontWeights.Bold, Foreground = Brush("#F28A45"), HorizontalAlignment = HorizontalAlignment.Right };
+            var at = new TextBlock { FontSize = 9, Foreground = Brush("#A7A9AE") };
             var label = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
             label.Children.Add(name);
             label.Children.Add(at);
@@ -134,7 +155,7 @@ public sealed class EventTimersWindow : Window
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             row.ColumnDefinitions.Add(new ColumnDefinition());
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            var dot = new Ellipse { Width = 6, Height = 6, Fill = Brush("#FF741F"), VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left };
+            var dot = new Ellipse { Width = 6, Height = 6, Fill = Brush("#F06A22"), VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left };
             row.Children.Add(dot);
             Grid.SetColumn(label, 1);
             row.Children.Add(label);
@@ -143,7 +164,7 @@ public sealed class EventTimersWindow : Window
             row.Children.Add(countdown);
             var card = new Border
             {
-                Background = Brush("#141618"), BorderBrush = Brush("#30271F"), BorderThickness = new Thickness(1),
+                Background = _cardBrush, BorderBrush = Brush("#49312A"), BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(8), Padding = new Thickness(9, 6, 9, 6), Margin = new Thickness(0, 0, 0, 5), Child = row,
             };
             _rows.Add(new EventRow(card, name, countdown, at));
@@ -153,7 +174,7 @@ public sealed class EventTimersWindow : Window
         var source = new TextBlock
         {
             Text = UiText.Current.EventSource, FontSize = 9, TextWrapping = TextWrapping.Wrap,
-            Foreground = Brush("#807971"), Margin = new Thickness(14, 2, 14, 8),
+            Foreground = Brush("#718093"), Margin = new Thickness(14, 2, 14, 8),
         };
         _details.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         _details.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -168,14 +189,15 @@ public sealed class EventTimersWindow : Window
         var body = new Grid();
         body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-        body.Children.Add(new Border { BorderBrush = Brush("#30271F"), BorderThickness = new Thickness(0, 0, 0, 1), Child = header });
+        body.Children.Add(new Border { BorderBrush = Brush("#7A452B"), BorderThickness = new Thickness(0, 0, 0, 1), Child = header });
         Grid.SetRow(_details, 1);
         body.Children.Add(_details);
-        Content = new Border
-        {
-            Background = Brush("#F20A0B0D"), BorderBrush = Brush("#30271F"), BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(12), Child = body,
-        };
+        _frame.Background = _surfaceBrush;
+        _frame.BorderBrush = Brush("#76513E");
+        _frame.BorderThickness = new Thickness(1);
+        _frame.CornerRadius = new CornerRadius(12);
+        _frame.Child = body;
+        Content = _frame;
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += (_, _) => RefreshRows();
@@ -187,7 +209,7 @@ public sealed class EventTimersWindow : Window
             _settings.EventTimersTop = Top;
             _settings.EventTimersWidth = Width;
             if (!_collapsed) _settings.EventTimersHeight = Height;
-            _settings.EventTimersOpacity = Opacity;
+            _settings.EventTimersOpacity = Math.Clamp(_opacitySlider.Value, 0, 1);
             _settings.Save();
         };
     }
@@ -212,6 +234,23 @@ public sealed class EventTimersWindow : Window
     }
 
     internal void ReloadNow() => RefreshRows();
+
+    private void ApplySurfaceOpacity(double opacity)
+    {
+        var value = Math.Clamp(opacity, 0, 1);
+        _surfaceBrush.Opacity = value;
+        _cardBrush.Opacity = value;
+    }
+
+    private static bool IsInteractiveHeaderSource(DependencyObject? source, DependencyObject header)
+    {
+        while (source is not null && source != header)
+        {
+            if (source is ButtonBase or Slider) return true;
+            source = VisualTreeHelper.GetParent(source);
+        }
+        return false;
+    }
 
     private static DateTimeOffset NextHourly(DateTimeOffset now, int minute)
     {

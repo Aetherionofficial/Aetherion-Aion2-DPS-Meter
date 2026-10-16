@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="Aetherion — Questlog.gg Karte &amp; AION2 News" Width="1540" Height="900" MinWidth="1050" MinHeight="600"
-        WindowStartupLocation="CenterScreen" Background="#0A0B0D" Foreground="#F4F0EB"
+        WindowStartupLocation="CenterScreen" Background="#09090B" Foreground="#F0F1F2"
         FontFamily="Segoe UI" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -12,28 +12,28 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#111315" BorderBrush="#30271F" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="#121216" BorderBrush="#393337" BorderThickness="0,0,0,1">
             <DockPanel Margin="14,0">
-                <TextBlock Text="AETHERION  ·  AION2 HUB" Foreground="#FF9B4A" FontSize="15" FontWeight="Bold"
+                <TextBlock Text="AETHERION  ·  AION2 HUB" Foreground="#F28A45" FontSize="15" FontWeight="Bold"
                            VerticalAlignment="Center" Margin="0,0,24,0" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="BackButton" Content="‹" Width="36" Height="30" Margin="0,0,6,0" Click="Back_Click"
-                            Background="#191B1E" Foreground="White" BorderBrush="#3A3029" ToolTip="Zurück" />
+                    Background="#201B1B" Foreground="White" BorderBrush="#493B39" ToolTip="Zurück" />
                     <Button x:Name="ForwardButton" Content="›" Width="36" Height="30" Margin="0,0,6,0" Click="Forward_Click"
-                            Background="#191B1E" Foreground="White" BorderBrush="#3A3029" ToolTip="Vorwärts" />
+                    Background="#201B1B" Foreground="White" BorderBrush="#493B39" ToolTip="Vorwärts" />
                     <Button Content="⟳" Width="36" Height="30" Margin="0,0,12,0" Click="Reload_Click"
-                            Background="#191B1E" Foreground="White" BorderBrush="#3A3029" ToolTip="Neu laden" />
+                            Background="#201B1B" Foreground="White" BorderBrush="#493B39" ToolTip="Neu laden" />
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Content="Wakayashi.gg · separates Fenster" Padding="12,5" Margin="0,0,8,0" Click="OpenWakayashi_Click"
-                        Background="#261A12" Foreground="#FF9B4A" BorderBrush="#82421C" VerticalAlignment="Center" />
+                        Background="#261914" Foreground="#F28A45" BorderBrush="#78391F" VerticalAlignment="Center" />
                 <Button Content="Im Browser öffnen" Padding="12,5" Click="OpenBrowser_Click"
-                        Background="#191B1E" Foreground="#FF9B4A" BorderBrush="#82421C" VerticalAlignment="Center" />
+                        Background="#201B1B" Foreground="#F28A45" BorderBrush="#78391F" VerticalAlignment="Center" />
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <Border x:Name="RuntimeNotice" Grid.Row="1" Background="#261A12" BorderBrush="#82421C" BorderThickness="0,0,0,1"
+        <Border x:Name="RuntimeNotice" Grid.Row="1" Background="#382A18" BorderBrush="#806D46" BorderThickness="0,0,0,1"
                 Padding="14,9" Visibility="Collapsed">
             <TextBlock x:Name="RuntimeMessage" TextWrapping="Wrap" />
         </Border>
@@ -44,12 +44,12 @@
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="1.15*" MinWidth="320" />
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Background="#0F1113" BorderBrush="#30271F" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
+            <Border Grid.Column="0" Background="#121216" BorderBrush="#393337" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions><RowDefinition Height="38" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                    <Border Background="#141618" BorderBrush="#30271F" BorderThickness="0,0,0,1" Padding="12,0">
+                    <Border Background="#171518" BorderBrush="#393337" BorderThickness="0,0,0,1" Padding="12,0">
                         <DockPanel>
-                            <TextBlock Text="QUESTLOG.GG  /  INTERAKTIVE AION2-KARTE" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#FFB56D" />
+                            <TextBlock Text="QUESTLOG.GG  /  INTERAKTIVE AION2-KARTE" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Foreground="#E8C77E" />
                             <TextBlock DockPanel.Dock="Right" Text="LIVE-WEBSITE" VerticalAlignment="Center" FontSize="9" Foreground="#65C7AE" />
                         </DockPanel>
                     </Border>
@@ -57,16 +57,16 @@
                 </Grid>
             </Border>
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" ShowsPreview="True" />
-            <Border Grid.Column="2" Background="#0F1113" BorderBrush="#30271F" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
+            <Border Grid.Column="2" Background="#121216" BorderBrush="#393337" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions><RowDefinition Height="68" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                    <Border Background="#141618" BorderBrush="#30271F" BorderThickness="0,0,0,1" Padding="14,8">
+                    <Border Background="#171518" BorderBrush="#393337" BorderThickness="0,0,0,1" Padding="14,8">
                         <DockPanel LastChildFill="True">
                             <Button DockPanel.Dock="Right" Content="↗" Width="30" Height="28" Click="OpenNewsBrowser_Click" ToolTip="Offizielle Patchnotes im Browser öffnen"
-                                    Background="#1D1A17" Foreground="#FFB56D" BorderBrush="#453126" />
+                                    Background="#261914" Foreground="#FFAC72" BorderBrush="#78391F" />
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="AION2 NEWS" FontSize="13" FontWeight="Bold" Foreground="#F1F4F3" />
-                                <TextBlock Text="OFFIZIELLE PATCHNOTES  ·  LIVE" Margin="0,3,0,0" FontSize="9" FontWeight="SemiBold" Foreground="#65C78F" />
+                                <TextBlock Text="OFFIZIELLE PATCHNOTES  ·  LIVE" Margin="0,3,0,0" FontSize="9" FontWeight="SemiBold" Foreground="#65C7AE" />
                             </StackPanel>
                         </DockPanel>
                     </Border>

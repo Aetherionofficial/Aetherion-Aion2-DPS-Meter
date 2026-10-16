@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="Aetherion — Wakayashi.gg" Width="1360" Height="860" MinWidth="760" MinHeight="520"
-        WindowStartupLocation="CenterScreen" Background="#0A0B0D" Foreground="#F4F0EB"
+        WindowStartupLocation="CenterScreen" Background="#09090B" Foreground="#F0F1F2"
         FontFamily="Segoe UI" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -12,24 +12,24 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#111315" BorderBrush="#30271F" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="#121216" BorderBrush="#393337" BorderThickness="0,0,0,1">
             <DockPanel Margin="14,0">
-                <TextBlock Text="AETHERION  ·  WAKAYASHI.GG" Foreground="#FF9B4A" FontSize="15" FontWeight="Bold"
+                <TextBlock Text="AETHERION  ·  WAKAYASHI.GG" Foreground="#F28A45" FontSize="15" FontWeight="Bold"
                            VerticalAlignment="Center" Margin="0,0,24,0" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="BackButton" Content="‹" Width="36" Height="30" Margin="0,0,6,0" Click="Back_Click"
-                            Background="#191B1E" Foreground="White" BorderBrush="#3A3029" ToolTip="Zurück" />
+                    Background="#201B1B" Foreground="White" BorderBrush="#493B39" ToolTip="Zurück" />
                     <Button x:Name="ForwardButton" Content="›" Width="36" Height="30" Margin="0,0,6,0" Click="Forward_Click"
-                            Background="#191B1E" Foreground="White" BorderBrush="#3A3029" ToolTip="Vorwärts" />
+                    Background="#201B1B" Foreground="White" BorderBrush="#493B39" ToolTip="Vorwärts" />
                     <Button Content="⟳" Width="36" Height="30" Margin="0,0,12,0" Click="Reload_Click"
-                            Background="#191B1E" Foreground="White" BorderBrush="#3A3029" ToolTip="Neu laden" />
+                            Background="#201B1B" Foreground="White" BorderBrush="#493B39" ToolTip="Neu laden" />
                 </StackPanel>
                 <Button DockPanel.Dock="Right" Content="Im Browser öffnen" Padding="12,5" Click="OpenBrowser_Click"
-                        Background="#191B1E" Foreground="#FF9B4A" BorderBrush="#82421C" VerticalAlignment="Center" />
+                        Background="#201B1B" Foreground="#F28A45" BorderBrush="#78391F" VerticalAlignment="Center" />
             </DockPanel>
         </Border>
 
-        <Border x:Name="RuntimeNotice" Grid.Row="1" Background="#261A12" BorderBrush="#82421C" BorderThickness="0,0,0,1"
+        <Border x:Name="RuntimeNotice" Grid.Row="1" Background="#382A18" BorderBrush="#806D46" BorderThickness="0,0,0,1"
                 Padding="14,9" Visibility="Collapsed">
             <TextBlock x:Name="RuntimeMessage" TextWrapping="Wrap" />
         </Border>

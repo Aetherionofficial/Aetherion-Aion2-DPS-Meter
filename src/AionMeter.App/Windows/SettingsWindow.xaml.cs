@@ -100,6 +100,7 @@ public partial class SettingsWindow : Window
         VersionText.Text = string.Format(Updater.IsInstalled ? T.VersionInstalled : T.VersionPortable, _meter.Updates.Current.ToString(3));
 
         CaptureState.Text = T.StatusPrefix + _meter.CaptureStatus.Message;
+        RefreshDiagnostics();
         var data = _meter.Data;
         DataInfo.Text = string.Format(T.DataInfo, data.Skills.Count, data.Npcs.Count, data.Npcs.Values.Count(n => n.IsBoss),
             data.DotSkills.Count, data.Maps.Count);
@@ -107,6 +108,93 @@ public partial class SettingsWindow : Window
     }
 
     private static UiText T => UiText.Current;
+
+    private void RefreshDiagnostics_Click(object sender, RoutedEventArgs e)
+    {
+        DiagnosticFeedback.Text = "";
+        RefreshDiagnostics();
+    }
+
+    private void RefreshDiagnostics()
+    {
+        var status = _meter.CaptureStatus;
+        var gameDetected = IsGameDetected();
+        var npcapInstalled = IsNpcapInstalled();
+
+        SetDiagnostic(GameCheckValue, gameDetected ? true : null, gameDetected ? T.CheckDetected : T.CheckNotDetected);
+        SetDiagnostic(NpcapCheckValue, npcapInstalled, npcapInstalled ? T.CheckInstalled : T.CheckMissing);
+
+        var captureResult = status.State switch
+        {
+            AionMeter.Core.Capture.CaptureState.Capturing => (Passed: (bool?)true, Text: T.CheckCapturing),
+            AionMeter.Core.Capture.CaptureState.Error => (Passed: (bool?)false, Text: T.CheckCaptureError),
+            AionMeter.Core.Capture.CaptureState.Starting => (Passed: (bool?)null, Text: T.CheckStarting),
+            AionMeter.Core.Capture.CaptureState.WaitingForGame => (Passed: (bool?)null, Text: T.CheckWaiting),
+            _ => (Passed: (bool?)null, Text: T.CheckStopped),
+        };
+        SetDiagnostic(CaptureCheckValue, captureResult.Passed, captureResult.Text);
+
+        SetDiagnostic(PacketsCheckValue, status.Packets > 0 ? true : null,
+            status.Packets > 0 ? string.Format(T.CheckPacketCount, status.Packets) : T.CheckWaitingPackets);
+
+        var nameKnown = !string.IsNullOrWhiteSpace(_meter.Tracker.SelfName);
+        var eventText = status.Events > 0
+            ? string.Format(T.CheckEventCount, status.Events) + " · " + (nameKnown ? T.CheckNameKnown : T.CheckNameUnknown)
+            : T.CheckWaitingCombat + " · " + T.CheckNameUnknown;
+        SetDiagnostic(DecodedCheckValue, status.Events > 0 ? true : null, eventText);
+
+        var overlayVisible = _meter.Settings.OverlayVisible;
+        SetDiagnostic(OverlayCheckValue, overlayVisible ? true : null,
+            overlayVisible ? T.CheckOverlayVisible : T.CheckOverlayHidden);
+    }
+
+    private void SetDiagnostic(TextBlock target, bool? passed, string text)
+    {
+        target.Text = text;
+        var key = passed switch { true => "Gold", false => "Red", _ => "TextDim" };
+        target.Foreground = (System.Windows.Media.Brush)FindResource(key);
+    }
+
+    private static bool IsGameDetected()
+    {
+        try { return GameProcessLocator.FindGameProcessIds().Length > 0; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { return false; }
+    }
+
+    private static bool IsNpcapInstalled()
+    {
+        try { return LiveCapture.IsNpcapInstalled(); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
+    }
+
+    private void CopyDiagnosticReport_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshDiagnostics();
+        var status = _meter.CaptureStatus;
+        var gameDetected = IsGameDetected();
+        var npcapInstalled = IsNpcapInstalled();
+        var nameKnown = !string.IsNullOrWhiteSpace(_meter.Tracker.SelfName);
+        var version = typeof(SettingsWindow).Assembly.GetName().Version?.ToString(3) ?? "unknown";
+        var report = string.Join(Environment.NewLine,
+            "Aetherion connection check",
+            "Version: " + version,
+            "AION2 process detected: " + gameDetected,
+            "Npcap installed: " + npcapInstalled,
+            "Capture state: " + status.State,
+            "Game packets: " + status.Packets,
+            "Decoded events: " + status.Events,
+            "Character identified: " + nameKnown,
+            "Overlay visible: " + _meter.Settings.OverlayVisible);
+        try
+        {
+            Clipboard.SetText(report);
+            DiagnosticFeedback.Text = T.SupportReportCopied;
+        }
+        catch (System.Runtime.InteropServices.ExternalException)
+        {
+            DiagnosticFeedback.Text = T.ClipboardUnavailable;
+        }
+    }
 
     private void SettingsNav_Click(object sender, RoutedEventArgs e)
     {
@@ -125,7 +213,7 @@ public partial class SettingsWindow : Window
         }
         if (button is not null)
         {
-            button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xFF, 0x74, 0x1F));
+            button.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x26, 0xF0, 0x6A, 0x22));
             button.Foreground = (System.Windows.Media.Brush)FindResource("GoldBright");
             if (button.Template.FindName("Marker", button) is FrameworkElement marker)
                 marker.Visibility = Visibility.Visible;
@@ -169,6 +257,8 @@ public partial class SettingsWindow : Window
         };
         SettingsScroll.ScrollToTop();
     }
+
+    internal void ShowSettingsPageForPreview(string page) => SelectSettingsPage(page);
 
     private void SizePreset_Click(object sender, RoutedEventArgs e)
     {

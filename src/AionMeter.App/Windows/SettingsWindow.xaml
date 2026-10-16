@@ -11,16 +11,16 @@
     </WindowChrome.WindowChrome>
     <Window.Resources>
         <Style x:Key="Section" TargetType="Border">
-            <Setter Property="Background" Value="#151719" />
-            <Setter Property="BorderBrush" Value="#30271F" />
+            <Setter Property="Background" Value="#171518" />
+            <Setter Property="BorderBrush" Value="#393337" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14,10" />
             <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
         <Style x:Key="OverlayCard" TargetType="Border">
-            <Setter Property="Background" Value="#121416" />
-            <Setter Property="BorderBrush" Value="#30271F" />
+            <Setter Property="Background" Value="#121216" />
+            <Setter Property="BorderBrush" Value="#393337" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="11" />
             <Setter Property="Padding" Value="16,14" />
@@ -69,7 +69,7 @@
         </Style>
         <Style x:Key="OverlayModeButton" TargetType="ToggleButton">
             <Setter Property="Foreground" Value="{StaticResource TextDim}" />
-            <Setter Property="Background" Value="#211811" />
+            <Setter Property="Background" Value="#201B1B" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="10,8" />
@@ -84,12 +84,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#332216" />
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#A34D1A" />
+                                <Setter TargetName="Surface" Property="Background" Value="#30201A" />
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#A55023" />
                                 <Setter Property="Foreground" Value="{StaticResource GoldBright}" />
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="#7A4626" />
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#78391F" />
                                 <Setter Property="Foreground" Value="{StaticResource Text}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -130,9 +130,8 @@
             <Border Grid.Row="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
                 <StackPanel Margin="16,24,14,16">
                     <StackPanel Orientation="Horizontal" Margin="4,0,0,28">
-                        <Border Width="34" Height="34" CornerRadius="10" Background="#211811" BorderBrush="#704020" BorderThickness="1">
-                            <TextBlock Text="A" Foreground="{StaticResource GoldBright}" FontSize="20" FontWeight="Bold"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border Width="34" Height="34" CornerRadius="10" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
+                            <Image Source="pack://application:,,,/Assets/aetherion-mark.png" Stretch="Uniform" />
                         </Border>
                         <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
                             <TextBlock Text="AETHERION" Foreground="{StaticResource Text}" FontWeight="Bold" FontSize="12" />
@@ -277,7 +276,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                 <TextBlock Text="{Binding TimerOpacityLabel, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="280" />
-                                <Slider x:Name="EventTimerOpacity" Style="{StaticResource GoldSlider}" Width="220" Minimum="0.2" Maximum="1" />
+                                <Slider x:Name="EventTimerOpacity" Style="{StaticResource GoldSlider}" Width="220" Minimum="0" Maximum="1" />
                             </StackPanel>
                             <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" Text="Timer-Fenster und Boss-Hinweise werden gemeinsam gespeichert." />
                         </StackPanel>
@@ -351,6 +350,38 @@
                                       Content="{Binding RecordPackets, Source={x:Static s:UiText.Current}}" />
                             <TextBlock Style="{StaticResource Hint}" Text="{Binding RecordHint, Source={x:Static s:UiText.Current}}" />
                             <TextBlock x:Name="CaptureState" Style="{StaticResource Hint}" Margin="0,6,0,0" Foreground="{StaticResource TextDim}" />
+                            <Border Margin="0,10,0,0" Padding="10,8" Background="#101216" BorderBrush="#393337" BorderThickness="1" CornerRadius="8">
+                                <StackPanel>
+                                    <DockPanel LastChildFill="False">
+                                        <TextBlock Text="{Binding ConnectionCheckTitle, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource Gold}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Content="{Binding RunConnectionCheck, Source={x:Static s:UiText.Current}}" Click="RefreshDiagnostics_Click" Padding="9,4" />
+                                    </DockPanel>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="145" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="{Binding DiagnosticGame, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,2,8,2" />
+                                        <TextBlock x:Name="GameCheckValue" Grid.Row="0" Grid.Column="1" Style="{StaticResource Hint}" Margin="0,2,0,2" />
+                                        <TextBlock Grid.Row="1" Text="{Binding DiagnosticNpcap, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,2,8,2" />
+                                        <TextBlock x:Name="NpcapCheckValue" Grid.Row="1" Grid.Column="1" Style="{StaticResource Hint}" Margin="0,2,0,2" />
+                                        <TextBlock Grid.Row="2" Text="{Binding DiagnosticCapture, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,2,8,2" />
+                                        <TextBlock x:Name="CaptureCheckValue" Grid.Row="2" Grid.Column="1" Style="{StaticResource Hint}" Margin="0,2,0,2" />
+                                        <TextBlock Grid.Row="3" Text="{Binding DiagnosticPackets, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,2,8,2" />
+                                        <TextBlock x:Name="PacketsCheckValue" Grid.Row="3" Grid.Column="1" Style="{StaticResource Hint}" Margin="0,2,0,2" />
+                                        <TextBlock Grid.Row="4" Text="{Binding DiagnosticDecoded, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,2,8,2" />
+                                        <TextBlock x:Name="DecodedCheckValue" Grid.Row="4" Grid.Column="1" Style="{StaticResource Hint}" Margin="0,2,0,2" />
+                                        <TextBlock Grid.Row="5" Text="{Binding DiagnosticOverlay, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,2,8,2" />
+                                        <TextBlock x:Name="OverlayCheckValue" Grid.Row="5" Grid.Column="1" Style="{StaticResource Hint}" Margin="0,2,0,2" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <Button Style="{StaticResource GhostButton}" Content="{Binding CopySupportReport, Source={x:Static s:UiText.Current}}" Click="CopyDiagnosticReport_Click" Padding="9,4" />
+                                        <TextBlock x:Name="DiagnosticFeedback" Foreground="{StaticResource TextDim}" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding ConnectionCheckHint, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
 

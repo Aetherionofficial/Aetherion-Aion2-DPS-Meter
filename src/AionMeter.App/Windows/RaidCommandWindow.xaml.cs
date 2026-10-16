@@ -19,6 +19,9 @@ public partial class RaidCommandWindow : Window
     private DateTime _lastDetailRefresh = DateTime.MinValue;
     private Guid? _fightId;
     private bool _healingMode;
+    private IReadOnlyList<CombatantSnapshot> _playerRows = [];
+    private long _playerTotal;
+    private double _combatSeconds = 1;
 
     public ObservableCollection<RaidPlayerViewModel> Players { get; } = [];
 
@@ -27,6 +30,7 @@ public partial class RaidCommandWindow : Window
         _meter = meter;
         InitializeComponent();
         PlayersList.ItemsSource = Players;
+        UpdateModeButtons();
         Loaded += (_, _) => Refresh();
         SizeChanged += (_, _) => DrawChart();
         Closing += (_, e) =>
@@ -82,6 +86,7 @@ public partial class RaidCommandWindow : Window
             : "AION2 liefert aktuell keine verlässlichen Phasen- oder Mechanikereignisse für diesen Kampf.";
 
         var activeSeconds = Math.Max(1, snap.CombatMs / 1000.0);
+        RateColumnText.Text = _healingMode ? "HPS" : "DPS";
         var healing = snap.Combatants.Sum(c => c.Healing);
         PartyDpsText.Text = Format.Compact(snap.PartyDps) + "/s";
         PartyHpsText.Text = Format.Compact(healing / activeSeconds) + "/s";
@@ -91,12 +96,19 @@ public partial class RaidCommandWindow : Window
         PlayerCountText.Text = $"{snap.PlayerCount} Spieler · {(snap.IsActive ? "Kampf aktiv" : "Kampf beendet")}";
         ChartRangeText.Text = snap.IsActive ? "LIVE · letzte 18 Sek." : "KAMPF BEENDET";
 
-        var total = _healingMode ? healing : snap.TotalDamage;
-        var ordered = snap.Combatants
+        _playerRows = snap.Combatants
             .Where(c => !c.IsUnknownSummons && (_healingMode ? c.Healing > 0 : c.Damage > 0))
-            .OrderByDescending(c => _healingMode ? c.Healing : c.Damage)
             .ToList();
-        UpdatePlayers(ordered, total, activeSeconds);
+        _playerTotal = _healingMode ? healing : snap.TotalDamage;
+        _combatSeconds = activeSeconds;
+        RefreshPlayerRows();
+
+        CaptureStateText.Text = snap.IsActive ? "KAMPF LÄUFT" : "KAMPF-ZUSAMMENFASSUNG";
+        if (!snap.IsActive)
+        {
+            MechanicTitleText.Text = "Kampf abgeschlossen";
+            MechanicDetailText.Text = $"{snap.PlayerCount} Spieler · {Format.Compact(snap.TotalDamage)} Gesamtschaden · {Format.ClockShort(snap.CombatMs)} Kampfzeit";
+        }
 
         if (DateTime.UtcNow - _lastDetailRefresh >= TimeSpan.FromSeconds(1))
         {
@@ -119,7 +131,81 @@ public partial class RaidCommandWindow : Window
             var share = total > 0 ? (double)amount / total : 0;
             Players[i].Update(row, i + 1, rate, share, (double)amount / max, _healingMode);
         }
-        if (Players.Count == 0) PlayerCountText.Text = "Noch keine Spieler in diesem Kampf";
+        EmptyPlayersPanel.Visibility = Players.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PlayersList.Visibility = Players.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        if (Players.Count == 0)
+        {
+            PlayerCountText.Text = _playerRows.Count == 0 ? "Warte auf Spielerwerte" : "Keine passenden Spieler";
+            EmptyPlayersTitle.Text = _playerRows.Count == 0 ? "Noch keine Kampfdaten" : "Keine Treffer für diesen Filter";
+            EmptyPlayersDetail.Text = _playerRows.Count == 0
+                ? "Sobald Aetherion Treffer aus einem Kampf erkennt, erscheinen hier Spielernamen und Werte."
+                : "Passe die Suche oder den Klassenfilter an, um Spieler einzublenden.";
+        }
+        else PlayerCountText.Text = $"{Players.Count} Spieler angezeigt";
+    }
+
+    private void RefreshPlayerRows()
+    {
+        var classTag = (ClassFilterBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        var query = PlayerSearchBox.Text.Trim();
+        var rows = _playerRows.AsEnumerable();
+        if (!string.IsNullOrWhiteSpace(classTag) && classTag != "*" && Enum.TryParse<GameClass>(classTag, out var selectedClass))
+            rows = rows.Where(c => c.Class == selectedClass);
+        if (query.Length > 0)
+            rows = rows.Where(c => c.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                || c.Class.ToString().Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        var sort = (SortBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "value";
+        var amount = (CombatantSnapshot c) => _healingMode ? c.Healing : c.Damage;
+        var rate = (CombatantSnapshot c) => _healingMode ? c.Healing / _combatSeconds : c.Dps;
+        rows = sort switch
+        {
+            "burst" => rows.OrderByDescending(c => _healingMode ? rate(c) : c.BurstDps).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
+            "name" => rows.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
+            "class" => rows.OrderBy(c => c.Class.ToString(), StringComparer.OrdinalIgnoreCase).ThenByDescending(c => amount(c)),
+            "value" => rows.OrderByDescending(c => amount(c)).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
+            _ => rows.OrderByDescending(c => rate(c)).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
+        };
+        UpdatePlayers(rows.ToList(), _playerTotal, _combatSeconds);
+    }
+
+    private void PlayerFilter_Changed(object sender, RoutedEventArgs e)
+    {
+        if (PlayerSearchPlaceholder is not null)
+            PlayerSearchPlaceholder.Visibility = string.IsNullOrEmpty(PlayerSearchBox.Text) ? Visibility.Visible : Visibility.Collapsed;
+        if (IsLoaded) RefreshPlayerRows();
+    }
+
+    private void ViewMenu_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { ContextMenu: { } menu } button)
+        {
+            menu.PlacementTarget = button;
+            menu.IsOpen = true;
+        }
+    }
+
+    private void PanelToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem item) return;
+        var visible = item.IsChecked ? Visibility.Visible : Visibility.Collapsed;
+        switch (item.Tag?.ToString())
+        {
+            case "metrics":
+                MetricsPanel.Visibility = visible;
+                MetricsRow.Height = item.IsChecked ? new GridLength(116) : new GridLength(0);
+                break;
+            case "chart":
+                FightChartPanel.Visibility = visible;
+                break;
+            case "team":
+                TeamStatusPanel.Visibility = visible;
+                break;
+        }
+        var showChart = FightChartPanel.Visibility == Visibility.Visible;
+        var showTeam = TeamStatusPanel.Visibility == Visibility.Visible;
+        ChartRow.Height = showChart && showTeam ? new GridLength(1.18, GridUnitType.Star) : showChart ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        TeamRow.Height = showChart && showTeam ? new GridLength(.92, GridUnitType.Star) : showTeam ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
     }
 
     private void RefreshTeamDetails(EncounterSnapshot snap)
@@ -156,6 +242,12 @@ public partial class RaidCommandWindow : Window
         LocationText.Text = "Live-Kampfanalyse · Warte auf AION2";
         PlayerCountText.Text = "Warte auf Spieler";
         Players.Clear();
+        _playerRows = [];
+        EmptyPlayersPanel.Visibility = Visibility.Visible;
+        PlayersList.Visibility = Visibility.Collapsed;
+        EmptyPlayersTitle.Text = "Noch keine Kampfdaten";
+        EmptyPlayersDetail.Text = "Sobald Aetherion Treffer aus einem Kampf erkennt, erscheinen hier Spielernamen und Werte.";
+        CaptureStateText.Text = _meter.CaptureStatus.State == CaptureState.Capturing ? "WARTE AUF KAMPF" : "WARTE AUF AION2";
         DrawChart();
     }
 
@@ -198,8 +290,19 @@ public partial class RaidCommandWindow : Window
     private void Settings_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowSettings();
     private void Overlay_Click(object sender, RoutedEventArgs e) => AppHost.Current.SetOverlayVisible(!AppHost.Current.OverlayVisible);
     private void Details_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowCurrentBreakdown();
-    private void DamageMode_Click(object sender, RoutedEventArgs e) { _healingMode = false; Refresh(); }
-    private void HealingMode_Click(object sender, RoutedEventArgs e) { _healingMode = true; Refresh(); }
+    private void DamageMode_Click(object sender, RoutedEventArgs e) { _healingMode = false; UpdateModeButtons(); Refresh(); }
+    private void HealingMode_Click(object sender, RoutedEventArgs e) { _healingMode = true; UpdateModeButtons(); Refresh(); }
+    private void UpdateModeButtons()
+    {
+        var selected = new SolidColorBrush(Color.FromRgb(0xF0, 0x6A, 0x22));
+        var selectedText = new SolidColorBrush(Color.FromRgb(0x12, 0x0D, 0x0A));
+        var inactive = new SolidColorBrush(Color.FromRgb(0x1B, 0x19, 0x1A));
+        var inactiveText = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEA));
+        DamageModeButton.Background = _healingMode ? inactive : selected;
+        DamageModeButton.Foreground = _healingMode ? inactiveText : selectedText;
+        HealingModeButton.Background = _healingMode ? selected : inactive;
+        HealingModeButton.Foreground = _healingMode ? selectedText : inactiveText;
+    }
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void Close_Click(object sender, RoutedEventArgs e) => Hide();
 

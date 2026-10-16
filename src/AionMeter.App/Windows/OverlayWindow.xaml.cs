@@ -59,18 +59,16 @@ public partial class OverlayWindow : Window
         // Drag the card by any part of it (unless locked); a click without movement still opens a breakdown.
         _drag = DragAnywhere.Attach(this, canDrag: () => !_settings.Locked, dropped: SavePlacement);
 
-        // Keep the combat card clean; the title area becomes the quick toolbar on hover.
+        // Keep the combat card clean; hover reveals a grounded control tray at the bottom.
         MouseEnter += (_, _) =>
         {
-            FightTitlePanel.Visibility = Visibility.Collapsed;
-            LabelPanel.Visibility = Visibility.Collapsed;
+            ToolbarTray.Visibility = Visibility.Visible;
             Toolbar.Visibility = Visibility.Visible;
         };
         MouseLeave += (_, _) =>
         {
+            ToolbarTray.Visibility = Visibility.Collapsed;
             Toolbar.Visibility = Visibility.Collapsed;
-            FightTitlePanel.Visibility = Visibility.Visible;
-            LabelPanel.Visibility = Visibility.Visible;
         };
 
         SourceInitialized += (_, _) =>
@@ -709,6 +707,12 @@ public partial class OverlayWindow : Window
     private void Settings_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowSettings();
 
     private void Hide_Click(object sender, RoutedEventArgs e) => AppHost.Current.SetOverlayVisible(false);
+
+    internal void ShowToolbarPreview()
+    {
+        ToolbarTray.Visibility = Visibility.Visible;
+        Toolbar.Visibility = Visibility.Visible;
+    }
 
     private void Opacity_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {

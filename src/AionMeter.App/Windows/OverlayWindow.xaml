@@ -78,9 +78,9 @@
             <Setter Property="FontSize" Value="12" />
         </Style>
 
-        <SolidColorBrush x:Key="Cream" Color="#F3E6C8" />
-        <SolidColorBrush x:Key="Soft" Color="#C3CAD8" />
-        <SolidColorBrush x:Key="SelfGold" Color="#FF9B4A" />
+        <SolidColorBrush x:Key="Cream" Color="#E5E7EA" />
+        <SolidColorBrush x:Key="Soft" Color="#B4B8BE" />
+        <SolidColorBrush x:Key="SelfGold" Color="#F28A45" />
 
         <!-- A hairline frame, a touch lighter at the top -->
         <LinearGradientBrush x:Key="CardFrame" StartPoint="0,0" EndPoint="0,1">
@@ -89,12 +89,12 @@
         </LinearGradientBrush>
 
         <LinearGradientBrush x:Key="HpFill" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#B9303A" Offset="0" />
-            <GradientStop Color="#EE5A5E" Offset="1" />
+            <GradientStop Color="#D97438" Offset="0" />
+            <GradientStop Color="#F28A45" Offset="1" />
         </LinearGradientBrush>
 
         <Style x:Key="FooterLink" TargetType="Button">
-            <Setter Property="Foreground" Value="#FF9B4A" />
+            <Setter Property="Foreground" Value="#F28A45" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Focusable" Value="False" />
@@ -105,7 +105,7 @@
                         <ContentPresenter x:Name="P" VerticalAlignment="Center" />
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#FFB56D" />
+                                <Setter Property="Foreground" Value="#E5E7EA" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -115,8 +115,8 @@
 
         <Style x:Key="FooterAction" TargetType="Button">
             <Setter Property="Foreground" Value="#CBD4D7" />
-            <Setter Property="Background" Value="#19252D" />
-            <Setter Property="BorderBrush" Value="#30414A" />
+            <Setter Property="Background" Value="#1B191A" />
+            <Setter Property="BorderBrush" Value="#393337" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontSize" Value="9.5" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -133,8 +133,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="#26343B" />
-                                <Setter Property="Foreground" Value="#FFB56D" />
+                                <Setter TargetName="Surface" Property="Background" Value="#30201A" />
+                                <Setter Property="Foreground" Value="#E5E7EA" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -144,7 +144,7 @@
 
         <!-- The footer's boss timer button: a quiet outlined pill, still plainly a button -->
         <Style x:Key="TimersPill" TargetType="Button">
-            <Setter Property="Foreground" Value="#FF9B4A" />
+            <Setter Property="Foreground" Value="#F28A45" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontFamily" Value="{StaticResource NumberFont}" />
@@ -153,13 +153,13 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" CornerRadius="9" Padding="8,2,9,2" BorderThickness="1" BorderBrush="#66FF741F" Background="#1AFF741F">
+                        <Border x:Name="Bd" CornerRadius="9" Padding="8,2,9,2" BorderThickness="1" BorderBrush="#66F06A22" Background="#1AF06A22">
                             <ContentPresenter VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF741F" />
-                                <Setter TargetName="Bd" Property="Background" Value="#33FF741F" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#F06A22" />
+                                <Setter TargetName="Bd" Property="Background" Value="#33F06A22" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -167,9 +167,9 @@
             </Setter>
         </Style>
 
-        <!-- "A new version is out": a slim green banner above the footer, only while an update is available -->
+        <!-- "A new version is out": a slim ember banner above the footer, only while an update is available -->
         <Style x:Key="UpdateBannerButton" TargetType="Button">
-            <Setter Property="Foreground" Value="#D2FAE6" />
+            <Setter Property="Foreground" Value="#E5E7EA" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Cursor" Value="Hand" />
@@ -178,13 +178,13 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" CornerRadius="6" Padding="9,3,9,3" BorderThickness="1" BorderBrush="#803DD68C" Background="#2A3DD68C">
+                        <Border x:Name="Bd" CornerRadius="6" Padding="9,3,9,3" BorderThickness="1" BorderBrush="#80F06A22" Background="#2AF06A22">
                             <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#3DD68C" />
-                                <Setter TargetName="Bd" Property="Background" Value="#403DD68C" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#F06A22" />
+                                <Setter TargetName="Bd" Property="Background" Value="#40F06A22" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -198,7 +198,7 @@
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
                 <!-- track -->
-                <Border x:Name="Track" CornerRadius="4" Background="#B20B1119" />
+                <Border x:Name="Track" CornerRadius="4" Background="#E6171518" />
                 <!-- fill -->
                 <Border CornerRadius="4" Background="{Binding SoftFillBrush}" RenderTransformOrigin="0,0.5">
                     <Border.RenderTransform>
@@ -208,7 +208,7 @@
                 <!-- class strip -->
                 <Border Width="{DynamicResource RowAccentWidth}" HorizontalAlignment="Left" CornerRadius="4,0,0,4" Background="{Binding AccentBrush}" />
                 <!-- your own row -->
-                <Border CornerRadius="4" BorderThickness="1" BorderBrush="#B3FF9B4A"
+                <Border CornerRadius="4" BorderThickness="1" BorderBrush="#B3F06A22"
                         Visibility="{Binding IsSelf, Converter={StaticResource VisibleIf}}" />
 
                 <Grid Margin="8,0,10,0" Effect="{StaticResource TextShadow}">
@@ -238,9 +238,9 @@
 
                     <!-- Gear score and combat power, right by the name: only players of your party have them (the party roster) -->
                     <TextBlock Grid.Column="3" Style="{StaticResource GearText}" Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}"
-                               ToolTip="{Binding DataContext.T.TipGs, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="GS " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding GearScore, Mode=OneWay}" Foreground="#FFB56D" /></TextBlock>
+                               ToolTip="{Binding DataContext.T.TipGs, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="GS " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding GearScore, Mode=OneWay}" Foreground="#FFAC72" /></TextBlock>
                     <TextBlock Grid.Column="4" Style="{StaticResource GearText}" Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}"
-                               ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="CP " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#FFD0A8" /></TextBlock>
+                               ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="CP " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#E5E7EA" /></TextBlock>
 
                     <TextBlock Grid.Column="6" Text="{Binding Dps}" Style="{StaticResource RowNumber}"
                                ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}" />
@@ -251,7 +251,7 @@
             </Grid>
             <DataTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="Track" Property="Background" Value="#D20B1119" />
+                    <Setter TargetName="Track" Property="Background" Value="#F21F1C1D" />
                 </Trigger>
                 <DataTrigger Binding="{Binding IsSelf}" Value="True">
                     <Setter TargetName="NameText" Property="Foreground" Value="{StaticResource SelfGold}" />
@@ -263,20 +263,20 @@
     <Grid Margin="8">
         <Border x:Name="Frame" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource CardFrame}">
             <Border.Background>
-                <SolidColorBrush x:Name="FrameBackground" Color="#0A0B0D" Opacity="0.92" />
+                <SolidColorBrush x:Name="FrameBackground" Color="#09090B" Opacity="0.92" />
             </Border.Background>
             <Border.Effect>
                 <DropShadowEffect BlurRadius="14" ShadowDepth="0" Opacity="0.5" Color="Black" />
             </Border.Effect>
         </Border>
 
-        <!-- Aetherion signature line: a small orange sweep anchors the card without cluttering the fight data. -->
+        <!-- Aetherion signature line: a restrained silver-to-ember sweep anchors the card without cluttering fight data. -->
         <Border x:Name="SignatureLine" Height="0" Visibility="Collapsed" IsHitTestVisible="False">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#FF741F" Offset="0" />
-                    <GradientStop Color="#FFB56D" Offset="0.48" />
-                    <GradientStop Color="#FF741F" Offset="1" />
+                    <GradientStop Color="#E5E7EA" Offset="0" />
+                    <GradientStop Color="#F28A45" Offset="0.48" />
+                    <GradientStop Color="#7A3C22" Offset="1" />
                 </LinearGradientBrush>
             </Border.Background>
         </Border>
@@ -300,36 +300,14 @@
 
                     <StackPanel x:Name="FightTitlePanel" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Visibility="Collapsed">
-                        <Border Background="#FF741F" CornerRadius="1" Width="3" Height="10" Margin="0,0,6,0" />
-                        <TextBlock Text="{Binding T.OverlayLive}" FontSize="8" FontWeight="Bold" Foreground="#FFB56D" />
+                        <Border Background="#F06A22" CornerRadius="1" Width="3" Height="10" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding T.OverlayLive}" FontSize="8" FontWeight="Bold" Foreground="#F28A45" />
                     </StackPanel>
                     <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="13.5" FontWeight="SemiBold"
                            Foreground="#EEF0F5" TextTrimming="CharacterEllipsis"
                            VerticalAlignment="Center" Margin="0,1,10,0" Effect="{StaticResource TextShadow}" Background="Transparent"
                            MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
                     </StackPanel>
-
-                <StackPanel x:Name="Toolbar" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="Collapsed">
-                    <Button Style="{StaticResource Chip}" Content="{Binding ModeLabel}" Click="Mode_Click" Margin="0,0,5,0"
-                            ToolTip="{Binding T.TipTargetMode}" />
-                    <Button Style="{StaticResource Chip}" Content="{Binding RankingLabel}" Click="Ranking_Click" Margin="0,0,5,0"
-                            ToolTip="Switch DPS / HPS ranking" />
-                    <Button Style="{StaticResource Chip}" Content="{Binding LanguageCode}" Click="Language_Click" Margin="0,0,5,0"
-                            ToolTip="{Binding T.SwitchLanguage}" />
-                    <Button x:Name="ChatToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
-                    <Button x:Name="MapToolButton" Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
-                    <Button x:Name="GuideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8A7;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />
-                    <Button x:Name="TimersToolButton" Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />
-                    <Button x:Name="EventsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE787;" Click="Events_Click" ToolTip="{Binding T.EventTimersTitle}" />
-                    <Button x:Name="RestartButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" />
-                    <ToggleButton x:Name="LockButton" Style="{StaticResource ToolToggle}" Click="Lock_Click" ToolTip="{Binding T.TipLock}">
-                        <TextBlock x:Name="LockGlyph" Text="&#xE785;" />
-                    </ToggleButton>
-                    <Button x:Name="SettingsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="{Binding T.TipSettings}" />
-                    <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0.15" Maximum="1" Margin="5,0,3,0"
-                            ValueChanged="Opacity_Changed" VerticalAlignment="Center" ToolTip="{Binding T.TipOpacity}" />
-                    <Button x:Name="HideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="Hide_Click" ToolTip="{Binding T.TipHide}" />
-                </StackPanel>
 
                 <Border Grid.Column="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" CornerRadius="0" Padding="0" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal" Effect="{StaticResource TextShadow}">
@@ -360,52 +338,52 @@
                                 </Style>
                             </Ellipse.Style>
                         </Ellipse>
-                        <TextBlock Text="{Binding HeaderLabel}" Foreground="#B5C0CC" FontSize="9" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding HeaderLabel}" Foreground="#B4B8BE" FontSize="9" FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="13.5"
-                               Foreground="#FF9B4A" VerticalAlignment="Center" />
+                               Foreground="#F28A45" VerticalAlignment="Center" />
                 </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- Encounter identity and boss health, in one compact tactical strip -->
-            <Grid Grid.Row="1" Height="20" Margin="0,5,0,0" Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
-                <Border CornerRadius="5" Background="#D00B1118" BorderBrush="#52616D" BorderThickness="1" />
-                <Grid x:Name="BossHealthTrack" Margin="1" ClipToBounds="True">
-                    <Border CornerRadius="4" Background="#70434A52" />
-                    <Border Height="7" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
-                            Margin="0,0,0,0" Background="{StaticResource HpFill}" RenderTransformOrigin="0,0.5">
-                        <Border.RenderTransform>
-                            <ScaleTransform ScaleX="{Binding BossHpFraction}" />
-                        </Border.RenderTransform>
-                    </Border>
+            <!-- Boss health: separate label row and inset track keep text crisp and the fill easy to read. -->
+            <Border Grid.Row="1" Margin="0,5,0,0" Padding="8,4,8,5" CornerRadius="6"
+                    Background="#F0121216" BorderBrush="#493B39" BorderThickness="1"
+                    Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="5" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,4">
+                        <TextBlock Text="{Binding BossHpText}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="9"
+                                   Foreground="#D9DADD" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                        <TextBlock Text="{Binding BossPercent}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="9"
+                                   Foreground="#F2A06B" HorizontalAlignment="Right" />
+                    </Grid>
+                    <Grid x:Name="BossHealthTrack" Grid.Row="1" ClipToBounds="True" Background="#383337">
+                        <Border CornerRadius="3" Background="{StaticResource HpFill}" HorizontalAlignment="Stretch"
+                                RenderTransformOrigin="0,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="{Binding BossHpFraction}" />
+                            </Border.RenderTransform>
+                        </Border>
+                    </Grid>
                 </Grid>
-                <Grid Margin="9,0">
-                    <Grid.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.9" Color="Black" />
-                    </Grid.Effect>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Visibility="Collapsed" Text="{Binding T.ShowBossHpInfo}" FontSize="8" FontWeight="Bold" Foreground="#FFB56D" />
-                        <TextBlock Text="{Binding BossHpText}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10"
-                                   Foreground="#CBD4D4" />
-                    </StackPanel>
-                    <TextBlock Text="{Binding BossPercent}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="10.5"
-                               Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                </Grid>
-            </Grid>
+            </Border>
 
             <!-- Group output at a glance -->
             <Grid Grid.Row="2" Height="0" Margin="0" Visibility="Collapsed">
                 <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="8" /><ColumnDefinition /></Grid.ColumnDefinitions>
-                <Border x:Name="GroupDpsCard" Background="#141618" BorderBrush="#30271F" BorderThickness="1" CornerRadius="8" Padding="10,7">
-                    <StackPanel><StackPanel Orientation="Horizontal"><Border Background="#FF741F" Width="3" Height="9" Margin="0,0,6,0" /><TextBlock Text="{Binding T.GroupDps}" FontSize="8" FontWeight="Bold" Foreground="#B7B1AA" /></StackPanel>
-                        <TextBlock Text="{Binding PartyDps}" FontFamily="{StaticResource NumberFont}" FontSize="22" FontWeight="ExtraBold" Foreground="#F4F0EB" />
+                <Border x:Name="GroupDpsCard" Background="#121216" BorderBrush="#393337" BorderThickness="1" CornerRadius="8" Padding="10,7">
+                    <StackPanel><StackPanel Orientation="Horizontal"><Border Background="#F28A45" Width="3" Height="9" Margin="0,0,6,0" /><TextBlock Text="{Binding T.GroupDps}" FontSize="8" FontWeight="Bold" Foreground="#B4B8BE" /></StackPanel>
+                        <TextBlock Text="{Binding PartyDps}" FontFamily="{StaticResource NumberFont}" FontSize="22" FontWeight="ExtraBold" Foreground="#F0F1F2" />
                     </StackPanel>
                 </Border>
-                <Border x:Name="GroupHpsCard" Grid.Column="2" Background="#10211F" BorderBrush="#1B5049" BorderThickness="1" CornerRadius="8" Padding="10,7">
-                    <StackPanel><StackPanel Orientation="Horizontal"><Border Background="#43D7B4" Width="3" Height="9" Margin="0,0,6,0" /><TextBlock Text="{Binding T.GroupHps}" FontSize="8" FontWeight="Bold" Foreground="#76CDBA" /></StackPanel>
-                        <TextBlock Text="{Binding PartyHps}" FontFamily="{StaticResource NumberFont}" FontSize="22" FontWeight="ExtraBold" Foreground="#E5F8F1" /></StackPanel>
+                <Border x:Name="GroupHpsCard" Grid.Column="2" Background="#121216" BorderBrush="#393337" BorderThickness="1" CornerRadius="8" Padding="10,7">
+                    <StackPanel><StackPanel Orientation="Horizontal"><Border Background="#C3C5C9" Width="3" Height="9" Margin="0,0,6,0" /><TextBlock Text="{Binding T.GroupHps}" FontSize="8" FontWeight="Bold" Foreground="#B4B8BE" /></StackPanel>
+                        <TextBlock Text="{Binding PartyHps}" FontFamily="{StaticResource NumberFont}" FontSize="22" FontWeight="ExtraBold" Foreground="#E5E7EA" /></StackPanel>
                 </Border>
             </Grid>
 
@@ -439,12 +417,29 @@
                     <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
                 </ScrollViewer>
                 <TextBlock Grid.RowSpan="2" Text="{Binding T.EmptyParty}" FontSize="12"
-                           Foreground="#807971" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
+                           Foreground="#6B7590" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
                            Visibility="{Binding HasData, Converter={StaticResource VisibleIf}, ConverterParameter=!}" />
             </Grid>
 
             <!-- Footer -->
             <StackPanel Grid.Row="4" Margin="0,8,0,0">
+                <Border x:Name="ToolbarTray" Visibility="Collapsed" Background="#E60C0C0F" BorderBrush="#80F06A22" BorderThickness="1" CornerRadius="8" Padding="4" Margin="0,0,0,6">
+                    <StackPanel x:Name="Toolbar" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                        <Button Style="{StaticResource Chip}" Content="{Binding ModeLabel}" Click="Mode_Click" Margin="0,0,5,0" ToolTip="{Binding T.TipTargetMode}" />
+                        <Button Style="{StaticResource Chip}" Content="{Binding RankingLabel}" Click="Ranking_Click" Margin="0,0,5,0" ToolTip="Switch DPS / HPS ranking" />
+                        <Button Style="{StaticResource Chip}" Content="{Binding LanguageCode}" Click="Language_Click" Margin="0,0,5,0" ToolTip="{Binding T.SwitchLanguage}" />
+                        <Button x:Name="ChatToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
+                        <Button x:Name="MapToolButton" Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
+                        <Button x:Name="GuideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8A7;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />
+                        <Button x:Name="TimersToolButton" Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />
+                        <Button x:Name="EventsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE787;" Click="Events_Click" ToolTip="{Binding T.EventTimersTitle}" />
+                        <Button x:Name="RestartButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" />
+                        <ToggleButton x:Name="LockButton" Style="{StaticResource ToolToggle}" Click="Lock_Click" ToolTip="{Binding T.TipLock}"><TextBlock x:Name="LockGlyph" Text="&#xE785;" /></ToggleButton>
+                        <Button x:Name="SettingsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="{Binding T.TipSettings}" />
+                        <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0" Maximum="1" Margin="5,0,3,0" ValueChanged="Opacity_Changed" VerticalAlignment="Center" ToolTip="{Binding T.TipOpacity}" />
+                        <Button x:Name="HideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="Hide_Click" ToolTip="{Binding T.TipHide}" />
+                    </StackPanel>
+                </Border>
                 <!-- New version on GitHub: a slim banner until it is installed, skipped or closed for this session -->
                 <Grid x:Name="UpdateBanner" Margin="0,0,0,6" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>
@@ -470,8 +465,8 @@
                                    Effect="{StaticResource TextShadow}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,35,0">
-                        <Ellipse Width="5" Height="5" Fill="#45C2B0" Margin="0,0,5,0" />
-                        <TextBlock Text="LIVE" FontSize="9" FontWeight="Bold" Foreground="#A9B9BC" />
+                        <Ellipse Width="5" Height="5" Fill="#F06A22" Margin="0,0,5,0" />
+                        <TextBlock Text="LIVE" FontSize="9" FontWeight="Bold" Foreground="#F2A06B" />
                     </StackPanel>
                 </Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -480,7 +475,7 @@
                     <Button x:Name="FooterSettingsButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click"
                             ToolTip="{Binding T.TipSettings}" AutomationProperties.Name="Einstellungen" />
                     <Button x:Name="FooterRankingButton" Style="{StaticResource FooterAction}" Content="{Binding T.FooterRankingLabel}" Click="Ranking_Click"
-                            Background="#261A12" BorderBrush="#82421C" Foreground="#FF9B4A" Margin="0" />
+                            Background="#261914" BorderBrush="#78391F" Foreground="#F28A45" Margin="0" />
                 </StackPanel>
             </StackPanel>
         </Grid>
@@ -490,8 +485,8 @@
                Cursor="SizeNWSE" ToolTip="Fenstergröße ändern · am Eck ziehen" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
             <Thumb.Template>
                 <ControlTemplate TargetType="Thumb">
-                    <Border x:Name="GripBack" Background="#D90A0B0D" BorderBrush="#75FF741F" BorderThickness="1" CornerRadius="8">
-                    <Path Data="M23 5 L5 23 M23 13 L13 23" Stroke="#FFFF9B4A" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                    <Border x:Name="GripBack" Background="#D9111922" BorderBrush="#75F06A22" BorderThickness="1" CornerRadius="8">
+                    <Path Data="M23 5 L5 23 M23 13 L13 23" Stroke="#FFE5E7EA" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
                     </Border>
                 </ControlTemplate>
             </Thumb.Template>
