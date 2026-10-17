@@ -17,7 +17,7 @@
     <Product>Aetherion</Product>
     <AssemblyTitle>Aetherion — AION 2 DPS Meter</AssemblyTitle>
     <ApplicationIcon>Assets\aetherion-mark.ico</ApplicationIcon>
-    <Version>0.3.43</Version>
+    <Version>0.3.44</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
@@ -29,6 +29,8 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(AetherionOwnerBuild)' != 'true'">
     <Compile Remove="Windows\KeyIssuerWindow.cs" />
+    <Compile Remove="Windows\SupabaseLicenseDashboardWindow.cs" />
+    <Compile Remove="Services\SupabaseLicenseAdminService.cs" />
   </ItemGroup>
 
   <ItemGroup>

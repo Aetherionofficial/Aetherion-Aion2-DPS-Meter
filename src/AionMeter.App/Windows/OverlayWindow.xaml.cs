@@ -207,9 +207,16 @@ public partial class OverlayWindow : Window
 
     private void ApplyBackgroundOpacity(double opacity)
     {
-        FrameBackground.Opacity = Math.Clamp(opacity, 0, 1);
-        Frame.BorderBrush = opacity <= 0.001 ? Brushes.Transparent : (Brush)FindResource("CardFrame");
-        SignatureLine.Visibility = opacity <= 0.001 ? Visibility.Collapsed : Visibility.Visible;
+        var value = Math.Clamp(opacity, 0, 1);
+        FrameBackground.Opacity = value;
+
+        // Fade the toolbar's empty surface with the main panel too. Keeping its fixed opaque backing
+        // prevented mouse clicks from reaching the game underneath, even at zero background opacity.
+        if (ToolbarTray.Background is SolidColorBrush toolbarSurface) toolbarSurface.Opacity = value;
+        if (ToolbarTray.BorderBrush is SolidColorBrush toolbarBorder) toolbarBorder.Opacity = value;
+
+        Frame.BorderBrush = value <= 0.001 ? Brushes.Transparent : (Brush)FindResource("CardFrame");
+        SignatureLine.Visibility = value <= 0.001 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     /// <summary>
