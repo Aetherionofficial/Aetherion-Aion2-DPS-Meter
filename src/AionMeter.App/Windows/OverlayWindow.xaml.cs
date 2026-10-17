@@ -46,6 +46,11 @@ public partial class OverlayWindow : Window
 
         OpacitySlider.Value = _settings.BackgroundOpacity;
         ApplyBackgroundOpacity(_settings.BackgroundOpacity);
+        if (_settings.BackgroundOpacity <= 0.001)
+        {
+            ToolbarTray.Visibility = Visibility.Visible;
+            Toolbar.Visibility = Visibility.Visible;
+        }
         ApplyResponsiveLayout();
         ApplyLock();
         ApplyRowSize(_settings.RowSize);
@@ -67,6 +72,9 @@ public partial class OverlayWindow : Window
         };
         MouseLeave += (_, _) =>
         {
+            // Keep controls available at full transparency; otherwise a zero-alpha gap can trigger
+            // MouseLeave and collapse the toolbar before the pointer reaches the next button.
+            if (_settings.BackgroundOpacity <= 0.001) return;
             ToolbarTray.Visibility = Visibility.Collapsed;
             Toolbar.Visibility = Visibility.Collapsed;
         };

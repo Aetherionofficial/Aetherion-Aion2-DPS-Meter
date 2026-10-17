@@ -68,11 +68,14 @@
 
         <!-- The hover toolbar's buttons: clear, high-contrast icon chips that stay legible over the game. -->
         <Style x:Key="ToolIcon" TargetType="ButtonBase" BasedOn="{StaticResource IconButton}">
+            <!-- A 1/255-alpha hit surface keeps layered-window icon buttons clickable over fully transparent areas. -->
+            <Setter Property="Background" Value="#01000000" />
             <Setter Property="Width" Value="22" />
             <Setter Property="Height" Value="22" />
             <Setter Property="FontSize" Value="12" />
         </Style>
         <Style x:Key="ToolToggle" TargetType="ToggleButton" BasedOn="{StaticResource IconToggle}">
+            <Setter Property="Background" Value="#01000000" />
             <Setter Property="Width" Value="22" />
             <Setter Property="Height" Value="22" />
             <Setter Property="FontSize" Value="12" />
