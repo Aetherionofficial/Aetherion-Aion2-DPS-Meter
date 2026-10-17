@@ -238,16 +238,16 @@ public partial class OverlayWindow : Window
         var height = Math.Round(68 * k);
         Resources["RowHeight"] = height;
         Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(8 * k)));
-        Resources["RowNameFont"] = Math.Round(13 * f, 1);
-        Resources["RowGearFont"] = Math.Round(12 * f, 1);
-        Resources["RowNumberFont"] = Math.Round(13.5 * f, 1);
-        Resources["RowSubFont"] = Math.Round(12 * f, 1);
-        Resources["RowGlyphSize"] = Math.Min(Math.Round(24 * f), height - 8);
-        Resources["RowRankFont"] = Math.Round(11 * f, 1);
+        Resources["RowNameFont"] = Math.Round(17 * f, 1);
+        Resources["RowGearFont"] = Math.Round(13.5 * f, 1);
+        Resources["RowNumberFont"] = Math.Round(15.5 * f, 1);
+        Resources["RowSubFont"] = Math.Round(13.5 * f, 1);
+        Resources["RowGlyphSize"] = Math.Min(Math.Round(28 * f), height - 8);
+        Resources["RowRankFont"] = Math.Round(12.5 * f, 1);
         Resources["RowAccentWidth"] = Math.Max(2, Math.Round(3 * f));
-        Resources["ColRankWidth"] = new GridLength(Math.Round(20 * f));
-        Resources["ColGlyphWidth"] = new GridLength(Math.Round(26 * f));
-        Resources["ColGap"] = new Thickness(Math.Round(10 * f), 0, 0, 0);
+        Resources["ColRankWidth"] = new GridLength(Math.Round(22 * f));
+        Resources["ColGlyphWidth"] = new GridLength(Math.Round(32 * f));
+        Resources["ColGap"] = new Thickness(Math.Round(12 * f), 0, 0, 0);
     }
 
 

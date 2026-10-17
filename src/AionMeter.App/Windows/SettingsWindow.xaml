@@ -123,7 +123,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid Grid.ColumnSpan="2" Grid.RowSpan="3" Margin="20,8,8,0" VerticalAlignment="Top" Height="36">
-                <Button Style="{StaticResource IconButton}" Content="&#xE711;" Click="Cancel_Click" HorizontalAlignment="Right"
+                <Button Style="{StaticResource IconButton}" Content="&#xE711;" Click="Save_Click" ToolTip="Einstellungen übernehmen und schließen" HorizontalAlignment="Right"
                         VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
 
@@ -145,6 +145,7 @@
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Tag="appearance" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGeneral, Source={x:Static s:UiText.Current}}" Tag="general" Click="SettingsNav_Click" />
                     <TextBlock Text="AION2 EXTRAS" Foreground="{StaticResource TextMute}" FontSize="9" FontWeight="Bold" Margin="12,18,0,7" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavPvp, Source={x:Static s:UiText.Current}}" Tag="pvp" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavMap, Source={x:Static s:UiText.Current}}" Tag="map" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGuide, Source={x:Static s:UiText.Current}}" Tag="guide" Click="SettingsNav_Click" />
                     <TextBlock Text="KONTO" Foreground="{StaticResource TextMute}" FontSize="9" FontWeight="Bold" Margin="12,18,0,7" />
@@ -236,6 +237,64 @@
                             <TextBlock Text="{Binding GuidePageTitle, Source={x:Static s:UiText.Current}}" FontSize="17" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding GuidePageHint, Source={x:Static s:UiText.Current}}" Style="{StaticResource Hint}" Margin="0,6,0,12" />
                             <Button Style="{StaticResource PrimaryButton}" Content="{Binding OpenGuideLabel, Source={x:Static s:UiText.Current}}" Click="OpenGuide_Click" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="PvpSection" Style="{StaticResource Section}" Visibility="Collapsed">
+                        <StackPanel>
+                            <Border Background="#171518" BorderBrush="#503825" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                            <TextBlock Text="AETHERION · PVP" Foreground="{StaticResource Gold}" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                                            <Border Background="#2AF06A22" BorderBrush="#80F06A22" BorderThickness="1" CornerRadius="8" Padding="8,3" Margin="10,0,0,0">
+                                                <TextBlock Text="{Binding PvpPreview, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource GoldBright}" FontSize="9" FontWeight="Bold" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding PvpPageTitle, Source={x:Static s:UiText.Current}}" FontSize="21" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding PvpLockedHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" TextWrapping="Wrap" Margin="0,7,0,0" MaxWidth="500" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Width="76" Height="76" CornerRadius="16" Background="#241B18" BorderBrush="#754322" BorderThickness="1" VerticalAlignment="Center">
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock Text="&#xE72E;" FontFamily="{StaticResource IconFont}" FontSize="27" Foreground="{StaticResource GoldBright}" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{Binding PvpComingSoon, Source={x:Static s:UiText.Current}}" FontSize="8" FontWeight="Bold" Foreground="{StaticResource TextDim}" Margin="0,5,0,0" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="{Binding PvpComingSoon, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="2,0,0,8" />
+                            <UniformGrid Columns="3" Margin="0,0,0,12">
+                                <Border Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="9" Padding="14,13" Margin="0,0,8,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding PvpPointsTitle, Source={x:Static s:UiText.Current}}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding PvpPointsHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" FontSize="11" Margin="0,5,0,12" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding PvpComingSoon, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource GoldBright}" FontSize="9" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="9" Padding="14,13" Margin="0,0,8,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding PvpRankTitle, Source={x:Static s:UiText.Current}}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding PvpRankHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" FontSize="11" Margin="0,5,0,12" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding PvpComingSoon, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource GoldBright}" FontSize="9" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="9" Padding="14,13">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding PvpLadderTitle, Source={x:Static s:UiText.Current}}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding PvpLadderHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextMute}" FontSize="11" Margin="0,5,0,12" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding PvpComingSoon, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource GoldBright}" FontSize="9" FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            <Border Background="#111114" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="9" Padding="13,11">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#xE72E;" FontFamily="{StaticResource IconFont}" FontSize="14" Foreground="{StaticResource Gold}" Margin="0,0,10,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding PvpPageHint, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
                     <Border x:Name="AppearanceSection" Style="{StaticResource Section}">

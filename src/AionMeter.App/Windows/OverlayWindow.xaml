@@ -26,12 +26,12 @@
         <sys:Double x:Key="NameMaxWidth">220</sys:Double>
         <sys:Double x:Key="RowHeight">28</sys:Double>
         <Thickness x:Key="RowMargin">0,0,0,3</Thickness>
-        <sys:Double x:Key="RowNameFont">13.5</sys:Double>
-        <sys:Double x:Key="RowGearFont">12</sys:Double>
-        <sys:Double x:Key="RowNumberFont">13.5</sys:Double>
-        <sys:Double x:Key="RowSubFont">12</sys:Double>
+        <sys:Double x:Key="RowNameFont">17</sys:Double>
+        <sys:Double x:Key="RowGearFont">14</sys:Double>
+        <sys:Double x:Key="RowNumberFont">15.5</sys:Double>
+        <sys:Double x:Key="RowSubFont">13.5</sys:Double>
         <sys:Double x:Key="RowGlyphSize">20</sys:Double>
-        <sys:Double x:Key="RowRankFont">11</sys:Double>
+        <sys:Double x:Key="RowRankFont">12.5</sys:Double>
         <sys:Double x:Key="RowAccentWidth">3</sys:Double>
 
         <!-- A soft dark halo under every text so it stays readable over any game scene -->
@@ -235,8 +235,8 @@
                                   Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
 
                     <!-- As wide as the longest name, up to what the other columns leave (OverlayWindow.FitNames) -->
-                    <TextBlock x:Name="NameText" Grid.Column="2" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="SemiBold"
-                               Foreground="White" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="2,0,0,1"
+                    <TextBlock x:Name="NameText" Grid.Column="2" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
+                               Foreground="#FFF8F1" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="2,0,0,1"
                                MaxWidth="{DynamicResource NameMaxWidth}" />
 
                     <!-- Gear score and combat power, right by the name: only players of your party have them (the party roster) -->
@@ -411,9 +411,9 @@
 
                 <Grid Grid.Row="0" Margin="0,0,10,4">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="28" /><ColumnDefinition Width="28" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                    <TextBlock Grid.ColumnSpan="3" Text="RANG · SPIELER" FontSize="8" FontWeight="Bold" Foreground="#899BA5" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="3" Text="DPS" FontSize="8" FontWeight="Bold" Foreground="#758B94" Margin="0,0,14,0" />
-                    <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="8" FontWeight="Bold" Foreground="#758B94" VerticalAlignment="Center" />
+                    <TextBlock Grid.ColumnSpan="3" Text="RANG · SPIELER" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="DPS" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" Margin="0,0,14,0" />
+                    <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" VerticalAlignment="Center" />
                 </Grid>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">

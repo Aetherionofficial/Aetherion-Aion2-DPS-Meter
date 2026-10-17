@@ -227,12 +227,13 @@ public partial class SettingsWindow : Window
             "appearance" => new[] { AppearanceSection, LanguageSection, DataFilesSection },
             "general" => new[] { OverlayBehaviorSection, MeterSection, HotkeysSection, LicenseSection, DataSection },
             "account" => new[] { PremiumSection, UpdatesSection },
+            "pvp" => new[] { PvpSection },
             "map" => new[] { MapSection },
             "guide" => new[] { GuideSection },
             _ => new[] { OverlaySection },
         };
         FrameworkElement[] allSections = new FrameworkElement[] { PremiumSection, LanguageSection, OverlaySection, MapSection, GuideSection, AppearanceSection, TimerSection, MeterSection,
-            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection };
+            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection, PvpSection };
         foreach (var section in allSections)
             section.Visibility = visible.Contains(section) ? Visibility.Visible : Visibility.Collapsed;
         DisclaimerText.Visibility = page == "general" ? Visibility.Visible : Visibility.Collapsed;
@@ -244,6 +245,7 @@ public partial class SettingsWindow : Window
             "appearance" => T.NavAppearance,
             "general" => T.NavGeneral,
             "account" => T.NavAccount,
+            "pvp" => T.PvpPageTitle,
             "map" => T.MapPageTitle,
             "guide" => T.GuidePageTitle,
             _ => T.SettingsOverlayTitle,
@@ -251,6 +253,7 @@ public partial class SettingsWindow : Window
         PageSubtitle.Text = page switch
         {
             "timer" => T.TimerPageHint,
+            "pvp" => T.PvpPageHint,
             "map" => T.MapPageHint,
             "guide" => T.GuidePageHint,
             _ => T.SettingsPageHint,

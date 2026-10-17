@@ -402,6 +402,18 @@ public sealed class UiText
     public string NavGeneral { get; init; } = "General";
     public string NavAccount { get; init; } = "Aetherion Premium";
     public string NavMap { get; init; } = "AION2 Map";
+    public string NavPvp { get; init; } = "PvP";
+    public string PvpPageTitle { get; init; } = "Abyss & PvP";
+    public string PvpPageHint { get; init; } = "A preview of the PvP overview planned for Aetherion.";
+    public string PvpComingSoon { get; init; } = "COMING SOON";
+    public string PvpPreview { get; init; } = "FEATURE PREVIEW";
+    public string PvpPointsTitle { get; init; } = "Abyss points";
+    public string PvpPointsHint { get; init; } = "Score and progress";
+    public string PvpRankTitle { get; init; } = "PvP rank";
+    public string PvpRankHint { get; init; } = "Rank and insignia";
+    public string PvpLadderTitle { get; init; } = "Leaderboards";
+    public string PvpLadderHint { get; init; } = "Faction and server rankings";
+    public string PvpLockedHint { get; init; } = "This preview shows what is planned. Live PvP values will appear here once they can be read reliably from the game.";
     public string NavGuide { get; init; } = "Wakayashi.gg";
     public string MapPageTitle { get; init; } = "Questlog.gg AION2 map";
     public string MapPageHint { get; init; } = "Open the interactive map and AION2 news in a dedicated window.";
@@ -570,6 +582,18 @@ public sealed class UiText
         ShowHealingInfo = "Heilung / HPS", ShowPeakDpsInfo = "Peak-DPS", ShowBossHpInfo = "Boss-LP", ShowGearInfo = "Gear-Infos",
         CombinedOverlayMode = "Schaden + Heilung", CompactOverlayMode = "Nur DPS · kompakt", OverlayRank = "RANG", OverlayShare = "ANTEIL",
         MapLabel = "AION2-Hub",
+        NavPvp = "PvP",
+        PvpPageTitle = "Abyss & PvP",
+        PvpPageHint = "Vorschau auf die geplante PvP-Übersicht in Aetherion.",
+        PvpComingSoon = "BALD VERFÜGBAR",
+        PvpPreview = "VORSCHAU",
+        PvpPointsTitle = "Abyss-Punkte",
+        PvpPointsHint = "Punktestand und Verlauf",
+        PvpRankTitle = "PvP-Rang",
+        PvpRankHint = "Rang und Abzeichen",
+        PvpLadderTitle = "Ranglisten",
+        PvpLadderHint = "Fraktions- und Serverränge",
+        PvpLockedHint = "Diese Vorschau zeigt die geplanten Inhalte. Echte PvP-Werte erscheinen hier, sobald sie zuverlässig aus dem Spiel ausgelesen werden können.",
         NavMap = "AION2-Karte", NavGuide = "Wakayashi.gg",
         MapPageTitle = "Questlog.gg AION2-Karte", MapPageHint = "Öffne die interaktive Karte und AION2-News in einem eigenen Fenster.", OpenMapLabel = "AION2-Karte öffnen",
         GuidePageTitle = "Wakayashi.gg Guide", GuidePageHint = "Öffne Wakayashi.gg getrennt von der Karte und vom Kampf-Overlay.", OpenGuideLabel = "Wakayashi.gg öffnen",
@@ -696,6 +720,18 @@ public sealed class UiText
         ShowHealingInfo = "Лечение / HPS", ShowPeakDpsInfo = "Пиковый DPS", ShowBossHpInfo = "Здоровье босса", ShowGearInfo = "Экипировка",
         CombinedOverlayMode = "Урон + лечение", CompactOverlayMode = "Только DPS · компактно", OverlayRank = "МЕСТО", OverlayShare = "ДОЛЯ",
         LanguageName = "Русский",
+        NavPvp = "PvP",
+        PvpPageTitle = "Бездна и PvP",
+        PvpPageHint = "Предварительный обзор PvP, который планируется добавить в Aetherion.",
+        PvpComingSoon = "СКОРО",
+        PvpPreview = "ПРЕДВАРИТЕЛЬНЫЙ ОБЗОР",
+        PvpPointsTitle = "Очки Бездны",
+        PvpPointsHint = "Очки и прогресс",
+        PvpRankTitle = "Ранг PvP",
+        PvpRankHint = "Ранг и знак отличия",
+        PvpLadderTitle = "Таблицы лидеров",
+        PvpLadderHint = "Рейтинг фракции и сервера",
+        PvpLockedHint = "Это предварительный обзор запланированных функций. Реальные данные PvP появятся здесь, когда их можно будет надёжно считывать из игры.",
         NavMap = "Карта AION2", NavGuide = "Wakayashi.gg",
         MapPageTitle = "Карта AION2 на Questlog.gg", MapPageHint = "Откройте интерактивную карту и новости AION2 в отдельном окне.", OpenMapLabel = "Открыть карту AION2",
         GuidePageTitle = "Гайд Wakayashi.gg", GuidePageHint = "Откройте Wakayashi.gg отдельно от карты и боевого оверлея.", OpenGuideLabel = "Открыть Wakayashi.gg",
