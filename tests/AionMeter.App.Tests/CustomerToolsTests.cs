@@ -98,4 +98,23 @@ public sealed class CustomerToolsTests
         }
         finally { PrivacyNames.Enabled = false; }
     }
+
+    [Fact]
+    public async Task First_record_notification_is_suppressed_when_maximum_boss_hp_is_unknown()
+    {
+        var settings = new AppSettings { Transient = true, SaveHistory = true, DownloadIcons = false };
+        using var meter = new MeterService(settings, null);
+        meter.Options.MinSavedFightMs = 0;
+        meter.Data.Npcs[990002] = new NpcDef(990002, "Unknown HP boss", IsBoss: true, IsDummy: false);
+        var saved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        meter.FightSaved += _ => saved.TrySetResult();
+        meter.Tracker.Process(new SelfIdentifiedEvent(0, 100, "RecordTest", 1304, GameClass.Cleric));
+        meter.Tracker.Process(new NpcSeenEvent(0, 500, 990002));
+        meter.Tracker.Process(new NpcHpEvent(500, 500, 5_000, 0));
+        meter.Tracker.Process(new DamageEvent(1_000, 100, 500, 17010000, 1_000, HitFlags.None));
+        Assert.False(meter.Tracker.Snapshot(null, 1_500)!.Boss!.MaxHpKnown);
+        meter.Tracker.Process(new DeathEvent(2_000, 500));
+        await saved.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.Null(meter.PersonalRecordMessage);
+    }
 }

@@ -311,7 +311,7 @@ public sealed class MeterService : IDisposable
         {
             try
             {
-                if (Settings.ShowPersonalRecords && record.Summary.Reason == EncounterEndReason.Kill
+                if (Settings.ShowPersonalRecords && FightInsights.ComparableKills(record, record) && record.Summary.Reason == EncounterEndReason.Kill
                     && record.Summary.Boss is { NpcCode: > 0 } boss && boss.CountedFrom is null && !record.Summary.MostDamageUnsent
                     && record.Details.FirstOrDefault(d => d.IsSelf) is { Dps: > 0 } self)
                 {
