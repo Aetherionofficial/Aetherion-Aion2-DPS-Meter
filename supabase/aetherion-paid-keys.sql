@@ -1,6 +1,6 @@
 -- Run in Supabase SQL Editor. Safe to re-run after the first installation.
 -- Key types accepted by issue_aetherion_license_key:
--- trial_1d, week_1w, days_30, days_90, lifetime, partner
+-- trial_1d, week_1w, days_30, days_90, days_365, lifetime, partner
 
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
@@ -60,11 +60,12 @@ begin
         when 'week_1w' then 7
         when 'days_30' then 30
         when 'days_90' then 90
+        when 'days_365' then 365
         when 'lifetime' then null
         when 'partner' then null
         else null
     end;
-    if p_license_type not in ('trial_1d', 'week_1w', 'days_30', 'days_90', 'lifetime', 'partner') then
+    if p_license_type not in ('trial_1d', 'week_1w', 'days_30', 'days_90', 'days_365', 'lifetime', 'partner') then
         raise exception 'LICENSE_TYPE_INVALID';
     end if;
 

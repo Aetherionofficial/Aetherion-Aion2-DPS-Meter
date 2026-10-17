@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -63,6 +64,26 @@ public partial class App : Application
         if (ArgValue(e.Args, "--render-sample") is not null) Log.Enabled = false;
         else Log.Info($"Startup requested. Version {InstanceSuffix}; executable {Environment.ProcessPath}.");
 #if AETHERION_OWNER_BUILD
+        if (e.Args.Contains("--owner-license-dashboard"))
+        {
+            try
+            {
+                var accessToken = await SupabaseAccessService.TryGetAccessTokenForOwnerToolsAsync();
+                if (accessToken is null)
+                {
+                    await SupabaseAccessService.SignInWithDiscordAsync();
+                    accessToken = await SupabaseAccessService.TryGetAccessTokenForOwnerToolsAsync();
+                }
+                if (accessToken is null) throw new InvalidOperationException("Die Discord-Anmeldung hat keine Sitzung erstellt.");
+                new SupabaseLicenseDashboardWindow(accessToken).ShowDialog();
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or IOException or UnauthorizedAccessException or TimeoutException)
+            {
+                MessageBox.Show(ex.Message, "Aetherion Lizenz-Dashboard", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            Shutdown();
+            return;
+        }
         if (e.Args.Contains("--owner-key-issuer"))
         {
             if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "owner-private.pem")))

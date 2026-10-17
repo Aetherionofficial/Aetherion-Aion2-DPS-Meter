@@ -38,6 +38,7 @@ select public.issue_aetherion_license_key('trial_1d'); -- 1-day trial
 select public.issue_aetherion_license_key('week_1w');  -- 1 week
 select public.issue_aetherion_license_key('days_30');  -- 30 days
 select public.issue_aetherion_license_key('days_90');  -- 90 days
+select public.issue_aetherion_license_key('days_365'); -- 1 year
 select public.issue_aetherion_license_key('lifetime'); -- lifetime
 select public.issue_aetherion_license_key('partner');  -- lifetime + Partner badge
 ```
@@ -55,3 +56,30 @@ select public.revoke_aetherion_license_key('PASTE-THE-KEY-HERE');
 The buyer signs into Aetherion with Discord and enters the key. The app shows remaining days in the start screen and Settings. Redeeming another key adds its days to the remaining entitlement. **Abmelden** removes the saved session and closes the app; the next launch allows Discord sign-in again.
 
 The app stores only the refresh token, protected with Windows DPAPI for the current Windows account. Entitlements are read through row-level security; redemption is an authenticated database function which derives the account id from the Supabase JWT. The publishable key in the client is not a secret.
+
+## Owner license dashboard
+
+The owner-only desktop build includes a searchable license dashboard. It shows key fingerprint, plan, state, issue date, Discord account, current access expiry and a shortened device-binding fingerprint. Search accepts a Discord name/UUID, key fingerprint or full raw key; status filters include active, expiring within seven days, unused, revoked and expired. Summary cards include active accounts, unused keys, revoked/expired keys and keys expiring within seven days.
+
+The owner can issue batches of up to 50 one-time keys, revoke unused or redeemed keys, restore revoked access, and reset a customer's device binding without changing the license state or expiry. Restoring a redeemed key clears the entitlement's revocation and old device binding so the next login can bind the intended installation; it does not extend the key's existing expiration. A private owner-only audit log records key creation, revocation, restoration and device resets. The full key is returned only once after generation; only its SHA-256 hash is stored. After copying generated keys, use **Anzeige leeren** to remove them from the dashboard; the clipboard contents remain available.
+
+Deploy the database migration and Edge Function from the repository root:
+
+```powershell
+npx.cmd supabase db push --linked
+npx.cmd supabase functions deploy aetherion-license-admin --project-ref aafdjzdirqpanuueveng
+```
+
+In **Supabase Dashboard → Authentication → Users**, copy the owner's Supabase user UUID after signing into Aetherion with Discord once. Allowlist only that UUID (multiple UUIDs may be comma-separated):
+
+```powershell
+npx supabase secrets set AETHERION_LICENSE_ADMIN_USER_IDS=YOUR-SUPABASE-AUTH-USER-UUID
+```
+
+Build and launch the owner-only dashboard from the repository root:
+
+```powershell
+dotnet run --project src/AionMeter.App/AionMeter.App.csproj -p:AetherionOwnerBuild=true -- --owner-license-dashboard
+```
+
+The first launch opens Discord sign-in if no Aetherion session is saved. The Edge Function checks the signed-in Supabase user against the server-side allowlist on every request. The service-role key remains in Supabase and is never placed in the desktop app. Regular customer builds compile out the dashboard and the existing local key issuer.

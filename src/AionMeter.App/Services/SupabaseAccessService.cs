@@ -24,7 +24,7 @@ public static class SupabaseAccessService
 {
     public const string ProjectUrl = "https://aafdjzdirqpanuueveng.supabase.co";
     // Publishable keys are intended for clients. Database writes are restricted to the authenticated RPC.
-    private const string PublishableKey = "sb_publishable_68xFqusKPvOo7wHoClrH5A_K2DuWBax";
+    public const string PublishableKey = "sb_publishable_68xFqusKPvOo7wHoClrH5A_K2DuWBax";
     public const string RedirectUri = "http://127.0.0.1:43781/auth/callback/";
     private const string SessionPathName = "account-session.bin";
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
@@ -75,6 +75,25 @@ public static class SupabaseAccessService
         PersistRefreshToken(session.RefreshToken);
         _accessToken = session.AccessToken;
         return await GetLicenseStatusAsync(session.AccessToken, cancellationToken);
+    }
+
+    public static async Task<string?> TryGetAccessTokenForOwnerToolsAsync(CancellationToken cancellationToken = default)
+    {
+        var refreshToken = ReadRefreshToken();
+        if (refreshToken is null) return null;
+        try
+        {
+            var session = await RefreshSessionAsync(refreshToken, cancellationToken);
+            PersistRefreshToken(session.RefreshToken);
+            _accessToken = session.AccessToken;
+            return session.AccessToken;
+        }
+        catch (InvalidOperationException) when (ReadRefreshToken() is null)
+        {
+            // An expired/revoked saved Discord session is cleared by RefreshSessionAsync;
+            // let the owner dashboard start a fresh OAuth sign-in.
+            return null;
+        }
     }
 
     public static async Task<AccountLicenseStatus> RedeemLicenseKeyAsync(string key, CancellationToken cancellationToken = default)
