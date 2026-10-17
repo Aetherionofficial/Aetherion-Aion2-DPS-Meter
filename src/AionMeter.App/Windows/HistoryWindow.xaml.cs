@@ -15,6 +15,7 @@ namespace AionMeter.App.Windows;
 public partial class HistoryWindow : Window
 {
     private static UiText T => UiText.Current;
+    private void OnPrivacyChanged() { if (Dispatcher.CheckAccess()) Reload(keepSelection: true); else Dispatcher.BeginInvoke(() => Reload(keepSelection: true)); }
     private readonly MeterService _meter;
     private readonly Controls.DragAnywhere _drag;
     private HistoryStore Store => _meter.History;
@@ -52,6 +53,8 @@ public partial class HistoryWindow : Window
     {
         _meter = meter;
         InitializeComponent();
+        PrivacyNames.Changed += OnPrivacyChanged;
+        Closed += (_, _) => PrivacyNames.Changed -= OnPrivacyChanged;
         _drag = Controls.DragAnywhere.Attach(this);
         Loaded += (_, _) => Reload();
         _sessionRefresh.Tick += (_, _) => RefreshSessionSummary();

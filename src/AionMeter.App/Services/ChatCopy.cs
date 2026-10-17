@@ -20,7 +20,7 @@ public static class ChatCopy
     public static IEnumerable<MenuItem> Items(FrameworkElement noteAnchor, Func<EncounterSnapshot?> fight, uint? player, string? playerName)
     {
         if (player is { } id && playerName is not null)
-            yield return Item(string.Format(T.CopyPlayer, playerName), s => ChatLine.Player(s, id, T.Chat, Name));
+            yield return Item(string.Format(T.CopyPlayer, PrivacyNames.Display(id, playerName)), s => ChatLine.Player(s, id, T.Chat, Name));
         yield return Item(T.CopyParty, s => ChatLine.Party(s, T.Chat, Name));
         yield return Item(T.CopyTable, s => ChatLine.Table(s, T.Chat, Name));
 
@@ -29,7 +29,7 @@ public static class ChatCopy
             var item = new MenuItem { Header = header };
             item.Click += (_, _) =>
             {
-                if (fight() is { } s) Copy(noteAnchor, text(s with { Title = T.FightTitle(s) }));
+                if (fight() is { } s) Copy(noteAnchor, text(PrivacyNames.Apply(s with { Title = T.FightTitle(s) })!));
             };
             return item;
         }

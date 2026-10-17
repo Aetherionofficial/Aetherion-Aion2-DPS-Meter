@@ -18,6 +18,13 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+      - name: Test combat engine and customer tools
+        shell: pwsh
+        run: |
+          dotnet test tests/AionMeter.Tests/AionMeter.Tests.csproj --configuration Release
+          if ($LASTEXITCODE -ne 0) { throw "Combat engine tests failed" }
+          dotnet test tests/AionMeter.App.Tests/AionMeter.App.Tests.csproj --configuration Release -p:UseAppHost=false
+          if ($LASTEXITCODE -ne 0) { throw "Customer tools tests failed" }
       - name: Install Inno Setup 7
         shell: pwsh
         run: |

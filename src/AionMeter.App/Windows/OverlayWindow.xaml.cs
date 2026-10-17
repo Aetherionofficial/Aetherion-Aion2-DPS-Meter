@@ -95,6 +95,8 @@ public partial class OverlayWindow : Window
     public void Refresh()
     {
         _vm.ShowGear = _settings.ShowGear;
+        _vm.HighContrast = _settings.HighContrast;
+        _vm.AccessibleColors = _settings.AccessibleColors;
         var licenseLabel = SupabaseAccessService.FormatOverlayLicense(SupabaseAccessService.CurrentStatus);
         PartnerBadge.Text = licenseLabel;
         PartnerBadge.Visibility = string.IsNullOrEmpty(licenseLabel) ? Visibility.Collapsed : Visibility.Visible;
@@ -151,6 +153,11 @@ public partial class OverlayWindow : Window
         FooterText.Text = status.State is CaptureState.Capturing && _vm.HasData
             ? (unnamed ? footer + " · " + UiText.Current.NamesLater : footer)
             : _vm.Status;
+        if (_settings.ShowPersonalRecords && _meter.PersonalRecordMessage is { } recordMessage && Environment.TickCount64 - _meter.PersonalRecordAt < 20_000)
+            FooterText.Text = recordMessage;
+        if (_settings.StreamerMode) PartnerBadge.Visibility = Visibility.Collapsed;
+        if (_settings.PowerSaving) StatusDot.BeginAnimation(UIElement.OpacityProperty, null);
+        ApplyAutomaticHeight();
         _vm.StatusBrush = status.State switch
         {
             CaptureState.Capturing => (Brush)FindResource("Green"),
@@ -199,6 +206,8 @@ public partial class OverlayWindow : Window
     /// <summary>Re-reads appearance settings changed in the Settings window.</summary>
     public void ApplyAppearance()
     {
+        Left = _settings.OverlayLeft; Top = _settings.OverlayTop;
+        EnsureOnScreen(); FitToMonitor();
         OpacitySlider.Value = _settings.BackgroundOpacity;
         ApplyBackgroundOpacity(_settings.BackgroundOpacity);
         ApplyRowSize(_settings.RowSize);
@@ -215,13 +224,21 @@ public partial class OverlayWindow : Window
 
     private void ApplyBackgroundOpacity(double opacity)
     {
-        var value = Math.Clamp(opacity, 0, 1);
+        var value = _settings.HighContrast ? 1 : Math.Clamp(opacity, 0, 1);
         FrameBackground.Opacity = value;
 
         // Fade the toolbar's empty surface with the main panel too. Keeping its fixed opaque backing
         // prevented mouse clicks from reaching the game underneath, even at zero background opacity.
         if (ToolbarTray.Background is SolidColorBrush toolbarSurface) toolbarSurface.Opacity = value;
-        if (ToolbarTray.BorderBrush is SolidColorBrush toolbarBorder) toolbarBorder.Opacity = value;
+        if (ToolbarTray.BorderBrush is SolidColorBrush toolbarBorder)
+        {
+            if (toolbarBorder.IsFrozen)
+            {
+                toolbarBorder = toolbarBorder.Clone();
+                ToolbarTray.BorderBrush = toolbarBorder;
+            }
+            toolbarBorder.Opacity = value;
+        }
 
         Frame.BorderBrush = value <= 0.001 ? Brushes.Transparent : (Brush)FindResource("CardFrame");
         SignatureLine.Visibility = value <= 0.001 ? Visibility.Collapsed : Visibility.Visible;
@@ -234,14 +251,14 @@ public partial class OverlayWindow : Window
     public void ApplyRowSize(int percent)
     {
         var k = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize) / 100.0;
-        var f = Math.Sqrt(k);
-        var height = Math.Round(68 * k);
+        var f = Math.Sqrt(k) * _settings.OverlayTextScale;
+        var height = Math.Max(Math.Round(72 * k), Math.Ceiling(22 * f + 8));
         Resources["RowHeight"] = height;
         Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(8 * k)));
-        Resources["RowNameFont"] = Math.Round(17 * f, 1);
-        Resources["RowGearFont"] = Math.Round(13.5 * f, 1);
-        Resources["RowNumberFont"] = Math.Round(15.5 * f, 1);
-        Resources["RowSubFont"] = Math.Round(13.5 * f, 1);
+        Resources["RowNameFont"] = Math.Round(16 * f, 1);
+        Resources["RowGearFont"] = Math.Round(12.5 * f, 1);
+        Resources["RowNumberFont"] = Math.Round(15 * f, 1);
+        Resources["RowSubFont"] = Math.Round(12.5 * f, 1);
         Resources["RowGlyphSize"] = Math.Min(Math.Round(28 * f), height - 8);
         Resources["RowRankFont"] = Math.Round(12.5 * f, 1);
         Resources["RowAccentWidth"] = Math.Max(2, Math.Round(3 * f));
@@ -338,7 +355,7 @@ public partial class OverlayWindow : Window
         _settings.OverlayLeft = Left;
         _settings.OverlayTop = Top;
         _settings.OverlayWidth = Width;
-        _settings.OverlayHeight = Height;
+        if (!_settings.AutoOverlayHeight) _settings.OverlayHeight = Height;
         _settings.Save();
     }
 
@@ -347,8 +364,28 @@ public partial class OverlayWindow : Window
     private void Resize_DragDelta(object sender, DragDeltaEventArgs e)
     {
         var axis = (sender as FrameworkElement)?.Tag as string;
+        _settings.AutoOverlayHeight = false; // Explicit manual resize takes priority over automatic sizing.
         if (axis != "height") Width = Math.Max(MinWidth, Width + e.HorizontalChange);
         if (axis != "width") Height = Math.Max(MinHeight, Height + e.VerticalChange);
+    }
+
+    private void ApplyAutomaticHeight()
+    {
+        if (!_settings.AutoOverlayHeight || !IsVisible || ActualHeight <= 0 || PlayerRowsViewport.ActualHeight <= 0) return;
+        var chrome = ActualHeight - PlayerRowsViewport.ActualHeight;
+        var row = (double)Resources["RowHeight"] + ((Thickness)Resources["RowMargin"]).Bottom;
+        var content = Math.Max(1, _vm.Rows.Count) * row;
+        var target = Math.Clamp(Math.Ceiling(chrome + content), MinHeight, Math.Max(MinHeight, _settings.OverlayHeight));
+        if (Math.Abs(Height - target) > 1) Height = target;
+    }
+
+    private void CustomerTools_Click(object sender, RoutedEventArgs e) => new CustomerToolsWindow(_meter).Show();
+
+    private void Streamer_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.StreamerMode = !_settings.StreamerMode;
+        _meter.ApplySettings();
+        Refresh();
     }
 
     private void Resize_DragCompleted(object sender, DragCompletedEventArgs e) => SavePlacement();
@@ -363,6 +400,8 @@ public partial class OverlayWindow : Window
         FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
         FooterCompareButton.Visibility = Width >= 390 ? Visibility.Visible : Visibility.Collapsed;
         FooterRankingButton.Visibility = Width >= 440 ? Visibility.Visible : Visibility.Collapsed;
+        CustomerToolsToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
+        StreamerToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         var compactToolbar = Width < 480;
         ChatToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
         MapToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;

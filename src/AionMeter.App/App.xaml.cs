@@ -216,7 +216,8 @@ public partial class App : Application
             }));
         // Start in the requested workspace: live DPS overlay at the left with the full settings panel beside it.
         SetOverlayVisible(true);
-        ShowSettings();
+        if (_meter.Settings.SetupCompleted) ShowSettings();
+        else new CustomerToolsWindow(_meter, firstRun: true).Show();
         SessionEnding += (_, end) => Log.Info($"Windows {end.ReasonSessionEnding}: closing");
 
         // A new player's first start: without Npcap nothing can be measured — say so and offer the download.
@@ -240,7 +241,7 @@ public partial class App : Application
             _ = Dispatcher.BeginInvoke(() => _tray?.ShowBalloon(AppInfo.Name,
                 string.Format(UiText.Current.UpdatedBalloon, _meter.Updates.Current.ToString(3))), DispatcherPriority.ApplicationIdle);
 
-        _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(200) };
+        _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(_meter.Settings.PowerSaving ? 500 : 200) };
         _timer.Tick += (_, _) => OnTick();
         _timer.Start();
 
@@ -789,6 +790,8 @@ public partial class App : Application
     public void OnSettingsChanged()
     {
         RegisterHotkeys();
+        if (_timer is not null) _timer.Interval = TimeSpan.FromMilliseconds(_meter.Settings.PowerSaving ? 500 : 200);
+        _overlay.PreviewSize(_meter.Settings.OverlayWidth, _meter.Settings.OverlayHeight);
         _overlay.ApplyAppearance();
         _overlay.Refresh();
         _ = UpdateDiscordPresenceAsync();

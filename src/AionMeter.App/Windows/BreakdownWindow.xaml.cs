@@ -39,6 +39,7 @@ public partial class BreakdownWindow : Window
         string Back, string Front, string Perfect, string Heavy, string Multi);
 
     private static UiText T => UiText.Current;
+    private void OnPrivacyChanged() { if (Dispatcher.CheckAccess()) Reload(); else Dispatcher.BeginInvoke(() => Reload()); }
 
     // Each table sorts by a clicked column header; a new breakdown starts with the order chosen last (while the app runs).
     private static SkillOrder _lastSkillOrder = SkillOrder.Default;
@@ -61,6 +62,8 @@ public partial class BreakdownWindow : Window
         _icons = icons;
         _portraits = portraits;
         InitializeComponent();
+        PrivacyNames.Changed += OnPrivacyChanged;
+        Closed += (_, _) => PrivacyNames.Changed -= OnPrivacyChanged;
         ShowSortHeads();
         DragAnywhere.Attach(this);
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -233,10 +236,18 @@ public partial class BreakdownWindow : Window
                 var skill = death.SkillCode != 0 ? _skillName(death.SkillCode) : "unknown skill";
                 return $"{at} · {death.Name} · {skill} · previous 10s: {Format.Compact(death.RecentDamageTaken)}";
             }));
-            incomingLines.Insert(deaths.Count + 1, "INCOMING DAMAGE BY SKILL");
+            foreach (var death in deaths)
+            {
+                if (death.Timeline is null) continue;
+                incomingLines.Add($"LAST 10s · {Format.Clock(Math.Max(0, death.TimeMs - summary.StartedAt.ToUnixTimeMilliseconds()))}");
+                incomingLines.AddRange(death.Timeline.Select(hit => $"{(hit.TimeMs - death.TimeMs) / 1000.0:0.0}s · {(hit.Healing ? "+ heal" : "− damage")} {Format.Compact(hit.Amount)} · {_skillName(hit.SkillCode)}"));
+            }
+            incomingLines.Add("INCOMING DAMAGE BY SKILL");
         }
         IncomingBreakdown.Text = incomingLines.Count == 0 ? "No incoming hits recorded" : string.Join(Environment.NewLine, incomingLines);
 
+        var activity = FightInsights.Activity(d.PerSecond, d.CombatMs);
+        IncomingBreakdown.Text += $"\n\nDAMAGE ACTIVITY: {activity.DamageSeconds}/{activity.ObservedSeconds}s ({activity.DamageUptime:P0}) · longest quiet interval {activity.LongestQuietSeconds}s.\nReceived damage only; this does not measure inputs, interrupts or boss mechanics.\nBUFF UPTIME: unavailable — the decoder does not provide reliable buff start/end events.";
         Rotation.SetData(d.Casts, _skillName, _icons.Get);
 
         // Party DPS timeline: the selected player filled, everyone else as thin class-coloured lines.

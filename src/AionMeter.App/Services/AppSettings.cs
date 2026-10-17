@@ -41,9 +41,9 @@ public sealed class AppSettings
     // Overlay window
     public double OverlayLeft { get; set; } = 125;
     public double OverlayTop { get; set; } = 129;
-    public double OverlayWidth { get; set; } = 410;
-    public double OverlayHeight { get; set; } = 700;
-    public double BackgroundOpacity { get; set; } = 0.96;
+    public double OverlayWidth { get; set; } = 678;
+    public double OverlayHeight { get; set; } = 330;
+    public double BackgroundOpacity { get; set; } = 0;
     public bool Locked { get; set; }
     public bool ClickThrough { get; set; }
     public bool OverlayVisible { get; set; } = true;
@@ -53,6 +53,16 @@ public sealed class AppSettings
     public int AutoHideSeconds { get; set; } = 60;
     /// <summary>Bring the overlay up when the meter starts and when it finds the game, so a player sees it is running.</summary>
     public bool ShowOnStart { get; set; } = true;
+
+    public bool AutoOverlayHeight { get; set; } = true;
+    public double OverlayTextScale { get; set; } = 1;
+    public bool HighContrast { get; set; }
+    public bool AccessibleColors { get; set; }
+    public bool StreamerMode { get; set; }
+    public bool PowerSaving { get; set; }
+    public bool SetupCompleted { get; set; }
+    public bool ShowPersonalRecords { get; set; } = true;
+    public Dictionary<string, LayoutProfile> LayoutProfiles { get; set; } = new();
 
     // Boss respawn timers
     /// <summary>Tray notification this many minutes before a tracked boss respawns; 0 = off.</summary>
@@ -76,7 +86,7 @@ public sealed class AppSettings
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
     public int RowSize { get; set; } = 80;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
-    public bool ShowGear { get; set; } = true;
+    public bool ShowGear { get; set; } = false;
     public bool ShowHealingPanel { get; set; } = true;
     public bool ShowPeakDps { get; set; } = true;
     public bool CompactDpsOnly { get; set; }
@@ -121,7 +131,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 11;
+    private const int CurrentLayout = 12;
 
     public static AppSettings Load()
     {
@@ -183,6 +193,17 @@ public sealed class AppSettings
                     if (s.MaxRows == 10) s.MaxRows = 8;
                     if (s.RowSize >= 95) s.RowSize = 80;
                 }
+                if (s.LayoutVersion < 12)
+                {
+                    // v12 follows the wide, shallow reference overlay, including existing installations.
+                    s.OverlayWidth = 678;
+                    s.OverlayHeight = 330;
+                    s.RowSize = 80;
+                    s.BackgroundOpacity = 0;
+                    s.ShowGear = false;
+                }
+                s.OverlayTextScale = double.IsFinite(s.OverlayTextScale) ? Math.Clamp(s.OverlayTextScale, 0.8, 1.5) : 1;
+                s.LayoutProfiles ??= new();
                 s.Language = UiText.Normalize(s.Language);
                 s.LayoutVersion = CurrentLayout;
                 return s;

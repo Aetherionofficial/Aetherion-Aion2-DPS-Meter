@@ -29,6 +29,8 @@ public partial class RaidCommandWindow : Window
     {
         _meter = meter;
         InitializeComponent();
+        PrivacyNames.Changed += OnPrivacyChanged;
+        Closed += (_, _) => PrivacyNames.Changed -= OnPrivacyChanged;
         PlayersList.ItemsSource = Players;
         UpdateModeButtons();
         Loaded += (_, _) => Refresh();
@@ -40,6 +42,8 @@ public partial class RaidCommandWindow : Window
             Hide();
         };
     }
+
+    private void OnPrivacyChanged() { if (Dispatcher.CheckAccess()) Refresh(); else Dispatcher.BeginInvoke(Refresh); }
 
     public void Refresh()
     {
@@ -55,7 +59,7 @@ public partial class RaidCommandWindow : Window
         var segments = _meter.Tracker.Segments();
         var liveId = _meter.Tracker.LiveFight()?.Id;
         var selected = liveId is { } id ? segments.FirstOrDefault(s => s.Id == id) : segments.FirstOrDefault();
-        var snap = selected is null ? null : _meter.Tracker.Snapshot(selected.Id, now);
+        var snap = selected is null ? null : PrivacyNames.Apply(_meter.Tracker.Snapshot(selected.Id, now));
         if (snap is null)
         {
             ClearFight();
@@ -214,7 +218,7 @@ public partial class RaidCommandWindow : Window
             .OrderByDescending(d => d.TimeMs).ToList();
         DeathCountText.Text = "Todesfälle " + deaths.Count;
         DeathStatusText.Text = deaths.Count.ToString();
-        LastDeathText.Text = deaths.Count == 0 ? "Noch keine Todesfälle" : $"Zuletzt: {deaths[0].Name}";
+        LastDeathText.Text = deaths.Count == 0 ? "Noch keine Todesfälle" : $"Zuletzt: {PrivacyNames.Display(deaths[0].ActorId, deaths[0].Name)}";
 
         var incoming = snap.Combatants.SelectMany(c => _meter.Tracker.Detail(snap.Id, c.ActorId)?.IncomingSkills ?? [])
             .OrderByDescending(s => s.Damage).FirstOrDefault();

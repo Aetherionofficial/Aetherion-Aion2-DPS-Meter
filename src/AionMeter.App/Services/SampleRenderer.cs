@@ -40,6 +40,12 @@ public static class SampleRenderer
         Action refresh;
         switch (o.Window)
         {
+            case "customer-tools":
+                var tools = new CustomerToolsWindow(meter) { Width = o.Width ?? 900, Height = o.Height ?? 760 };
+                tools.ShowPageForPreview(o.Tab);
+                host = tools;
+                refresh = () => { };
+                break;
             case "breakdown":
                 var segment = meter.Tracker.Segments()[0].Id;
                 var breakdown = new BreakdownWindow(new ViewModels.LiveFightView(meter.Tracker, segment), 2, meter.Data, meter.Icons, meter.Portraits)

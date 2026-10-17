@@ -248,6 +248,7 @@ public sealed class CombatTracker
                 victim.RecentIncomingDamage += d.Damage;
                 victim.LastIncomingMs = d.TimeMs;
                 victim.LastIncomingSkill = d.SkillCode;
+                victim.RecordIncoming(new IncomingEvent(d.TimeMs, d.SkillCode, d.Damage, false));
             }
             return;
         }
@@ -308,6 +309,8 @@ public sealed class CombatTracker
     private void OnHeal(HealEvent h)
     {
         if (_current is not { IsActive: true } enc) return;
+        if (h.Amount > 0 && enc.Combatants.TryGetValue(h.TargetId, out var recipient))
+            recipient.RecordIncoming(new IncomingEvent(h.TimeMs, h.SkillCode, h.Amount, true));
         var source = _entities.ResolveOwner(h.SourceId);
         if (h.Amount <= 0 || !_entities.IsKnownPlayer(source)) return;
         // The DPS overlay is built from encounter participants, not nearby group members. Do not
@@ -380,11 +383,12 @@ public sealed class CombatTracker
         EndBossLimit(e.ActorId);
         if (_current is { IsActive: true } playerFight && _entities.IsKnownPlayer(e.ActorId))
         {
+            if (e.AlreadyDead || playerFight.Deaths.Any(death => death.ActorId == e.ActorId && death.TimeMs == e.TimeMs)) return;
             var player = GetCombatant(playerFight, e.ActorId);
             playerFight.Deaths.Add(new DeathRecord(e.TimeMs, e.ActorId,
                 string.IsNullOrWhiteSpace(player.Name) ? $"#{e.ActorId}" : player.Name,
                 player.LastIncomingSkill, player.DamageTaken, player.LastIncomingMs > 0 && e.TimeMs - player.LastIncomingMs <= 10_000
-                    ? player.RecentIncomingDamage : 0));
+                    ? player.BeforeDeath(e.TimeMs).Where(hit => !hit.Healing).Sum(hit => hit.Amount) : 0, player.BeforeDeath(e.TimeMs)));
             player.RecentIncomingDamage = 0;
             player.LastIncomingMs = 0;
             player.LastIncomingSkill = 0;

@@ -21,6 +21,7 @@ public sealed class MeterService : IDisposable
     {
         SessionStartedAt = DateTimeOffset.Now;
         Settings = settings;
+        if (!settings.Transient) PrivacyNames.Enabled = settings.StreamerMode;
         CaptureFactory = captureFactory;
         Data = GameData.Load(DataDirectory, UiText.Normalize(settings.Language));
         Icons = new SkillIcons(DataDirectory, settings.DownloadIcons);
@@ -97,6 +98,8 @@ public sealed class MeterService : IDisposable
 
     /// <summary>Raised (on a worker thread) after a fight was written to disk.</summary>
     public event Action<string>? FightSaved;
+    public string? PersonalRecordMessage { get; private set; }
+    public long PersonalRecordAt { get; private set; }
 
     /// <summary>
     /// Plays a recorded capture through the meter as fast as it parses. Live events are detached meanwhile (their
@@ -224,6 +227,7 @@ public sealed class MeterService : IDisposable
 
     public void ApplySettings()
     {
+        PrivacyNames.Enabled = Settings.StreamerMode;
         Settings.ApplyTo(Options);
         Icons.Enabled = Settings.DownloadIcons;
         Portraits.Enabled = Settings.DownloadIcons;
@@ -307,6 +311,22 @@ public sealed class MeterService : IDisposable
         {
             try
             {
+                if (Settings.ShowPersonalRecords && record.Summary.Reason == EncounterEndReason.Kill
+                    && record.Summary.Boss is { NpcCode: > 0 } boss && boss.CountedFrom is null && !record.Summary.MostDamageUnsent
+                    && record.Details.FirstOrDefault(d => d.IsSelf) is { Dps: > 0 } self)
+                {
+                    var previous = History.List().Where(e => e.BossCode == boss.NpcCode && e.Reason == EncounterEndReason.Kill
+                        && e.SelfName == self.Name && e.SelfClass == self.Class && e.FileName != "")
+                        .Select(e => History.Load(e.Path)).OfType<FightRecord>()
+                        .Where(old => FightInsights.ComparableKills(old, record))
+                        .Select(old => old.Details.First(d => d.IsSelf).Dps).DefaultIfEmpty(0).Max();
+                    if (self.Dps > previous)
+                    {
+                        PersonalRecordMessage = previous > 0 ? $"Neuer Boss-Rekord: {Format.Compact(self.Dps)}/s (+{(self.Dps / previous - 1):P1})"
+                            : $"Erster Boss-Rekord: {Format.Compact(self.Dps)}/s";
+                        PersonalRecordAt = Environment.TickCount64;
+                    }
+                }
                 var path = History.Save(record);
                 FightSaved?.Invoke(path);
             }

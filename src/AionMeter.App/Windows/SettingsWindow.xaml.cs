@@ -386,6 +386,12 @@ public partial class SettingsWindow : Window
         if (language != UiText.Normalize(s.Language)) AppHost.Current.SetLanguage(language);
     }
 
+    private void CustomerTools_Click(object sender, RoutedEventArgs e)
+    {
+        Save_Click(sender, e);
+        new CustomerToolsWindow(_meter).Show();
+    }
+
     private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 
     /// <summary>The overlay follows the slider at once, so the size can be judged on the real rows.</summary>

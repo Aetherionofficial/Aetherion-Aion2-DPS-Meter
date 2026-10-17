@@ -142,7 +142,7 @@ public sealed class UiText
 
     /// <summary>A row of the ranking: a player, or the pseudo-row of pets whose owner is unknown.</summary>
     public string CombatantLabel(uint actorId, string name, Core.Events.GameClass cls) =>
-        actorId == Core.Combat.Combatant.UnknownSummonsId ? UnknownSummons : PlayerLabel(name, cls);
+        actorId == Core.Combat.Combatant.UnknownSummonsId ? UnknownSummons : PlayerLabel(PrivacyNames.Display(actorId, name), cls);
 
     /// <summary>A fight's title as shown: a boss the meter never saw appear has nothing but its id.</summary>
     public string FightTitle(Core.Combat.EncounterSnapshot s) =>

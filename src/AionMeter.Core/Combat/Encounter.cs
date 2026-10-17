@@ -69,7 +69,9 @@ public sealed class IncomingSkillStats
     public int Hits { get; set; }
 }
 
-public sealed record DeathRecord(long TimeMs, uint ActorId, string Name, int SkillCode, long DamageTaken, long RecentDamageTaken);
+public sealed record IncomingEvent(long TimeMs, int SkillCode, long Amount, bool Healing);
+public sealed record DeathRecord(long TimeMs, uint ActorId, string Name, int SkillCode, long DamageTaken, long RecentDamageTaken,
+    IReadOnlyList<IncomingEvent>? Timeline = null);
 
 /// <summary>One cast / hit in order, for the rotation view.</summary>
 public readonly record struct CastRecord(int OffsetMs, int SkillCode, long Damage, HitFlags Flags);
@@ -110,6 +112,17 @@ public sealed class Combatant
     public long LastIncomingMs { get; set; }
     public int LastIncomingSkill { get; set; }
     public long RecentIncomingDamage { get; set; }
+
+    private readonly Queue<IncomingEvent> _recentEvents = new();
+    public void RecordIncoming(IncomingEvent item)
+    {
+        while (_recentEvents.TryPeek(out var first) && first.TimeMs < item.TimeMs - 10_000) _recentEvents.Dequeue();
+        // Bounded even in exceptionally busy encounters.
+        while (_recentEvents.Count >= 512) _recentEvents.Dequeue();
+        _recentEvents.Enqueue(item);
+    }
+    public IReadOnlyList<IncomingEvent> BeforeDeath(long at) => _recentEvents
+        .Where(e => e.TimeMs >= at - 10_000 && e.TimeMs <= at).OrderBy(e => e.TimeMs).ToArray();
 
     public long FirstHitMs { get; set; }
     public long LastHitMs { get; set; }

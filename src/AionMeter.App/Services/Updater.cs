@@ -144,7 +144,8 @@ public sealed class Updater : IDisposable
     public static void LaunchPortableUpdate(string archivePath)
     {
         var exe = Environment.ProcessPath ?? throw new InvalidOperationException("Could not locate the running executable");
-        var payload = JsonSerializer.Serialize(new { Archive = Path.GetFullPath(archivePath), Target = AppContext.BaseDirectory, Exe = Path.GetFullPath(exe), Pid = Environment.ProcessId });
+        var checkpoint = UpdateRecovery.CreateCheckpoint();
+        var payload = JsonSerializer.Serialize(new { Backup = checkpoint, Archive = Path.GetFullPath(archivePath), Target = AppContext.BaseDirectory, Exe = Path.GetFullPath(exe), Pid = Environment.ProcessId });
         var payload64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(payload));
         var script = "$ErrorActionPreference='Stop'; $j=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('" + payload64 + "')) | ConvertFrom-Json; " +
                      "while (Get-Process -Id $j.Pid -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 300 }; " +
@@ -160,7 +161,7 @@ public sealed class Updater : IDisposable
                      "for ($i=0; $i -lt 40; $i++) { try { Copy-Item -LiteralPath $newExe.FullName -Destination $j.Exe -Force -ErrorAction Stop; break } catch { if ($i -eq 39) { throw }; Start-Sleep -Milliseconds 750 } }; " +
                      "foreach ($doc in @('LICENSE','INSTALL.txt')) { $source=Join-Path $stage $doc; if (Test-Path $source) { Copy-Item -LiteralPath $source -Destination $j.Target -Force } }; " +
                      "Start-Sleep -Milliseconds 500; $started=$false; for ($i=0; $i -lt 5 -and -not $started; $i++) { try { Start-Process -FilePath $j.Exe -ArgumentList '--updated' -ErrorAction Stop; $started=$true } catch { Start-Sleep -Milliseconds 700 } }; if (-not $started) { throw 'The updated app could not be restarted' }; $success=$true } catch { " +
-                     "try { Start-Process -FilePath $j.Exe -ErrorAction SilentlyContinue | Out-Null } catch {}; " +
+                     "try { if ($j.Backup -and (Test-Path -LiteralPath $j.Backup)) { Copy-Item -LiteralPath $j.Backup -Destination $j.Exe -Force }; Start-Process -FilePath $j.Exe -WindowStyle Hidden -ErrorAction SilentlyContinue | Out-Null } catch {}; " +
                      "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show(('Aetherion konnte das Update nicht einspielen: ' + $_.Exception.Message + [Environment]::NewLine + 'Das Update-Archiv bleibt erhalten: ' + $j.Archive),'Aetherion Update') | Out-Null " +
                      "} finally { " +
                      "Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue; " +
@@ -218,6 +219,7 @@ public sealed class Updater : IDisposable
     {
         if (!UpdateFeed.IsProductName(FileVersionInfo.GetVersionInfo(path).ProductName, AppInfo.Name))
             throw new InvalidDataException($"{Path.GetFileName(path)} is not the {AppInfo.Name} installer");
+        UpdateRecovery.CreateCheckpoint();
         Process.Start(new ProcessStartInfo(path, (quiet ? "/VERYSILENT" : "/SILENT") + " /SUPPRESSMSGBOXES /NORESTART /RELAUNCH=1")
             { UseShellExecute = true });
     }

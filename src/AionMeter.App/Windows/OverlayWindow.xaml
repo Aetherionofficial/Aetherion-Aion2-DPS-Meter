@@ -5,7 +5,7 @@
         xmlns:vm="clr-namespace:AionMeter.App.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
-        Title="AION2 DPS Meter" Width="470" Height="540" MinWidth="300" MinHeight="160"
+        Title="AION2 DPS Meter" Width="678" Height="330" MinWidth="300" MinHeight="160"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" SizeChanged="Overlay_SizeChanged"
@@ -201,7 +201,7 @@
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
                 <!-- track -->
-                <Border x:Name="Track" CornerRadius="4" Background="#E6171518" />
+                <Border x:Name="Track" CornerRadius="4" Background="{Binding TrackBrush}" />
                 <!-- fill -->
                 <Border CornerRadius="4" Background="{Binding SoftFillBrush}" RenderTransformOrigin="0,0.5">
                     <Border.RenderTransform>
@@ -211,7 +211,7 @@
                 <!-- class strip -->
                 <Border Width="{DynamicResource RowAccentWidth}" HorizontalAlignment="Left" CornerRadius="4,0,0,4" Background="{Binding AccentBrush}" />
                 <!-- your own row -->
-                <Border CornerRadius="4" BorderThickness="1" BorderBrush="#B3F06A22"
+                <Border CornerRadius="4" BorderThickness="1" BorderBrush="Transparent"
                         Visibility="{Binding IsSelf, Converter={StaticResource VisibleIf}}" />
 
                 <Grid Margin="8,0,10,0" Effect="{StaticResource TextShadow}">
@@ -257,7 +257,7 @@
                     <Setter TargetName="Track" Property="Background" Value="#F21F1C1D" />
                 </Trigger>
                 <DataTrigger Binding="{Binding IsSelf}" Value="True">
-                    <Setter TargetName="NameText" Property="Foreground" Value="{StaticResource SelfGold}" />
+                    <Setter TargetName="NameText" Property="Foreground" Value="White" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
@@ -325,7 +325,7 @@
                                    Foreground="{Binding LimitBrush}" VerticalAlignment="Center" />
                     </StackPanel>
                     <StackPanel x:Name="LabelPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-                        <Ellipse Width="6" Height="6" Margin="0,0,6,0" Fill="{Binding HeaderBrush}">
+                        <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,6,0" Fill="{Binding HeaderBrush}">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse">
                                     <Style.Triggers>
@@ -415,7 +415,7 @@
                     <TextBlock Grid.Column="3" Text="DPS" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" Margin="0,0,14,0" />
                     <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" VerticalAlignment="Center" />
                 </Grid>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
+                <ScrollViewer x:Name="PlayerRowsViewport" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">
                     <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
                 </ScrollViewer>
@@ -426,11 +426,13 @@
 
             <!-- Footer -->
             <StackPanel Grid.Row="4" Margin="0,8,0,0">
-                <Border x:Name="ToolbarTray" Visibility="Collapsed" Background="#E60C0C0F" BorderBrush="#80F06A22" BorderThickness="1" CornerRadius="8" Padding="4" Margin="0,0,0,6">
+                <Border x:Name="ToolbarTray" Visibility="Collapsed" Background="#010C0C0F" BorderBrush="Transparent" BorderThickness="0" CornerRadius="4" Padding="4" Margin="0,0,0,6">
                     <StackPanel x:Name="Toolbar" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
                         <Button Style="{StaticResource Chip}" Content="{Binding ModeLabel}" Click="Mode_Click" Margin="0,0,5,0" ToolTip="{Binding T.TipTargetMode}" />
                         <Button Style="{StaticResource Chip}" Content="{Binding RankingLabel}" Click="Ranking_Click" Margin="0,0,5,0" ToolTip="Switch DPS / HPS ranking" />
                         <Button Style="{StaticResource Chip}" Content="{Binding LanguageCode}" Click="Language_Click" Margin="0,0,5,0" ToolTip="{Binding T.SwitchLanguage}" />
+                        <Button x:Name="CustomerToolsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE890;" Click="CustomerTools_Click" ToolTip="Komfort &amp; Analyse" AutomationProperties.Name="Komfort und Analyse" />
+                        <Button x:Name="StreamerToolButton" Style="{StaticResource ToolIcon}" Content="&#xE730;" Click="Streamer_Click" ToolTip="Streamer-Modus umschalten" AutomationProperties.Name="Streamer-Modus umschalten" />
                         <Button x:Name="ChatToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
                         <Button x:Name="MapToolButton" Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
                         <Button x:Name="GuideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8A7;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />

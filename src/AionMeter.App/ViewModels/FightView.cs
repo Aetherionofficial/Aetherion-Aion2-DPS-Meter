@@ -1,3 +1,4 @@
+using AionMeter.App.Services;
 using AionMeter.Core.Combat;
 
 namespace AionMeter.App.ViewModels;
@@ -15,19 +16,19 @@ public sealed class LiveFightView(CombatTracker tracker, Guid segmentId) : IFigh
 {
     public bool IsLive => Summary() is { IsActive: true };
 
-    public EncounterSnapshot? Summary() => tracker.Snapshot(segmentId, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+    public EncounterSnapshot? Summary() => PrivacyNames.Apply(tracker.Snapshot(segmentId, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 
-    public CombatantDetail? Detail(uint actorId) => tracker.Detail(segmentId, actorId);
+    public CombatantDetail? Detail(uint actorId) => PrivacyNames.Apply(tracker.Detail(segmentId, actorId));
 
     public IReadOnlyList<CombatantDetail> AllDetails() =>
-        Summary()?.Combatants.Select(c => tracker.Detail(segmentId, c.ActorId)).OfType<CombatantDetail>().ToList()
+        Summary()?.Combatants.Select(c => tracker.Detail(segmentId, c.ActorId)).OfType<CombatantDetail>().Select(d => PrivacyNames.Apply(d)!).ToList()
         ?? (IReadOnlyList<CombatantDetail>)[];
 }
 
 public sealed class RecordFightView(FightRecord record) : IFightView
 {
     public bool IsLive => false;
-    public EncounterSnapshot? Summary() => record.Summary;
-    public CombatantDetail? Detail(uint actorId) => record.Details.FirstOrDefault(d => d.ActorId == actorId);
-    public IReadOnlyList<CombatantDetail> AllDetails() => record.Details;
+    public EncounterSnapshot? Summary() => PrivacyNames.Apply(record.Summary);
+    public CombatantDetail? Detail(uint actorId) => PrivacyNames.Apply(record.Details.FirstOrDefault(d => d.ActorId == actorId));
+    public IReadOnlyList<CombatantDetail> AllDetails() => record.Details.Select(d => PrivacyNames.Apply(d)!).ToArray();
 }

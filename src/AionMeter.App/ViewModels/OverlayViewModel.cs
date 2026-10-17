@@ -10,6 +10,23 @@ namespace AionMeter.App.ViewModels;
 
 public sealed class RowViewModel : ObservableObject
 {
+    public Brush TrackBrush { get; private set; } = Freeze(new SolidColorBrush(Color.FromArgb(201, 23, 21, 24)));
+    private (GameClass, bool, bool, bool)? _lastTheme;
+    public void ApplyAccessibility(bool contrast, bool accessible)
+    {
+        var key = (Class, contrast, accessible, IsSelf);
+        if (_lastTheme == key) return;
+        _lastTheme = key;
+        var c = _class; _class = (GameClass)255; Class = c;
+        TrackBrush = Freeze(new SolidColorBrush(contrast ? Color.FromRgb(16, 16, 20) : Color.FromArgb(201, 23, 21, 24)));
+        if (accessible || contrast)
+        {
+            var hue = IsSelf ? Color.FromRgb(230, 159, 0) : Color.FromRgb(86, 180, 233);
+            AccentBrush = Freeze(new SolidColorBrush(hue));
+            SoftFillBrush = Freeze(new SolidColorBrush(Color.FromArgb(contrast ? (byte)55 : (byte)40, hue.R, hue.G, hue.B)));
+        }
+        Raise(nameof(TrackBrush)); Raise(nameof(AccentBrush)); Raise(nameof(SoftFillBrush));
+    }
     private uint _actorId;
     private string _name = "";
     private GameClass _class;
@@ -344,8 +361,12 @@ public sealed class OverlayViewModel : ObservableObject
     public bool HasGear { get => _hasGear; private set => Set(ref _hasGear, value); }
     private bool _hasGear;
 
+    public bool HighContrast { get; set; }
+    public bool AccessibleColors { get; set; }
+
     public void Apply(EncounterSnapshot? snap, int maxRows, bool relativeToTop, OverlayRanking ranking = OverlayRanking.Damage)
     {
+        snap = PrivacyNames.Apply(snap);
         if (snap is null)
         {
             SegmentId = null;
@@ -464,6 +485,7 @@ public sealed class OverlayViewModel : ObservableObject
             row.CombatPower = ShowGear && GearFits && cb.CombatPower > 0 ? Format.Power(cb.CombatPower) : "";
             row.Class = cb.Class;
             row.IsSelf = cb.IsSelf;
+            row.ApplyAccessibility(HighContrast, AccessibleColors);
             row.Dps = Format.Compact(rankingHealing ? cb.Healing / seconds : cb.Dps) + "/s";
             row.Damage = Format.Compact(rankingHealing ? cb.Healing : cb.Damage);
             var share = rankingHealing ? (double)cb.Healing / Math.Max(1, visibleHealing) : (double)cb.Damage / Math.Max(1, visibleDamage);
