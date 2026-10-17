@@ -305,12 +305,10 @@ public sealed class UiText
     public string AllSaved { get; init; } = "All saved fights ({0})…";
     public string NoFights { get; init; } = "No fights yet — they are saved automatically";
     public string OpenBreakdown { get; init; } = "Open breakdown";
-    public string CopyPlayer { get; init; } = "Copy {0}'s result to chat";
-    public string CopyParty { get; init; } = "Copy party ranking to chat";
-    public string CopyTable { get; init; } = "Copy party table for Discord";
-    public string Copied { get; init; } = "Copied — paste it into the chat with Ctrl+V";
+    public string CopyTable { get; init; } = "Copy DPS table for Discord";
+    public string Copied { get; init; } = "Copied — paste into Discord with Ctrl+V";
     public string CopyFailed { get; init; } = "The clipboard is busy — try again";
-    public string TipChat { get; init; } = "Result to chat or Discord";
+    public string TipChat { get; init; } = "Copy results for Discord";
     /// <summary>What a pasted result says, in this language (numbers keep their units in every language).</summary>
     public Core.ChatWords Chat { get; init; } = Core.ChatWords.English;
     public string RowDamage { get; init; } = "Damage";
@@ -670,9 +668,8 @@ public sealed class UiText
         ClickThroughOn = "Klickdurchlässig EIN — Overlay ignoriert die Maus. {0} schaltet es aus.", ClickThroughOff = "Klickdurchlässig AUS",
         Live = "Live", LiveHint = "zeigt den aktuellen Kampf", SessionSection = "DIESE SITZUNG", SavedToday = "GESPEICHERT · HEUTE", SavedYesterday = "GESPEICHERT · GESTERN",
         SavedOn = "GESPEICHERT · {0}", AllSaved = "Alle gespeicherten Kämpfe ({0})…", NoFights = "Noch keine Kämpfe — sie werden automatisch gespeichert",
-        OpenBreakdown = "Auswertung öffnen", CopyPlayer = "Ergebnis von {0} in den Chat kopieren", CopyParty = "Gruppenrangliste in den Chat kopieren",
-        CopyTable = "Gruppentabelle für Discord kopieren", Copied = "Kopiert — mit Strg+V in den Chat einfügen", CopyFailed = "Zwischenablage belegt — bitte erneut versuchen",
-        TipChat = "Ergebnis für Chat oder Discord", RowDamage = "Schaden", RowHits = "Treffer", RowCrit = "Kritisch", RowMax = "Max.",
+        OpenBreakdown = "Auswertung öffnen", CopyTable = "DPS-Tabelle für Discord kopieren", Copied = "Kopiert — mit Strg+V in Discord einfügen", CopyFailed = "Zwischenablage belegt — bitte erneut versuchen",
+        TipChat = "Für Discord kopieren", RowDamage = "Schaden", RowHits = "Treffer", RowCrit = "Kritisch", RowMax = "Max.",
         Players = n => n == 1 ? "1 Spieler" : $"{n} Spieler",
         TabDps = "DPS", TabAccuracy = "Trefferquote", TabRotation = "Rotation", TabDefense = "Verteidigung", TabHealing = "Heilung", HealingTotal = "GESAMTHEILUNG", HealingSkill = "FERTIGKEIT", HealingEvents = "ANWENDUNGEN", HealingAmount = "GEHEILT", FightHighlights = "KAMPF-HIGHLIGHTS", HighlightTopSkill = "STÄRKSTE SCHADENSFERTIGKEIT", HighlightPeakSecond = "STÄRKSTE SEKUNDE", HighlightHealing = "GEHEILTE LP", HighlightNoHealing = "Keine Heilung erfasst", TilePlace = "RANG", TileDamage = "SCHADEN", TileDps = "DPS", TileContrib = "ANTEIL", TileTime = "ZEIT",
         DpsTimeline = "DPS-VERLAUF", ThSkill = "FERTIGKEIT", ThHits = "TREFFER", ThDamage = "SCHADEN", ThDps = "DPS", ThAvg = "Ø", ThMax = "MAX.", IdleDpsHint = "Live-DPS folgt dem aktuellen Schaden; bei einer Pause bleibt der höchste DPS-Wert dieses Kampfes stehen.", ThCrit = "KRIT.", ThShare = "ANTEIL", ThBack = "RÜCKEN", ThFront = "FRONTAL", ThPerfect = "PERFEKT", ThSmite = "VERNICHTEND", ThMulti = "MEHRFACH",
@@ -897,12 +894,10 @@ public sealed class UiText
         AllSaved = "Все сохранённые бои ({0})…",
         NoFights = "Боёв пока нет — они сохраняются автоматически",
         OpenBreakdown = "Открыть разбор",
-        CopyPlayer = "Скопировать результат {0} в чат",
-        CopyParty = "Скопировать рейтинг группы в чат",
-        CopyTable = "Скопировать таблицу группы для Discord",
-        Copied = "Скопировано — вставьте в чат: Ctrl+V",
+        CopyTable = "Скопировать DPS-таблицу для Discord",
+        Copied = "Скопировано — вставьте в Discord: Ctrl+V",
         CopyFailed = "Буфер обмена занят — попробуйте ещё раз",
-        TipChat = "Результат в чат или Discord",
+        TipChat = "Скопировать для Discord",
         Chat = new Core.ChatWords
         {
             Kill = "УБИТ",

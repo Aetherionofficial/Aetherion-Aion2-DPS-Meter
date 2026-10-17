@@ -46,6 +46,14 @@ public sealed class WindowSmokeTests
                     var footer = Assert.IsType<System.Windows.Controls.Button>(overlay.FindName("FooterDetailsButton"));
                     Assert.True(footer.IsVisible);
                     Assert.True(footer.TranslatePoint(new Point(0, footer.ActualHeight), overlay).Y <= overlay.ActualHeight);
+                    foreach (var language in new[] { "de", "en", "ru" })
+                    {
+                        UiText.Use(language);
+                        var share = Assert.Single(ChatCopy.Items(overlay, () => meter.Tracker.Snapshot(null, now)));
+                        Assert.Contains("Discord", share.Header.ToString());
+                        Assert.Contains("Discord", UiText.Current.TipChat);
+                        Assert.Contains("Discord", UiText.Current.Copied);
+                    }
                     using var output = new TemporaryOutput();
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "customer-tools", Backdrop: "dark", Scale: 1));
                     Assert.True(new FileInfo(output.Path).Length > 1_000);

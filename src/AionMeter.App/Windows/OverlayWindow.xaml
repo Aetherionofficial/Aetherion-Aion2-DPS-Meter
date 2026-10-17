@@ -433,7 +433,7 @@
                         <Button Style="{StaticResource Chip}" Content="{Binding LanguageCode}" Click="Language_Click" Margin="0,0,5,0" ToolTip="{Binding T.SwitchLanguage}" />
                         <Button x:Name="CustomerToolsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE890;" Click="CustomerTools_Click" ToolTip="Komfort &amp; Analyse" AutomationProperties.Name="Komfort und Analyse" />
                         <Button x:Name="StreamerToolButton" Style="{StaticResource ToolIcon}" Content="&#xE730;" Click="Streamer_Click" ToolTip="Streamer-Modus umschalten" AutomationProperties.Name="Streamer-Modus umschalten" />
-                        <Button x:Name="ChatToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8BD;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
+                        <Button x:Name="ChatToolButton" Style="{StaticResource ToolIcon}" Content="&#xE72D;" Click="Chat_Click" ToolTip="{Binding T.TipChat}" />
                         <Button x:Name="MapToolButton" Style="{StaticResource ToolIcon}" Content="&#xE774;" Click="Map_Click" ToolTip="{Binding T.MapLabel}" />
                         <Button x:Name="GuideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE8A7;" Click="Wakayashi_Click" ToolTip="Wakayashi.gg in eigenem Fenster öffnen" />
                         <Button x:Name="TimersToolButton" Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />

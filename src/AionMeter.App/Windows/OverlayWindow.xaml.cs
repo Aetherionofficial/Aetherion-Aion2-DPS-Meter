@@ -443,18 +443,16 @@ public partial class OverlayWindow : Window
         open.Click += (_, _) => OpenBreakdown(row.ActorId);
         menu.Items.Add(open);
         menu.Items.Add(new Separator());
-        var player = row.ActorId == Combatant.UnknownSummonsId ? null : (uint?)row.ActorId;
-        foreach (var item in ChatCopy.Items(CardBody, ShownSummary, player, row.Name)) menu.Items.Add(item);
+        foreach (var item in ChatCopy.Items(CardBody, ShownSummary)) menu.Items.Add(item);
         menu.IsOpen = true;
         e.Handled = true;
     }
 
-    /// <summary>The toolbar's chat button: your result (when you took part), the party ranking or the Discord table.</summary>
+    /// <summary>The toolbar's Discord button copies the party table.</summary>
     private void Chat_Click(object sender, RoutedEventArgs e)
     {
         if (ShownSummary() is null) return;
-        var self = _vm.Rows.FirstOrDefault(r => r.IsSelf);
-        ChatCopy.ShowMenu((FrameworkElement)sender, CardBody, ShownSummary, self?.ActorId, self?.Name);
+        ChatCopy.ShowMenu((FrameworkElement)sender, CardBody, ShownSummary);
     }
 
     private void Details_Click(object sender, RoutedEventArgs e)

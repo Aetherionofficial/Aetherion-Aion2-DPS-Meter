@@ -9,19 +9,15 @@ using AionMeter.Core.Combat;
 namespace AionMeter.App.Services;
 
 /// <summary>
-/// "To chat" for the overlay and the breakdown: one player's result or the party ranking as a single line for the game
-/// chat, or the ranking as a table for Discord. A short note confirms what landed on the clipboard.
+/// Copies a Discord table from the overlay or breakdown. In-game chat formats are intentionally not exposed.
 /// </summary>
 public static class ChatCopy
 {
     private static UiText T => UiText.Current;
 
     /// <summary>The menu entries; <paramref name="fight"/> is read when one is clicked, so a live fight copies its latest numbers.</summary>
-    public static IEnumerable<MenuItem> Items(FrameworkElement noteAnchor, Func<EncounterSnapshot?> fight, uint? player, string? playerName)
+    public static IEnumerable<MenuItem> Items(FrameworkElement noteAnchor, Func<EncounterSnapshot?> fight)
     {
-        if (player is { } id && playerName is not null)
-            yield return Item(string.Format(T.CopyPlayer, PrivacyNames.Display(id, playerName)), s => ChatLine.Player(s, id, T.Chat, Name));
-        yield return Item(T.CopyParty, s => ChatLine.Party(s, T.Chat, Name));
         yield return Item(T.CopyTable, s => ChatLine.Table(s, T.Chat, Name));
 
         MenuItem Item(string header, Func<EncounterSnapshot, string> text)
@@ -36,10 +32,10 @@ public static class ChatCopy
     }
 
     /// <summary>A small menu of <see cref="Items"/> under <paramref name="button"/>.</summary>
-    public static void ShowMenu(FrameworkElement button, FrameworkElement noteAnchor, Func<EncounterSnapshot?> fight, uint? player, string? playerName)
+    public static void ShowMenu(FrameworkElement button, FrameworkElement noteAnchor, Func<EncounterSnapshot?> fight)
     {
         var menu = new ContextMenu { PlacementTarget = button, Placement = PlacementMode.Bottom };
-        foreach (var item in Items(noteAnchor, fight, player, playerName)) menu.Items.Add(item);
+        foreach (var item in Items(noteAnchor, fight)) menu.Items.Add(item);
         menu.IsOpen = true;
     }
 
