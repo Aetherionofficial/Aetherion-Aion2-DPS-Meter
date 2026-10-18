@@ -107,6 +107,19 @@ public sealed class WindowSmokeTests
                 Assert.True(journal.IsVisible);
                 var tabs = (System.Windows.Controls.TabControl)typeof(FightJournalWindow).GetField("_tabs", flags)!.GetValue(journal)!;
                 Assert.Equal(new[] { 0, 2, 1, 0, 0, 3 }[index], tabs.SelectedIndex);
+                var back = ((System.Windows.Controls.DockPanel)journal.Content).Children
+                    .OfType<System.Windows.Controls.Button>().Single(b => Equals(b.Content, "← Zurück zu den Einstellungen"));
+                System.ComponentModel.CancelEventHandler cancel = (_, e) => e.Cancel = true;
+                journal.Closing += cancel;
+                back.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                Assert.True(journal.IsVisible);
+                Assert.Empty(app.Windows.OfType<SettingsWindow>());
+                journal.Closing -= cancel;
+                back.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                Assert.False(journal.IsVisible);
+                var returned = Assert.Single(app.Windows.OfType<SettingsWindow>());
+                Assert.True(returned.IsVisible);
+                returned.Close();
             }
             finally { journal.Close(); }
         }
@@ -144,7 +157,16 @@ public sealed class WindowSmokeTests
                     var button = Assert.IsType<System.Windows.Controls.Button>(settings.FindName("CustomerToolsButton"));
                     button.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
                     var opened = Assert.Single(Application.Current.Windows.OfType<CustomerToolsWindow>());
-                    try { Assert.True(opened.IsVisible); }
+                    try
+                    {
+                        Assert.True(opened.IsVisible);
+                        var back = ((System.Windows.Controls.DockPanel)opened.Content).Children
+                            .OfType<System.Windows.Controls.Button>().Single(b => Equals(b.Content, "← Zurück zu den Einstellungen"));
+                        back.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                        Assert.False(opened.IsVisible);
+                        var returned = Assert.Single(Application.Current.Windows.OfType<SettingsWindow>());
+                        Assert.True(returned.IsVisible); returned.Close();
+                    }
                     finally { opened.Close(); }
                 }
                 finally { settings.Close(); }

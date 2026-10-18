@@ -50,6 +50,10 @@ public sealed class CustomerToolsWindow : Window
         header.Children.Add(new TextBlock { Text = "AETHERION  /  Komfort & Analyse", Foreground = Brushes.WhiteSmoke, FontSize = 19, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center });
         header.MouseLeftButtonDown += (_, e) => { if (e.OriginalSource is TextBlock || ReferenceEquals(e.OriginalSource, header)) DragMove(); };
         DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
+        var back = new Button { Content = "← Zurück zu den Einstellungen", HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(20, 0, 20, 12), Style = (Style)Application.Current.FindResource("GhostButton") };
+        back.Click += (_, _) => { Close(); AppHost.Current.ShowSettings(); };
+        DockPanel.SetDock(back, Dock.Top); root.Children.Add(back);
         PreviewKeyDown += (_, e) => { if (e.Key == System.Windows.Input.Key.Escape) Close(); };
         _feedback.Foreground = Brushes.LightGray;
         _tabs.BorderBrush = new SolidColorBrush(Color.FromRgb(55, 49, 48));

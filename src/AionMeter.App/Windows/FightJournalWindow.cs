@@ -55,6 +55,14 @@ public sealed class FightJournalWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = B("#0D1017"); Foreground = Brushes.WhiteSmoke; FontFamily = new FontFamily("Segoe UI");
         var root = new DockPanel { Margin = new Thickness(20) }; Content = root;
+        var back = Button("← Zurück zu den Einstellungen", () =>
+        {
+            Close(); // Closing checks unsaved edits and can cancel navigation.
+            if (!IsVisible) AppHost.Current.ShowSettings();
+        });
+        back.HorizontalAlignment = HorizontalAlignment.Left;
+        back.Margin = new Thickness(0, 0, 0, 12);
+        DockPanel.SetDock(back, Dock.Top); root.Children.Add(back);
         var heading = new DockPanel { Margin = new Thickness(0, 0, 0, 15) };
         var refresh = Button("Aktualisieren", () => { if (LeaveEdits()) Reload(_entry?.FileName); });
         DockPanel.SetDock(refresh, Dock.Right); heading.Children.Add(refresh);
