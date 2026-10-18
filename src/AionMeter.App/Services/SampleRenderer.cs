@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -36,6 +36,20 @@ public static class SampleRenderer
             foreach (var entry in meter.History.List().Take(20)) meter.PortraitOf(entry);
         WaitForPortraits(meter);
 
+        if (o.Window is "fight-journal" or "discord-card")
+        {
+            meter.Tracker.Process(new PlayerSeenEvent(start, 700001, "Aelyra", 2305, GameClass.Cleric));
+            meter.Tracker.Process(new HealEvent(start + 19_000, 700001, 2, 17020000, 3_200_000, HitFlags.Restore));
+            meter.Tracker.Process(new HealEvent(start + 19_100, 700001, 1, 17030000, 1_100_000, HitFlags.Restore));
+            if (o.Window == "discord-card")
+            {
+                var record = JournalPreview.Create(meter.Tracker.Record(null)!)[0].Record;
+                DiscordCardRenderer.Save(DiscordCardRenderer.Render(Core.Storage.DiscordCardData.Create(record, true, meter.DisplayTitle(record.Summary.Title,
+                    record.Summary.Boss?.NpcCode ?? 0, record.Summary.TargetCode))[0]), path);
+                return;
+            }
+        }
+
         Window host;
         Action refresh;
         switch (o.Window)
@@ -55,6 +69,14 @@ public static class SampleRenderer
                 refresh = () => { };
                 break;
 #endif
+            case "fight-journal":
+                var preview = JournalPreview.Create(meter.Tracker.Record(null)!);
+                meter.Journal.Edit(preview[0].Entry.FileName, true, "Neue Ausrüstung getestet – vollständiger Kill.", Core.Storage.TrainingScope.For(preview[0].Record), 650_000);
+                var journal = new FightJournalWindow(meter, preview[0].Entry, preview) { Width = o.Width ?? 1220, Height = o.Height ?? 870 };
+                journal.ShowPageForPreview(o.Tab);
+                host = journal;
+                refresh = () => { };
+                break;
             case "customer-tools":
                 var tools = new CustomerToolsWindow(meter) { Width = o.Width ?? 900, Height = o.Height ?? 760 };
                 tools.ShowPageForPreview(o.Tab);

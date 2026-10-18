@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Interop;
@@ -54,6 +54,7 @@ public partial class App : Application
     private bool _restartAfterMaintenance;
     private RaidCommandWindow? _raidCommand;
     private HistoryWindow? _history;
+    private FightJournalWindow? _journal;
     private SettingsWindow? _settingsWindow;
     private BossTimersWindow? _timersWindow;
     private EventTimersWindow? _eventTimersWindow;
@@ -603,6 +604,15 @@ public partial class App : Application
     {
         if (!_overlay.IsVisible) SetOverlayVisible(true);
         _overlay.ShowSaved(entry);
+    }
+
+    public void ShowJournal(Core.Storage.HistoryEntry? selected = null)
+    {
+        if (_maintenanceBlocked) return;
+        if (_journal is { IsLoaded: true }) { if (selected is not null) _journal.SelectEntry(selected); Activate(_journal); return; }
+        _journal = new FightJournalWindow(_meter, selected);
+        _journal.Closed += (_, _) => _journal = null;
+        _journal.Show();
     }
 
     public void ShowHistory()

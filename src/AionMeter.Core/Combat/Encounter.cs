@@ -62,6 +62,13 @@ public sealed class HealingSkillStats
     public int Events { get; set; }
 }
 
+public sealed class EncounterHealer
+{
+    public long Total;
+    public Dictionary<int, HealingSkillStats> Skills { get; } = new();
+    public Dictionary<uint, (long Amount, int Events)> Recipients { get; } = new();
+}
+
 public sealed class IncomingSkillStats
 {
     public required int SkillCode { get; init; }
@@ -225,6 +232,9 @@ public sealed class Encounter
     /// <summary>The NPC hit most recently; used for a responsive live target title/HP panel.</summary>
     public uint LastTargetId { get; set; }
     public Dictionary<uint, Combatant> Combatants { get; } = new();
+    public Dictionary<uint, EncounterHealer> Healers { get; } = new();
+    public bool HealingTruncated { get; set; }
+    public long LastHealingMs { get; set; }
 
     /// <summary>Players seen landing hits on the fight's targets (hit notices), whether or not their damage arrived.</summary>
     public HashSet<uint> Attackers { get; } = new();

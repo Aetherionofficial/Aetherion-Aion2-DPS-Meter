@@ -140,6 +140,7 @@ public sealed class CustomerToolsWindow : Window
         });
 
         var analysis = Page("Kampfanalyse");
+        Action(analysis, "Kampfbuch: Boss-Tagebuch, Training, Heiler & Discord-Karte", () => AppHost.Current.ShowJournal());
         Heading(analysis, "Deine letzten Kämpfe verstehen");
         Note(analysis, "Die Auswertung beruht auf empfangenen Ereignissen. Sekunden mit Schaden sind keine Messung deiner Eingaben. Fehlende Treffer, Bossphasen und außer Reichweite befindliche Spieler können das Bild beeinflussen.");
         _entries = meter.History.List(200).ToList();
@@ -211,7 +212,7 @@ public sealed class CustomerToolsWindow : Window
         Heading(_analysis, "Persönlicher Boss-Rekord");
         var best = _entries.Where(e => e.BossCode == entry.BossCode && e.SelfName == self.Name && e.SelfClass == self.Class)
             .Select(e => _meter.History.Load(e.Path)).OfType<FightRecord>()
-            .Where(old => FightInsights.ComparableKills(old, record))
+            .Where(old => JournalInsights.EligibleBest(old) && FightInsights.ComparableKills(old, record))
             .Select(old => old.Details.First(d => d.IsSelf).Dps).DefaultIfEmpty(0).Max();
         Note(_analysis, best > 0 ? $"Bester vergleichbarer vollständiger Kill in den letzten 200 gespeicherten Kämpfen: {Format.Compact(best)}/s. Eigener Charakter, Klasse, Server und Boss müssen übereinstimmen. Ausrüstung und Bossvarianten können Unterschiede erklären."
             : "Noch kein vergleichbarer vollständiger Boss-Kill. Rekorde berücksichtigen keine Demo-Kämpfe oder teilweise erfassten Kämpfe.");

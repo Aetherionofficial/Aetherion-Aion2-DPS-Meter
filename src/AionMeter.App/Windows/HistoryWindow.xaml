@@ -44,6 +44,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="52" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid Margin="18,0,8,0">
@@ -68,7 +69,12 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1">
+            <WrapPanel Grid.Row="1" Margin="14,4,14,10">
+                <Button Style="{StaticResource PrimaryButton}" Content="Kampfbuch &amp; Training" Click="Journal_Click" Margin="0,0,10,0" />
+                <Button Style="{StaticResource GhostButton}" Content="Ergebniskarte für Discord…" Click="DiscordCard_Click" Margin="0,0,10,0" />
+                <TextBlock Text="Suche · Favoriten · Notizen · Ziele · Heiler · Datenqualität" Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
+            </WrapPanel>
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="360" />
                     <ColumnDefinition Width="*" />

@@ -311,3 +311,11 @@ data and art are © NCSOFT; this project is not affiliated with NCSOFT.
 Access requests and payments are handled manually through Discord tickets. The owner creates one-time keys in the Supabase SQL Editor and sends them privately to buyers. The database stores only key hashes. To issue or revoke keys, see [`supabase/README.md`](supabase/README.md). Configure Discord OAuth and run the SQL migration before distributing this build. The Supabase publishable key in the client is intended for public use; never distribute database passwords, service-role keys or OAuth client secrets.
 
 This project remains GPL-3.0. The license gate is a convenience for paid distribution, not tamper-proof DRM: recipients can modify and rebuild GPL source. Distribute the corresponding source and license with customer builds.
+
+## Kampfbuch, Heilung und Ergebniskarten (v0.3.52)
+
+Verlauf → **Kampfbuch & Training** öffnet Boss-Tagebuch, Suchfilter, Favoriten, Notizen, Ziele, Heiler- und Datenqualitätsansicht. Alternativ: Komfort & Analyse → Kampfanalyse. **Ergebniskarte für Discord** öffnet eine lokale PNG-Vorschau mit Anonymisierung und Seitenauswahl. Exportiert wird ausschließlich nach einer Dateiauswahl; es gibt keinen automatischen Upload oder Versand an einen Chat.
+
+Notizen/Favoriten und kontextgebundene DPS-Ziele liegen getrennt von den Originalkämpfen in `%AppData%/AionMeter/journal/metadata.json` (bei abweichender AppData-Konfiguration entsprechend dort). Der genaue App-Datenordner ist über die vorhandenen Hilfe-/Ordnerfunktionen erreichbar. Defekte oder unbekannte Metadatenformate werden nicht überschrieben. Vor einer manuellen Reparatur die Originaldatei sichern.
+
+Kampfdateiformat 3 ergänzt Heilungsquellen und Empfänger, den erfassten Heilungszeitraum und eine gespeicherte Boss-Startreferenz. Alte Kampfdateien bleiben lesbar. Fehlende Informationen werden gekennzeichnet; effektive Heilung und Überheilung werden nicht geschätzt. Neue bestätigte Bestwerte und Zielerreichungen benötigen einen vollständigen vergleichbaren Kill mit bekannter Startreferenz, eigenem Charakter/Klasse/Server/Zone und ohne bekannte Datenqualitäts-Einschränkungen.

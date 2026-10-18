@@ -155,6 +155,8 @@ public partial class OverlayWindow : Window
             : _vm.Status;
         if (_settings.ShowPersonalRecords && _meter.PersonalRecordMessage is { } recordMessage && Environment.TickCount64 - _meter.PersonalRecordAt < 20_000)
             FooterText.Text = recordMessage;
+        if (_meter.TrainingMessage is { } training && Environment.TickCount64 - _meter.TrainingMessageAt < 20_000
+            && status.State == CaptureState.Capturing) FooterText.Text = training;
         if (_settings.StreamerMode) PartnerBadge.Visibility = Visibility.Collapsed;
         if (_settings.PowerSaving) StatusDot.BeginAnimation(UIElement.OpacityProperty, null);
         ApplyAutomaticHeight();

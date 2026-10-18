@@ -313,13 +313,40 @@ public sealed class CombatTracker
             recipient.RecordIncoming(new IncomingEvent(h.TimeMs, h.SkillCode, h.Amount, true));
         var source = _entities.ResolveOwner(h.SourceId);
         if (h.Amount <= 0 || !_entities.IsKnownPlayer(source)) return;
+        // Track healers separately: a pure healer must not become a fabricated DPS participant.
+        if (enc.Combatants.ContainsKey(source) || enc.Combatants.ContainsKey(h.TargetId))
+        {
+            enc.LastHealingMs = Math.Max(enc.LastHealingMs, h.TimeMs);
+            if (!enc.Healers.TryGetValue(source, out var healer))
+            {
+                if (enc.Healers.Count >= 256) enc.HealingTruncated = true;
+                else enc.Healers[source] = healer = new EncounterHealer();
+            }
+            if (healer is not null)
+            {
+                healer.Total += h.Amount;
+                if (!healer.Skills.TryGetValue(h.SkillCode, out var healSkill))
+                {
+                    if (healer.Skills.Count >= 512) enc.HealingTruncated = true;
+                    else healer.Skills[h.SkillCode] = healSkill = new HealingSkillStats { SkillCode = h.SkillCode };
+                }
+                if (healSkill is not null) { healSkill.Amount += h.Amount; healSkill.Events++; }
+                if (healer.Recipients.TryGetValue(h.TargetId, out var target))
+                    healer.Recipients[h.TargetId] = (target.Amount + h.Amount, target.Events + 1);
+                else if (healer.Recipients.Count < 512) healer.Recipients[h.TargetId] = (h.Amount, 1);
+                else enc.HealingTruncated = true;
+            }
+        }
         // The DPS overlay is built from encounter participants, not nearby group members. Do not
         // create a combatant from a heal packet alone: passive/periodic heals otherwise add a row
         // for someone who has not contributed any damage to this encounter.
         if (!enc.Combatants.TryGetValue(source, out var c) || c.Total.Damage <= 0) return;
         c.Healing += h.Amount;
         if (!c.HealingSkills.TryGetValue(h.SkillCode, out var skill))
+        {
+            if (c.HealingSkills.Count >= 512) { enc.HealingTruncated = true; return; }
             c.HealingSkills[h.SkillCode] = skill = new HealingSkillStats { SkillCode = h.SkillCode };
+        }
         skill.Amount += h.Amount;
         skill.Events++;
     }
@@ -990,11 +1017,34 @@ public sealed class CombatTracker
     private FightRecord BuildRecord(Encounter enc)
     {
         var snapshot = BuildSnapshot(enc, enc.EndMs > 0 ? enc.EndMs : enc.LastDamageMs);
+        // A saved fight needs its known boss identity even when a pure healer never targeted it.
+        // The live overlay still follows the local player's own target in BuildSnapshot.
+        if (snapshot.Boss is null && enc.BossId is { } bossId && enc.BossCode > 0)
+        {
+            var uncounted = enc.BossMaxHpKnown && enc.BossMaxHp > 0 && enc.BossRefHp > 0
+                ? Math.Max(0, enc.BossMaxHp - enc.BossRefHp - enc.BossRefCounted) : 0;
+            snapshot = snapshot with { Boss = new BossSnapshot(bossId, enc.BossCode, enc.BossName ?? "Boss", BossHpNow(enc), enc.BossMaxHp, enc.BossMaxHpKnown, uncounted) };
+        }
         var details = enc.Combatants.Values
             .OrderByDescending(c => c.Total.Damage)
             .Select(c => BuildDetail(enc, c, 5_000))
             .ToList();
-        return new FightRecord(2, snapshot, details, enc.Deaths.ToArray());
+        var healers = enc.Healers.Select(pair =>
+        {
+            var identity = new Combatant { ActorId = pair.Key };
+            RefreshIdentity(identity);
+            var healer = pair.Value;
+            return new HealerRecord(identity.ActorId, identity.Name, identity.Class, identity.IsSelf, identity.ServerId,
+                healer.Total, healer.Skills.Values.Select(h => new HealingSkillRow(h.SkillCode, _data.SkillName(h.SkillCode), h.Amount, h.Events))
+                    .OrderByDescending(h => h.Amount).ToArray(),
+                healer.Recipients.Select(target =>
+                {
+                    var recipient = new Combatant { ActorId = target.Key };
+                    RefreshIdentity(recipient);
+                    return new HealingRecipientRow(target.Key, recipient.Name, target.Value.Amount, target.Value.Events);
+                }).OrderByDescending(h => h.Amount).ToArray());
+        }).OrderByDescending(h => h.Total).ToArray();
+        return new FightRecord(3, snapshot, details, enc.Deaths.ToArray(), healers, enc.HealingTruncated, Math.Max(snapshot.CombatMs, enc.LastHealingMs - enc.StartMs), enc.BossId is not null ? enc.BossRefHp > 0 : null);
     }
 
     /// <summary>Null when nothing was measured, so the UI can show a dash instead of a fake zero.</summary>

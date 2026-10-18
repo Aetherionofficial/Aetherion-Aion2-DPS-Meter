@@ -6,6 +6,8 @@ using AionMeter.App.Services;
 using AionMeter.App.Windows;
 using AionMeter.Core.Events;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace AionMeter.App.Tests;
 
 public static class TestEnvironment
@@ -59,13 +61,18 @@ public sealed class WindowSmokeTests
                     Assert.True(new FileInfo(output.Path).Length > 1_000);
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "maintenance", Scale: 1));
                     Assert.True(new FileInfo(output.Path).Length > 1_000);
+                    JournalUiChecks.Run(meter);
+                    SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "fight-journal", Tab: "healing", Scale: 1));
+                    Assert.True(new FileInfo(output.Path).Length > 1_000);
+                    SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "discord-card", Scale: 1));
+                    Assert.True(new FileInfo(output.Path).Length > 1_000);
                 }
                 finally { overlay.Close(); app.Shutdown(); }
             }
             catch (Exception ex) { failure = ex; }
         });
         thread.SetApartmentState(ApartmentState.STA); thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "WPF test did not finish.");
+        Assert.True(thread.Join(TimeSpan.FromSeconds(60)), "WPF test did not finish.");
         Assert.Null(failure);
     }
 

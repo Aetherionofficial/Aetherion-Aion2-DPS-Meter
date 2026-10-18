@@ -171,5 +171,9 @@ public sealed record BossNotice(int NpcCode, int MapId, string? Zone, BossNotice
     int ServerId = 0);
 
 /// <summary>A whole fight as saved to disk.</summary>
+public sealed record HealingRecipientRow(uint ActorId, string Name, long Amount, int Events);
+public sealed record HealerRecord(uint ActorId, string Name, GameClass Class, bool IsSelf, int ServerId,
+    long Total, IReadOnlyList<HealingSkillRow> Skills, IReadOnlyList<HealingRecipientRow>? Recipients);
+
 public sealed record FightRecord(int Version, EncounterSnapshot Summary, IReadOnlyList<CombatantDetail> Details,
-    IReadOnlyList<DeathRecord>? Deaths = null);
+    IReadOnlyList<DeathRecord>? Deaths = null, IReadOnlyList<HealerRecord>? Healers = null, bool HealingTruncated = false, long? HealingDurationMs = null, bool? BossStartObserved = null);

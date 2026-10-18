@@ -59,7 +59,7 @@ public sealed class HistoryStore
     public string Save(FightRecord record)
     {
         var s = record.Summary;
-        var name = $"{s.StartedAt:yyyyMMdd_HHmmss}_{Sanitize(s.Title)}.json";
+        var name = $"{s.StartedAt:yyyyMMdd_HHmmss}_{Sanitize(s.Title)}_{s.Id:N}.json";
         var path = System.IO.Path.Combine(Directory, name);
         var tmp = path + ".tmp";
         File.WriteAllText(tmp, JsonSerializer.Serialize(record, Json));
@@ -80,7 +80,14 @@ public sealed class HistoryStore
     {
         try
         {
-            return JsonSerializer.Deserialize<FightRecord>(File.ReadAllText(path), Json);
+            var record = JsonSerializer.Deserialize<FightRecord>(File.ReadAllText(path), Json);
+            if (record?.Summary is null || record.Summary.Title is null || record.Details is null || record.Summary.Combatants is null
+                || record.Summary.Combatants.Any(c => c is null || c.Name is null)
+                || record.Details.Any(d => d is null || d.Name is null || d.Quality is null || d.Skills is null || d.Skills.Any(s => s is null) || d.PerSecond is null || d.Casts is null
+                    || d.HealingSkills?.Any(h => h is null) == true)
+                || record.Healers?.Any(h => h is null || h.Name is null || h.Skills is null || h.Skills.Any(s => s is null)
+                    || h.Recipients?.Any(r => r is null || r.Name is null) == true) == true) return null;
+            return record;
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -164,10 +171,11 @@ public sealed class HistoryStore
         for (var i = 0; i < s.Combatants.Count; i++)
             if (s.Combatants[i].IsSelf) { selfIndex = i; break; }
         var self = selfIndex >= 0 ? s.Combatants[selfIndex] : null;
+        var ownHealer = record.Healers?.FirstOrDefault(h => h.IsSelf);
         return new HistoryEntry(
             fileName, s.Title, s.StartedAt, s.CombatMs, s.Reason, s.PartyDps, s.TotalDamage, s.Zone,
             s.Boss?.NpcCode ?? 0, s.TargetCode, s.PlayerCount,
-            self?.Name, self?.Class ?? GameClass.Unknown, self?.Dps ?? 0, selfIndex + 1);
+            self?.Name ?? ownHealer?.Name, self?.Class ?? ownHealer?.Class ?? GameClass.Unknown, self?.Dps ?? 0, selfIndex + 1);
     }
 
     private static string Sanitize(string title)

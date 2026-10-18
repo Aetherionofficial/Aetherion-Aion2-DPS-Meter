@@ -114,7 +114,7 @@ public partial class HistoryWindow : Window
             var dps = e.SelfDps > 0 ? Format.Compact(e.SelfDps) + "/s" : T.Party + " " + Format.Compact(e.PartyDps) + "/s";
             return new FightItem(
                 e,
-                _meter.DisplayTitle(e),
+                (_meter.Journal.Annotation(e.FileName).Favorite ? "★ " : "") + _meter.DisplayTitle(e),
                 $"{ZoneText(e.Zone)} · {Format.Clock(e.CombatMs)} · {e.Players} {T.PlayersShort}",
                 dps,
                 Relative(e.StartedAt),
@@ -163,18 +163,27 @@ public partial class HistoryWindow : Window
     private void Fights_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (Fights.SelectedItem is not FightItem item) return;
-        _record = Store.Load(item.Entry.Path);
-        if (_record is null) return;
         _entry = item.Entry;
+        _record = Store.Load(item.Entry.Path);
+        if (_record is null) { _view = null; Party.ItemsSource = null; DetailTitle.Text = "Kampfdatei nicht lesbar"; DetailMeta.Text = "Das Original wurde nicht verändert."; return; }
         _view = new RecordFightView(_record);
         var s = _record.Summary;
         DetailTitle.Text = item.Title;
         DetailPortrait.Source = item.Portrait;
         DetailMeta.Text = $"{s.StartedAt.ToString("dd MMM yyyy HH:mm", T.Culture)} · {Format.ClockPrecise(s.CombatMs)} · " +
                           $"{Format.Compact(s.TotalDamage)} {T.DamageWord} · {Format.Compact(s.PartyDps)}/s {T.Party} · {ReasonText(s.Reason)}";
+        var quality = JournalInsights.Quality(_record);
+        DetailMeta.Text += " · " + quality.Label;
+        DetailMeta.ToolTip = quality.Explanation;
         var vm = new OverlayViewModel();
         vm.Apply(s, 50, relativeToTop: true);
         Party.ItemsSource = vm.Rows;
+    }
+
+    private void Journal_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowJournal(_entry);
+    private void DiscordCard_Click(object sender, RoutedEventArgs e)
+    {
+        if (_record is not null) new DiscordCardWindow(_record, _entry is null ? null : _meter.DisplayTitle(_entry)) { Owner = this }.ShowDialog();
     }
 
     private void Member_Click(object sender, MouseButtonEventArgs e)
@@ -248,7 +257,8 @@ public partial class HistoryWindow : Window
     private void Delete_Click(object sender, RoutedEventArgs e)
     {
         if (Fights.SelectedItem is not FightItem item) return;
-        var answer = MessageBox.Show(this, string.Format(T.DeleteConfirm, item.Title, item.Entry.StartedAt.ToString("dd MMM HH:mm", T.Culture)), AppInfo.Name,
+        var warning = _meter.Journal.Annotation(item.Entry.FileName).Favorite ? "Dieser Kampf ist als Favorit markiert. Trotzdem endgültig löschen?\n\n" : "";
+        var answer = MessageBox.Show(this, warning + string.Format(T.DeleteConfirm, item.Title, item.Entry.StartedAt.ToString("dd MMM HH:mm", T.Culture)), AppInfo.Name,
             MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (answer != MessageBoxResult.Yes) return;
         Store.Delete(item.Entry.Path);

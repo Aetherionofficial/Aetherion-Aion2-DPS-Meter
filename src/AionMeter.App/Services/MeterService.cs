@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Collections.Concurrent;
 using AionMeter.Core;
 using AionMeter.Core.Capture;
@@ -30,6 +30,7 @@ public sealed class MeterService : IDisposable
         settings.ApplyTo(Options);
         Tracker = new CombatTracker(Data, Options);
         History = new HistoryStore(Path.Combine(AppSettings.AppDataDir, "fights"));
+        Journal = new FightJournalStore(settings.Transient ? null : Path.Combine(AppSettings.AppDataDir, "journal", "metadata.json"));
         Timers = new BossTimers(Path.Combine(AppSettings.AppDataDir, "boss-timers.json"), Data, DataDirectory, persistent: !settings.Transient);
         Updates = new Updater(settings);
         Tracker.EncounterFinished += OnEncounterFinished;
@@ -84,6 +85,9 @@ public sealed class MeterService : IDisposable
     public MeterOptions Options { get; }
     public CombatTracker Tracker { get; }
     public HistoryStore History { get; }
+    public FightJournalStore Journal { get; }
+    public string? TrainingMessage { get; private set; }
+    public long TrainingMessageAt { get; private set; }
     public BossTimers Timers { get; }
     /// <summary>New versions on GitHub; checks only run once the app calls <see cref="Updater.Start"/>.</summary>
     public Updater Updates { get; }
@@ -306,6 +310,14 @@ public sealed class MeterService : IDisposable
     private void OnEncounterFinished(FightRecord record)
     {
         if (!_replaying && !DemoRunning) _sessionFights.Enqueue(record);
+        if (!_replaying && !DemoRunning && TrainingScope.For(record) is { } scope
+            && JournalInsights.Progress(record, Journal.Target(scope)) is { } progress)
+        {
+            TrainingMessage = progress.Reached ? $"Trainingsziel erreicht: {Format.Compact(progress.ObservedDps)} / {Format.Compact(progress.Target)} DPS"
+                : $"Trainingsziel: {progress.Percent:0}% · {Format.Compact(progress.ObservedDps)} / {Format.Compact(progress.Target)} DPS"
+                    + (progress.Confirmed ? "" : " · vorläufiger Versuch");
+            TrainingMessageAt = Environment.TickCount64;
+        }
         LogBossFight(record.Summary);
         if (!ShouldSave(record.Summary)) return;
         if (_exiting) Save(); // the process is about to end: a worker thread would not get to it
@@ -315,14 +327,14 @@ public sealed class MeterService : IDisposable
         {
             try
             {
-                if (Settings.ShowPersonalRecords && FightInsights.ComparableKills(record, record) && record.Summary.Reason == EncounterEndReason.Kill
+                if (Settings.ShowPersonalRecords && JournalInsights.EligibleBest(record) && record.Summary.Reason == EncounterEndReason.Kill
                     && record.Summary.Boss is { NpcCode: > 0 } boss && boss.CountedFrom is null && !record.Summary.MostDamageUnsent
                     && record.Details.FirstOrDefault(d => d.IsSelf) is { Dps: > 0 } self)
                 {
                     var previous = History.List().Where(e => e.BossCode == boss.NpcCode && e.Reason == EncounterEndReason.Kill
                         && e.SelfName == self.Name && e.SelfClass == self.Class && e.FileName != "")
                         .Select(e => History.Load(e.Path)).OfType<FightRecord>()
-                        .Where(old => FightInsights.ComparableKills(old, record))
+                        .Where(old => JournalInsights.EligibleBest(old) && FightInsights.ComparableKills(old, record))
                         .Select(old => old.Details.First(d => d.IsSelf).Dps).DefaultIfEmpty(0).Max();
                     if (self.Dps > previous)
                     {
