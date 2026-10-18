@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 
@@ -24,7 +24,7 @@ public sealed record ReleaseAsset(string Name, long Size, string Url, string? Sh
 /// </summary>
 public sealed class UpdateFeed : IDisposable
 {
-    public const string Repository = "Aetherionofficial/MostWanted-DPS";
+    public const string Repository = "Aetherionofficial/Aetherion-Aion2-DPS-Meter";
     public const string LatestReleaseApi = "https://api.github.com/repos/" + Repository + "/releases/latest";
     public const string ReleasesPage = "https://github.com/" + Repository + "/releases/latest";
 

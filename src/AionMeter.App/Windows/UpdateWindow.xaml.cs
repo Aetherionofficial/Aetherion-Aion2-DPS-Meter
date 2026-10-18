@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
 using System.Windows;
@@ -41,6 +41,7 @@ public partial class UpdateWindow : Window
     }
 
     public ReleaseInfo Release { get; }
+    public bool UpdateStarted { get; private set; }
 
     private static string FormatDate(DateTimeOffset at) =>
         at.LocalDateTime.ToString(UiText.Current.Code == "ru" ? "d MMMM yyyy" : "MMMM d, yyyy", UiText.Current.Culture);
@@ -67,6 +68,7 @@ public partial class UpdateWindow : Window
             {
                 State.Text = t.UpdateStarting;
                 _updater.InstallDownloaded();
+                UpdateStarted = true;
                 Application.Current.Shutdown();
             }
             catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or Win32Exception)
@@ -101,6 +103,7 @@ public partial class UpdateWindow : Window
                 Log.Info($"Updating portable copy to {Release.Tag} with {archive}");
                 Updater.LaunchPortableUpdate(archive);
             }
+            UpdateStarted = true;
             Application.Current.Shutdown();
         }
         catch (OperationCanceledException) when (_download.IsCancellationRequested)

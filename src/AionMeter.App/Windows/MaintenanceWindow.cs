@@ -14,6 +14,7 @@ public sealed class MaintenanceWindow : Window
     private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 14, 0, 0), Foreground = Brushes.LightGray };
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(15) };
     private bool _checking;
+    private bool _updateOpen;
     private readonly bool _duringSession;
 
     public MaintenanceWindow(AppMaintenanceService? service = null, bool duringSession = false)
@@ -35,7 +36,16 @@ public sealed class MaintenanceWindow : Window
         retry.Click += async (_, _) => await CheckAsync();
         var exit = new Button { Content = "App beenden", Style = (Style)Application.Current.FindResource("GhostButton"), Padding = new Thickness(16, 9, 16, 9), Margin = new Thickness(12, 0, 0, 0) };
         exit.Click += (_, _) => { DialogResult = false; };
-        buttons.Children.Add(retry); buttons.Children.Add(exit); panel.Children.Add(buttons); panel.Children.Add(_status);
+        var update = new Button { Content = "Nach Updates suchen", Style = (Style)Application.Current.FindResource("GhostButton"), Padding = new Thickness(12, 8, 12, 8), Margin = new Thickness(0, 12, 0, 0), HorizontalAlignment = HorizontalAlignment.Left };
+        update.Click += async (_, _) =>
+        {
+            update.IsEnabled = false;
+            _updateOpen = true;
+            _timer.Stop();
+            try { await StartupUpdatePrompt.ShowAsync(this, manual: true); }
+            finally { _updateOpen = false; if (IsVisible) { update.IsEnabled = true; _timer.Start(); } }
+        };
+        buttons.Children.Add(retry); buttons.Children.Add(exit); panel.Children.Add(buttons); panel.Children.Add(_status); panel.Children.Add(update);
         Content = panel;
         Render();
         _timer.Tick += async (_, _) => await CheckAsync();
@@ -55,12 +65,12 @@ public sealed class MaintenanceWindow : Window
 
     private async Task CheckAsync()
     {
-        if (_checking) return;
+        if (_checking || _updateOpen) return;
         _checking = true;
         try
         {
             var success = await _service.RefreshAsync();
-            if (!IsVisible) return;
+            if (!IsVisible || _updateOpen) return;
             if (success && _service.CanUseApp) { DialogResult = true; return; }
             Render();
             if (!success) _status.Text = "Statusprüfung fehlgeschlagen. Die Sperre bleibt bestehen; nächster Versuch in 15 Sekunden.";

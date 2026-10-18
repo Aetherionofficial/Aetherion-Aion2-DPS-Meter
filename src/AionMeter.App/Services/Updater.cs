@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
@@ -30,14 +30,16 @@ public sealed class Updater : IDisposable
 
     private readonly AppSettings _settings;
     private readonly UpdateFeed _feed;
+    private readonly bool _allowAutomaticDownloads;
     private DispatcherTimer? _timer;
     private Task<UpdateCheckResult>? _running;
 
-    public Updater(AppSettings settings)
+    public Updater(AppSettings settings, UpdateFeed? feed = null, bool allowAutomaticDownloads = true)
     {
         _settings = settings;
+        _allowAutomaticDownloads = allowAutomaticDownloads;
         Current = UpdateFeed.Normalize(typeof(Updater).Assembly.GetName().Version ?? new Version(0, 0, 0));
-        _feed = new UpdateFeed($"AION2DpsMeter/{Current.ToString(3)}");
+        _feed = feed ?? new UpdateFeed($"AION2DpsMeter/{Current.ToString(3)}");
     }
 
     /// <summary>This copy's version (major.minor.patch).</summary>
@@ -105,7 +107,7 @@ public sealed class Updater : IDisposable
             Latest = await _feed.GetLatestAsync();
             LastError = null;
             Log.Info($"Update check: newest release {Latest?.Tag ?? "none"}, this copy {Current.ToString(3)}.");
-            if (Available is { Installer: not null } update && AutoInstall) _ = PrepareAsync(update);
+            if (_allowAutomaticDownloads && Available is { Installer: not null } update && AutoInstall) _ = PrepareAsync(update);
             return Latest is { } r && r.Version > Current ? UpdateCheckResult.Available : UpdateCheckResult.UpToDate;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException)

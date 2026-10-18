@@ -135,6 +135,8 @@ public partial class App : Application
             return;
         }
 
+        if (!await StartupUpdatePrompt.ShowAsync()) return;
+        _announcedUpdate = StartupUpdatePrompt.LastPromptedVersion;
         await AppMaintenanceService.Shared.RefreshAsync();
         if (!AppMaintenanceService.Shared.CanUseApp && new MaintenanceWindow().ShowDialog() != true)
         {
