@@ -337,7 +337,7 @@ public partial class App : Application
         _discordPresence.Dispose();
         _meter.PauseForMaintenance();
         foreach (Window window in Windows.Cast<Window>().ToArray()) { window.IsEnabled = false; window.Hide(); }
-        _restartAfterMaintenance = new MaintenanceWindow().ShowDialog() == true;
+        _restartAfterMaintenance = new MaintenanceWindow(duringSession: true).ShowDialog() == true;
         Shutdown();
     }
 

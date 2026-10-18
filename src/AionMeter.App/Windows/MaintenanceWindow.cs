@@ -14,10 +14,14 @@ public sealed class MaintenanceWindow : Window
     private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 14, 0, 0), Foreground = Brushes.LightGray };
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(15) };
     private bool _checking;
+    private readonly bool _duringSession;
 
-    public MaintenanceWindow(AppMaintenanceService? service = null)
+    public MaintenanceWindow(AppMaintenanceService? service = null, bool duringSession = false)
     {
         _service = service ?? AppMaintenanceService.Shared;
+        _duringSession = duringSession;
+        Topmost = true;
+        ShowActivated = true;
         Title = "Aetherion · Wartungsarbeiten";
         Width = 530; SizeToContent = SizeToContent.Height; ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -44,7 +48,9 @@ public sealed class MaintenanceWindow : Window
         var maintenance = _service.Status is { Enabled: true };
         _heading.Text = maintenance ? "Wartungsarbeiten" : "Verbindung prüfen";
         _message.Text = maintenance ? _service.Status!.Message : "Der App-Status kann gerade nicht bestätigt werden. Bitte prüfe deine Internetverbindung.";
-        _status.Text = "Die App ist gesperrt. Automatische Prüfung alle 15 Sekunden.";
+        _status.Text = maintenance && _duringSession
+            ? "Die Wartungsarbeiten haben begonnen. Die App kann vorübergehend nicht genutzt werden. Sobald sie wieder freigegeben ist, startet sie automatisch neu. Prüfung alle 15 Sekunden."
+            : "Die App kann während der Sperre nicht genutzt werden. Automatische Prüfung alle 15 Sekunden.";
     }
 
     private async Task CheckAsync()

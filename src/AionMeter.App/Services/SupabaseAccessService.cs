@@ -229,15 +229,10 @@ public static class SupabaseAccessService
         if (response.IsSuccessStatusCode) return;
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
-        if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+        if (MaintenanceStatus.FromError(body) is { } maintenance)
         {
-            using var json = JsonDocument.Parse(body);
-            if (json.RootElement.TryGetProperty("maintenance", out var maintenance))
-            {
-                var state = MaintenanceStatus.Parse(maintenance.GetRawText());
-                AppMaintenanceService.Shared.Observe(state);
-                throw new AppMaintenanceException(state);
-            }
+            AppMaintenanceService.Shared.Observe(maintenance);
+            throw new AppMaintenanceException(maintenance);
         }
         if (response.StatusCode is HttpStatusCode.Forbidden)
             throw new AccountAccessBlockedException("ACCOUNT_INSTALLATION_BLOCKED");
@@ -282,6 +277,11 @@ public static class SupabaseAccessService
     {
         try
         {
+            if (MaintenanceStatus.FromError(body) is { } maintenance)
+            {
+                AppMaintenanceService.Shared.Observe(maintenance);
+                throw new AppMaintenanceException(maintenance);
+            }
             using var json = JsonDocument.Parse(body);
             return json.RootElement.TryGetProperty("msg", out var msg) ? msg.GetString() ?? body
                 : json.RootElement.TryGetProperty("message", out var message) ? message.GetString() ?? body

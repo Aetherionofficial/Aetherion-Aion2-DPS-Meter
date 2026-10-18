@@ -20,6 +20,16 @@ public sealed class MaintenanceTests
             => Task.FromResult(new HttpResponseMessage(Code) { Content = new StringContent(Body) });
     }
 
+    [Fact]
+    public void Maintenance_error_is_a_user_message_instead_of_raw_json()
+    {
+        var state = MaintenanceStatus.FromError("{\"error\":\"app_maintenance\",\"maintenance\":{\"enabled\":true,\"message\":\"Bitte später erneut versuchen.\",\"revision\":1}}");
+        Assert.NotNull(state);
+        Assert.Equal("Bitte später erneut versuchen.", state.Message);
+        Assert.Null(MaintenanceStatus.FromError("{\"error\":\"auth_required\"}"));
+        Assert.Null(MaintenanceStatus.FromError("{\"error\":\"app_maintenance\",\"maintenance\":{}}"));
+    }
+
     private sealed class Capture : AionMeter.Core.Capture.IEventSource
     {
         public bool Disposed;

@@ -49,7 +49,10 @@ const accessRequest = () => new Request('https://test', { method: 'POST', header
 state.enabled = true; calls = [];
 const blocked = await check(accessRequest());
 assert.equal(blocked.status, 503);
-assert.equal((await blocked.json()).error, 'app_maintenance');
+const maintenanceBody = await blocked.json();
+assert.equal(maintenanceBody.error, 'app_maintenance');
+assert.match(maintenanceBody.message, /Wartungsarbeiten/);
+assert.match(maintenanceBody.message, /nicht genutzt werden/);
 assert.equal(calls.length, 0, 'Maintenance must not bind or revoke devices');
 state.enabled = false; conflict = false;
 db.rpc = async name => { calls.push(name); return { data: true }; };

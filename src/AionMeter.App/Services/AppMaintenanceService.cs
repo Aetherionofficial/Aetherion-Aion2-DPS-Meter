@@ -5,6 +5,19 @@ namespace AionMeter.App.Services;
 
 public sealed record MaintenanceStatus(bool Enabled, string Message, long Revision)
 {
+    public static MaintenanceStatus? FromError(string body)
+    {
+        try
+        {
+            using var json = JsonDocument.Parse(body);
+            var root = json.RootElement;
+            if (!root.TryGetProperty("error", out var error) || error.GetString() != "app_maintenance") return null;
+            var state = Parse(root.GetProperty("maintenance").GetRawText());
+            return state.Enabled ? state : null;
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException or KeyNotFoundException or FormatException) { return null; }
+    }
+
     public static MaintenanceStatus Parse(string text)
     {
         using var doc = JsonDocument.Parse(text);

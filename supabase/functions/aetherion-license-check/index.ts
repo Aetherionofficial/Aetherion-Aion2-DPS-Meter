@@ -27,7 +27,7 @@ Deno.serve(async (request: Request) => {
     const { data: maintenance, error: maintenanceError } = await supabase.from("aetherion_app_maintenance")
       .select("enabled,message,revision,updated_at").eq("id", true).single();
     if (maintenanceError || !maintenance) throw maintenanceError ?? new Error("Maintenance state missing");
-    if (maintenance.enabled) return Response.json({ error: "app_maintenance", maintenance: {
+    if (maintenance.enabled) return Response.json({ error: "app_maintenance", message: `Wartungsarbeiten: ${maintenance.message} Die App kann währenddessen vorübergehend nicht genutzt werden.`, maintenance: {
       enabled: true, message: maintenance.message, revision: maintenance.revision, updatedAt: maintenance.updated_at,
     } }, { status: 503, headers: { ...corsHeaders, "Cache-Control": "no-store" } });
 

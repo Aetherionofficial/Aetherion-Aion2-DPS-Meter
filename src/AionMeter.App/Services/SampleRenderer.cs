@@ -41,9 +41,10 @@ public static class SampleRenderer
         switch (o.Window)
         {
             case "maintenance":
+            case "maintenance-live":
                 var maintenanceService = new AppMaintenanceService(new System.Net.Http.HttpClient());
                 maintenanceService.Observe(new MaintenanceStatus(true, "Wir führen gerade Wartungsarbeiten durch. Bitte versuche es später erneut.", 1));
-                host = new MaintenanceWindow(maintenanceService) { Width = 530, Height = 340 };
+                host = new MaintenanceWindow(maintenanceService, duringSession: o.Window == "maintenance-live") { Width = 530, Height = o.Window == "maintenance-live" ? 410 : 340 };
                 refresh = () => { };
                 break;
 #if AETHERION_OWNER_BUILD
