@@ -87,7 +87,7 @@ The first launch opens Discord sign-in if no Aetherion session is saved. The Edg
 
 ## Global app maintenance (v0.3.50)
 
-The owner dashboard has an **APP-WARTUNG** panel: edit the customer message (1–500 characters), activate maintenance, save an updated message, or use **App freigeben** to end maintenance. Activation requires an explicit confirmation. Loading the dashboard or editing text does not change the live state. The initial database state is **off**. Admin login and the owner dashboard remain accessible during maintenance, including fresh Discord login.
+The owner dashboard has an **APP-WARTUNG** panel: edit the customer message (1ï¿½500 characters), activate maintenance, save an updated message, or use **App freigeben** to end maintenance. Activation requires an explicit confirmation. Loading the dashboard or editing text does not change the live state. The initial database state is **off**. Admin login and the owner dashboard remain accessible during maintenance, including fresh Discord login.
 
 The separate singleton state and transactional audit history do not revoke keys, change expiry dates, or reset devices. Every change uses the dashboard's expected revision; conflicting writes require a refresh. The setter RPC is service-role only, and the admin function verifies the existing owner UUID allowlist before reads or writes. Maintenance changes appear in the dashboard's audit log.
 
@@ -107,3 +107,5 @@ Customer builds **v0.3.50 or later must be installed** for the maintenance windo
 A temporary outage preserves a recent explicit non-maintenance status for at most two minutes during operation. Unknown/expired status blocks use with a connection message. An already observed maintenance state remains blocked during failures and is released only by a successful newer/current explicit disabled status. License time is not automatically extended during maintenance.
 
 Tests: `dotnet test tests/AionMeter.App.Tests/AionMeter.App.Tests.csproj -p:UseAppHost=false`; `node supabase/tests/maintenance.test.mjs` (Node 24+).
+
+Since v0.3.51, the customer app checks for updates before login and before entering the maintenance window. A new non-skipped release opens the regular update dialog. A failed update check continues to the normal maintenance and license gates. The maintenance window also offers a manual update check; maintenance polling pauses while its update dialog is open, and updating does not change maintenance state. The private owner startup path remains independent. Older clients blocked before reaching their updater require one manual installer/ZIP update.
