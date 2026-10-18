@@ -58,6 +58,7 @@ public partial class App : Application
     private SettingsWindow? _settingsWindow;
     private BossTimersWindow? _timersWindow;
     private EventTimersWindow? _eventTimersWindow;
+    private BossAlertToastWindow? _bossAlertToast;
     private MapWindow? _mapWindow;
     private WakayashiWindow? _wakayashiWindow;
     private readonly Dictionary<object, BreakdownWindow> _breakdowns = new();
@@ -684,7 +685,7 @@ public partial class App : Application
         _wakayashiWindow.Show();
     }
 
-    /// <summary>Tray notification (and a chime) shortly before a tracked boss respawns.</summary>
+    /// <summary>Own toast and cue shortly before a tracked boss respawns; avoids the generic Windows balloon.</summary>
     private void CheckBossAlerts()
     {
         var t = UiText.Current;
@@ -696,8 +697,11 @@ public partial class App : Application
             var text = minutes > 0
                 ? string.Format(t.AlertSoon, name, minutes, next.ToString("HH:mm"))
                 : string.Format(t.AlertNow, name, next.ToString("HH:mm"));
-            _tray?.ShowBalloon(t.TimersTitle, text);
-            System.Media.SystemSounds.Asterisk.Play();
+            _bossAlertToast?.Close();
+            _bossAlertToast = new BossAlertToastWindow(name, text, ShowBossTimers);
+            _bossAlertToast.Closed += (_, _) => _bossAlertToast = null;
+            _bossAlertToast.Show();
+            AlertChime.Play();
         }
     }
 
