@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Collections.Concurrent;
 using AionMeter.Core;
 using AionMeter.Core.Capture;
@@ -107,6 +107,7 @@ public sealed class MeterService : IDisposable
     /// </summary>
     public void Replay(string path)
     {
+        if (_maintenancePaused) return;
         _replay?.Dispose();
         Tracker.Reset();
         _replaying = true;
@@ -116,7 +117,7 @@ public sealed class MeterService : IDisposable
         replay.EventDecoded += Tracker.Process;
         replay.StatusChanged += s =>
         {
-            if (s.State != CaptureState.Stopped) return;
+            if (_maintenancePaused || s.State != CaptureState.Stopped) return;
             Tracker.Tick(Tracker.LastEventMs + 3_600_000); // close the recording's last fight
             _savedNamesVersion = Tracker.CacheVersion; // names from a recording must not overwrite the live cache
             _replaying = false;
@@ -127,6 +128,7 @@ public sealed class MeterService : IDisposable
     }
 
     private volatile bool _replaying;
+    private volatile bool _maintenancePaused;
 
     private readonly object _captureGate = new();
     private volatile bool _restarting;
@@ -135,7 +137,7 @@ public sealed class MeterService : IDisposable
     {
         lock (_captureGate)
         {
-            if (CaptureFactory is null || _capture is not null) return;
+            if (_maintenancePaused || CaptureFactory is null || _capture is not null) return;
             try
             {
                 _capture = CaptureFactory(Data);
@@ -176,6 +178,7 @@ public sealed class MeterService : IDisposable
     /// </summary>
     public void Restart()
     {
+        if (_maintenancePaused) return;
         _demo?.Dispose();
         Tracker.Reset();
         if (_replaying) return;
@@ -185,6 +188,7 @@ public sealed class MeterService : IDisposable
 
     public void StartDemo(int seconds = 45)
     {
+        if (_maintenancePaused) return;
         _demo?.Dispose();
         _demo = new DemoFightSource(Tracker.Process);
         _demo.Start(TimeSpan.FromSeconds(seconds));
@@ -335,6 +339,18 @@ public sealed class MeterService : IDisposable
                 Log.Error("Saving fight failed", ex);
             }
         }
+    }
+
+    public void PauseForMaintenance()
+    {
+        _maintenancePaused = true;
+        var live = !_replaying && !DemoRunning;
+        lock (_captureGate) { _capture?.Dispose(); _capture = null; }
+        _replay?.Dispose(); _replay = null;
+        _demo?.Dispose(); _demo = null;
+        _exiting = true;
+        if (live) Tracker.Reset();
+        else _replaying = true; // disposed demo/replay fights must never be saved as real combat
     }
 
     public void Dispose()

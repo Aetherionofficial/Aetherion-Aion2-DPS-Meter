@@ -1,8 +1,8 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $projectRef = 'aafdjzdirqpanuueveng'
-$migration = Join-Path $repoRoot 'supabase/migrations/202610170004_license_365_days.sql'
+$migration = Join-Path $repoRoot 'supabase/migrations/202610180001_app_maintenance.sql'
 $function = Join-Path $repoRoot 'supabase/functions/aetherion-license-admin/index.ts'
 
 if (-not (Test-Path -LiteralPath $migration)) {
@@ -14,7 +14,7 @@ if (-not (Test-Path -LiteralPath $function)) {
 
 Set-Location $repoRoot
 
-Write-Host 'Spiele die Jahreslizenz-Migration auf dem verknüpften Supabase-Projekt ein ...'
+Write-Host 'Spiele die Wartungs-Migration auf dem verknüpften Supabase-Projekt ein ...'
 & npx.cmd --yes supabase db push --linked --yes
 if ($LASTEXITCODE -ne 0) {
     throw "Supabase-Migration fehlgeschlagen (Exitcode $LASTEXITCODE). Prüfe Login und Migrationstatus."
@@ -26,4 +26,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "Edge-Function-Deployment fehlgeschlagen (Exitcode $LASTEXITCODE)."
 }
 
-Write-Host 'Owner-Dashboard-Backend ist aktualisiert.' -ForegroundColor Green
+foreach ($functionName in @('aetherion-license-check', 'aetherion-app-status')) {
+    & npx.cmd --yes supabase functions deploy $functionName --project-ref $projectRef
+    if ($LASTEXITCODE -ne 0) { throw "Deployment fehlgeschlagen: $functionName" }
+}
+Write-Host 'Owner-Dashboard und Wartungs-Backend sind aktualisiert. Der Wartungsstatus wird nicht geändert.' -ForegroundColor Green

@@ -83,3 +83,27 @@ dotnet run --project src/AionMeter.App/AionMeter.App.csproj -p:AetherionOwnerBui
 ```
 
 The first launch opens Discord sign-in if no Aetherion session is saved. The Edge Function checks the signed-in Supabase user against the server-side allowlist on every request. The service-role key remains in Supabase and is never placed in the desktop app. Regular customer builds compile out the dashboard and the existing local key issuer.
+
+
+## Global app maintenance (v0.3.50)
+
+The owner dashboard has an **APP-WARTUNG** panel: edit the customer message (1–500 characters), activate maintenance, save an updated message, or use **App freigeben** to end maintenance. Activation requires an explicit confirmation. Loading the dashboard or editing text does not change the live state. The initial database state is **off**. Admin login and the owner dashboard remain accessible during maintenance, including fresh Discord login.
+
+The separate singleton state and transactional audit history do not revoke keys, change expiry dates, or reset devices. Every change uses the dashboard's expected revision; conflicting writes require a refresh. The setter RPC is service-role only, and the admin function verifies the existing owner UUID allowlist before reads or writes. Maintenance changes appear in the dashboard's audit log.
+
+Deploy migration `202610180001_app_maintenance.sql`, then all three functions:
+
+```powershell
+npx.cmd supabase db push --linked
+npx.cmd supabase functions deploy aetherion-app-status --project-ref aafdjzdirqpanuueveng --no-verify-jwt
+npx.cmd supabase functions deploy aetherion-license-admin --project-ref aafdjzdirqpanuueveng
+npx.cmd supabase functions deploy aetherion-license-check --project-ref aafdjzdirqpanuueveng
+```
+
+`aetherion-app-status` is a deliberately public, read-only status/message endpoint with no-cache responses. Database tables are not exposed to anonymous/authenticated clients. The authenticated installation check returns a distinct maintenance response before modifying device bindings.
+
+Customer builds **v0.3.50 or later must be installed** for the maintenance window and usage gate. Older binaries cannot acquire these behaviors through backend deployment alone. New clients check before startup and every 15 seconds in use. On maintenance, capture/demo/replay, hotkeys, tray actions and meter updates stop, and existing app windows are hidden/disabled. The maintenance window retries every 15 seconds. Explicit server release restarts the app and checks the license normally. Closing the window exits the app.
+
+A temporary outage preserves a recent explicit non-maintenance status for at most two minutes during operation. Unknown/expired status blocks use with a connection message. An already observed maintenance state remains blocked during failures and is released only by a successful newer/current explicit disabled status. License time is not automatically extended during maintenance.
+
+Tests: `dotnet test tests/AionMeter.App.Tests/AionMeter.App.Tests.csproj -p:UseAppHost=false`; `node supabase/tests/maintenance.test.mjs` (Node 24+).

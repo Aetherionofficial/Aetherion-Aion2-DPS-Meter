@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -96,6 +96,12 @@ public sealed class ActivationWindow : Window
             SetAccountStatus(status);
             if (status.HasActiveLicense) DialogResult = true;
         }
+        catch (AppMaintenanceException)
+        {
+            var maintenance = new MaintenanceWindow { Owner = this };
+            if (maintenance.ShowDialog() != true) DialogResult = false;
+            else _accountStatus.Text = "Wartung beendet. Bitte erneut anmelden bzw. den Zugang prüfen.";
+        }
         catch (Exception ex)
         {
             _accountStatus.Text = ex is AccountAccessBlockedException
@@ -124,6 +130,12 @@ public sealed class ActivationWindow : Window
             _licenseKey.Clear();
             SetAccountStatus(status);
             if (status.HasActiveLicense) DialogResult = true;
+        }
+        catch (AppMaintenanceException)
+        {
+            var maintenance = new MaintenanceWindow { Owner = this };
+            if (maintenance.ShowDialog() != true) DialogResult = false;
+            else _accountStatus.Text = "Wartung beendet. Bitte erneut anmelden bzw. den Zugang prüfen.";
         }
         catch (Exception ex)
         {

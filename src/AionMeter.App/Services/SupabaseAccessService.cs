@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -35,6 +35,18 @@ public static class SupabaseAccessService
 
     public static async Task<AccountLicenseStatus> SignInWithDiscordAsync(CancellationToken cancellationToken = default)
     {
+        await SignInSessionAsync(cancellationToken);
+        return await GetLicenseStatusAsync(_accessToken!, cancellationToken);
+    }
+
+    public static async Task<string> SignInForOwnerToolsAsync()
+    {
+        await SignInSessionAsync(default);
+        return _accessToken!;
+    }
+
+    private static async Task SignInSessionAsync(CancellationToken cancellationToken)
+    {
         var verifier = Base64Url(RandomNumberGenerator.GetBytes(32));
         var challenge = Base64Url(SHA256.HashData(Encoding.ASCII.GetBytes(verifier)));
         using var listener = new HttpListener();
@@ -62,7 +74,7 @@ public static class SupabaseAccessService
         var session = await ExchangeCodeAsync(code, verifier, cancellationToken);
         PersistRefreshToken(session.RefreshToken);
         _accessToken = session.AccessToken;
-        return await GetLicenseStatusAsync(session.AccessToken, cancellationToken);
+
     }
 
     public static async Task<AccountLicenseStatus?> CheckSavedSessionAsync(CancellationToken cancellationToken = default)
@@ -217,6 +229,16 @@ public static class SupabaseAccessService
         if (response.IsSuccessStatusCode) return;
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+        {
+            using var json = JsonDocument.Parse(body);
+            if (json.RootElement.TryGetProperty("maintenance", out var maintenance))
+            {
+                var state = MaintenanceStatus.Parse(maintenance.GetRawText());
+                AppMaintenanceService.Shared.Observe(state);
+                throw new AppMaintenanceException(state);
+            }
+        }
         if (response.StatusCode is HttpStatusCode.Forbidden)
             throw new AccountAccessBlockedException("ACCOUNT_INSTALLATION_BLOCKED");
         throw new InvalidOperationException(ReadError(body));

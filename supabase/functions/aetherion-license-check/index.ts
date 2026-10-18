@@ -24,6 +24,13 @@ Deno.serve(async (request: Request) => {
     const { data: auth, error: authError } = await supabase.auth.getUser(token);
     if (authError || !auth.user) return Response.json({ error: "auth_required" }, { status: 401, headers: corsHeaders });
 
+    const { data: maintenance, error: maintenanceError } = await supabase.from("aetherion_app_maintenance")
+      .select("enabled,message,revision,updated_at").eq("id", true).single();
+    if (maintenanceError || !maintenance) throw maintenanceError ?? new Error("Maintenance state missing");
+    if (maintenance.enabled) return Response.json({ error: "app_maintenance", maintenance: {
+      enabled: true, message: maintenance.message, revision: maintenance.revision, updatedAt: maintenance.updated_at,
+    } }, { status: 503, headers: { ...corsHeaders, "Cache-Control": "no-store" } });
+
     const { data, error } = await supabase.rpc("check_aetherion_account_installation", {
       p_user_id: auth.user.id,
       p_installation_id: installationId,

@@ -25,8 +25,8 @@ public sealed class WindowSmokeTests
         {
             try
             {
-                var app = new global::AionMeter.App.App();
-                app.InitializeComponent();
+                var app = new SmokeApp();
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/AION2DpsMeter;component/Theme/Theme.xaml") });
                 app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                 var settings = new AppSettings { Transient = true, SaveHistory = false, DownloadIcons = false,
                     OverlayHeight = 500, AutoOverlayHeight = true };
@@ -57,6 +57,8 @@ public sealed class WindowSmokeTests
                     using var output = new TemporaryOutput();
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "customer-tools", Backdrop: "dark", Scale: 1));
                     Assert.True(new FileInfo(output.Path).Length > 1_000);
+                    SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "maintenance", Scale: 1));
+                    Assert.True(new FileInfo(output.Path).Length > 1_000);
                 }
                 finally { overlay.Close(); app.Shutdown(); }
             }
@@ -65,6 +67,12 @@ public sealed class WindowSmokeTests
         thread.SetApartmentState(ApartmentState.STA); thread.Start();
         Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "WPF test did not finish.");
         Assert.Null(failure);
+    }
+
+    // Pumping the dispatcher must not start real login, maintenance HTTP polling or the single-instance path.
+    private sealed class SmokeApp : global::AionMeter.App.App
+    {
+        protected override void OnStartup(StartupEventArgs e) { }
     }
 
     private sealed class TemporaryOutput : IDisposable

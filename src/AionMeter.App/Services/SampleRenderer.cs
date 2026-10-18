@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -40,6 +40,20 @@ public static class SampleRenderer
         Action refresh;
         switch (o.Window)
         {
+            case "maintenance":
+                var maintenanceService = new AppMaintenanceService(new System.Net.Http.HttpClient());
+                maintenanceService.Observe(new MaintenanceStatus(true, "Wir führen gerade Wartungsarbeiten durch. Bitte versuche es später erneut.", 1));
+                host = new MaintenanceWindow(maintenanceService) { Width = 530, Height = 340 };
+                refresh = () => { };
+                break;
+#if AETHERION_OWNER_BUILD
+            case "owner-maintenance":
+                var dashboard = new SupabaseLicenseDashboardWindow("preview") { Width = 1280, Height = 920 };
+                dashboard.ShowMaintenancePreview();
+                host = dashboard;
+                refresh = () => { };
+                break;
+#endif
             case "customer-tools":
                 var tools = new CustomerToolsWindow(meter) { Width = o.Width ?? 900, Height = o.Height ?? 760 };
                 tools.ShowPageForPreview(o.Tab);

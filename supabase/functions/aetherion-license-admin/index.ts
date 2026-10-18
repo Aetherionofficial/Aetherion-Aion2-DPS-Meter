@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Cache-Control": "no-store",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
@@ -33,6 +34,13 @@ Deno.serve(async (request: Request) => {
     if (adminIds.size === 0) return json({ error: "license_admin_not_configured" }, 503);
     if (!adminIds.has(auth.user.id)) return json({ error: "owner_access_required" }, 403);
 
+    if (request.method === "GET" && new URL(request.url).searchParams.get("view") === "maintenance") {
+      const { data, error } = await supabase.from("aetherion_app_maintenance")
+        .select("enabled,message,revision,updated_at").eq("id", true).single();
+      if (error || !data) throw error ?? new Error("Maintenance state missing");
+      return json({ enabled: data.enabled, message: data.message, revision: data.revision, updatedAt: data.updated_at });
+    }
+
     if (request.method === "GET" && new URL(request.url).searchParams.get("view") === "history") {
       const { data: events, error } = await supabase.from("aetherion_license_admin_events")
         .select("created_at,action,key_hash,account_user_id,details,actor_user_id")
@@ -40,7 +48,15 @@ Deno.serve(async (request: Request) => {
       if (error) throw error;
       const users = await listUsers(supabase);
       const byId = new Map(users.map((user) => [user.id, user]));
-      return json({ events: (events ?? []).map((event) => {
+      const { data: maintenanceEvents, error: maintenanceHistoryError } = await supabase.from("aetherion_maintenance_events")
+        .select("created_at,actor_user_id,enabled,message,revision").order("created_at", { ascending: false }).limit(250);
+      if (maintenanceHistoryError) throw maintenanceHistoryError;
+      const maintenanceHistory = (maintenanceEvents ?? []).map((event) => ({
+        createdAt: event.created_at, action: event.enabled ? "Wartung aktiviert / aktualisiert" : "Wartung beendet",
+        fingerprint: "APP", accountName: null,
+        details: `${event.message} · Revision ${event.revision} · durch ${byId.get(event.actor_user_id)?.user_metadata?.name ?? "Owner"}`,
+      }));
+      return json({ events: [...maintenanceHistory, ...(events ?? []).map((event) => {
         const metadata = (event.account_user_id ? byId.get(event.account_user_id)?.user_metadata : null) ?? {};
         const actorMetadata = byId.get(event.actor_user_id)?.user_metadata ?? {};
         const accountName = metadata.global_name ?? metadata.full_name ?? metadata.name ?? metadata.preferred_username ??
@@ -57,7 +73,7 @@ Deno.serve(async (request: Request) => {
           accountName,
           details: [event.details, `durch ${actorName}`].filter(Boolean).join(" Â· "),
         };
-      }) });
+      })].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 250) });
     }
 
     if (request.method === "GET") {
@@ -113,6 +129,20 @@ Deno.serve(async (request: Request) => {
     }
 
     const body = await request.json().catch(() => null);
+    if (body?.action === "set_maintenance") {
+      if (typeof body.enabled !== "boolean" || typeof body.message !== "string" ||
+          !body.message.trim() || body.message.trim().length > 500 ||
+          !Number.isSafeInteger(body.expectedRevision) || body.expectedRevision < 0)
+        return json({ error: "invalid_maintenance_request" }, 400);
+      const { data, error } = await supabase.rpc("admin_set_aetherion_maintenance", {
+        p_enabled: body.enabled, p_message: body.message.trim(),
+        p_expected_revision: body.expectedRevision, p_actor_user_id: auth.user.id,
+      });
+      if (error?.message?.includes("MAINTENANCE_CONFLICT")) return json({ error: "maintenance_conflict" }, 409);
+      if (error) throw error;
+      return json(data);
+    }
+
     if (!body || typeof body.action !== "string") return json({ error: "invalid_request" }, 400);
 
     if (body.action === "create") {

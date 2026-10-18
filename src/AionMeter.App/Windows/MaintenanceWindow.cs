@@ -1,0 +1,64 @@
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Threading;
+using AionMeter.App.Services;
+
+namespace AionMeter.App.Windows;
+
+public sealed class MaintenanceWindow : Window
+{
+    private readonly AppMaintenanceService _service;
+    private readonly TextBlock _heading = new() { FontSize = 28, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 20, 0, 16) };
+    private readonly TextBlock _message = new() { TextWrapping = TextWrapping.Wrap, FontSize = 15, Margin = new Thickness(0, 0, 0, 22) };
+    private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 14, 0, 0), Foreground = Brushes.LightGray };
+    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(15) };
+    private bool _checking;
+
+    public MaintenanceWindow(AppMaintenanceService? service = null)
+    {
+        _service = service ?? AppMaintenanceService.Shared;
+        Title = "Aetherion · Wartungsarbeiten";
+        Width = 530; SizeToContent = SizeToContent.Height; ResizeMode = ResizeMode.NoResize;
+        WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        Background = new SolidColorBrush(Color.FromRgb(12, 15, 20)); Foreground = Brushes.White;
+        FontFamily = new FontFamily("Segoe UI");
+        var panel = new StackPanel { Margin = new Thickness(32) };
+        panel.Children.Add(new TextBlock { Text = "AETHERION", Foreground = Brushes.DarkOrange, FontWeight = FontWeights.Bold });
+        panel.Children.Add(_heading); panel.Children.Add(_message);
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal };
+        var retry = new Button { Content = "Erneut prüfen", Style = (Style)Application.Current.FindResource("PrimaryButton"), Padding = new Thickness(16, 9, 16, 9) };
+        retry.Click += async (_, _) => await CheckAsync();
+        var exit = new Button { Content = "App beenden", Style = (Style)Application.Current.FindResource("GhostButton"), Padding = new Thickness(16, 9, 16, 9), Margin = new Thickness(12, 0, 0, 0) };
+        exit.Click += (_, _) => { DialogResult = false; };
+        buttons.Children.Add(retry); buttons.Children.Add(exit); panel.Children.Add(buttons); panel.Children.Add(_status);
+        Content = panel;
+        Render();
+        _timer.Tick += async (_, _) => await CheckAsync();
+        Loaded += (_, _) => _timer.Start();
+        Closed += (_, _) => _timer.Stop();
+    }
+
+    private void Render()
+    {
+        var maintenance = _service.Status is { Enabled: true };
+        _heading.Text = maintenance ? "Wartungsarbeiten" : "Verbindung prüfen";
+        _message.Text = maintenance ? _service.Status!.Message : "Der App-Status kann gerade nicht bestätigt werden. Bitte prüfe deine Internetverbindung.";
+        _status.Text = "Die App ist gesperrt. Automatische Prüfung alle 15 Sekunden.";
+    }
+
+    private async Task CheckAsync()
+    {
+        if (_checking) return;
+        _checking = true;
+        try
+        {
+            var success = await _service.RefreshAsync();
+            if (!IsVisible) return;
+            if (success && _service.CanUseApp) { DialogResult = true; return; }
+            Render();
+            if (!success) _status.Text = "Statusprüfung fehlgeschlagen. Die Sperre bleibt bestehen; nächster Versuch in 15 Sekunden.";
+        }
+        finally { _checking = false; }
+    }
+}

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Interop;
@@ -48,6 +48,10 @@ public partial class App : Application
     private DispatcherTimer? _timer;
     private DispatcherTimer? _licenseTimer;
     private bool _licenseCheckInProgress;
+    private DispatcherTimer? _maintenanceTimer;
+    private bool _maintenanceChecking;
+    private bool _maintenanceBlocked;
+    private bool _restartAfterMaintenance;
     private RaidCommandWindow? _raidCommand;
     private HistoryWindow? _history;
     private SettingsWindow? _settingsWindow;
@@ -71,7 +75,7 @@ public partial class App : Application
                 var accessToken = await SupabaseAccessService.TryGetAccessTokenForOwnerToolsAsync();
                 if (accessToken is null)
                 {
-                    await SupabaseAccessService.SignInWithDiscordAsync();
+                    await SupabaseAccessService.SignInForOwnerToolsAsync();
                     accessToken = await SupabaseAccessService.TryGetAccessTokenForOwnerToolsAsync();
                 }
                 if (accessToken is null) throw new InvalidOperationException("Die Discord-Anmeldung hat keine Sitzung erstellt.");
@@ -131,6 +135,13 @@ public partial class App : Application
             return;
         }
 
+        await AppMaintenanceService.Shared.RefreshAsync();
+        if (!AppMaintenanceService.Shared.CanUseApp && new MaintenanceWindow().ShowDialog() != true)
+        {
+            Shutdown();
+            return;
+        }
+
         Log.Info("Checking license and revocation status.");
         try
         {
@@ -147,6 +158,12 @@ public partial class App : Application
         {
             savedAccess = await SupabaseAccessService.CheckSavedSessionAsync();
         }
+        catch (AppMaintenanceException)
+        {
+            if (new MaintenanceWindow().ShowDialog() == true) _restartAfterMaintenance = true;
+            Shutdown();
+            return;
+        }
         catch (Exception ex)
         {
             Log.Error("Could not check saved Discord access", ex);
@@ -161,6 +178,14 @@ public partial class App : Application
                 Shutdown();
                 return;
             }
+        }
+        // Sign-in can take several minutes; confirm availability again before starting capture.
+        await AppMaintenanceService.Shared.RefreshAsync();
+        if (!AppMaintenanceService.Shared.CanUseApp)
+        {
+            _restartAfterMaintenance = new MaintenanceWindow().ShowDialog() == true;
+            Shutdown();
+            return;
         }
         Log.Info("Discord account has an active license.");
 
@@ -229,6 +254,7 @@ public partial class App : Application
         _showWait = ThreadPool.RegisterWaitForSingleObject(_showRequest,
             (_, _) => Dispatcher.BeginInvoke(() =>
             {
+                if (_maintenanceBlocked) return;
                 SetOverlayVisible(true);
                 ShowSettings();
             }), null, Timeout.Infinite, executeOnlyOnce: false);
@@ -248,6 +274,9 @@ public partial class App : Application
         _licenseTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMinutes(1) };
         _licenseTimer.Tick += async (_, _) => await RecheckLicenseAsync();
         _licenseTimer.Start();
+        _maintenanceTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+        _maintenanceTimer.Tick += async (_, _) => await RecheckMaintenanceAsync();
+        _maintenanceTimer.Start();
 
         // Developer switches: --demo, --replay <file.pcap> (instant), --open-last (breakdown of the newest fight).
         if (e.Args.Contains("--demo")) _meter.StartDemo();
@@ -282,9 +311,39 @@ public partial class App : Application
         }
     }
 
+    private async Task RecheckMaintenanceAsync()
+    {
+        if (_maintenanceChecking || _maintenanceBlocked) return;
+        _maintenanceChecking = true;
+        try
+        {
+            await AppMaintenanceService.Shared.RefreshAsync();
+            if (!AppMaintenanceService.Shared.CanUseApp) BlockForMaintenance();
+        }
+        finally { _maintenanceChecking = false; }
+    }
+
+    private void BlockForMaintenance()
+    {
+        if (_maintenanceBlocked) return;
+        _maintenanceBlocked = true;
+        _timer?.Stop();
+        _licenseTimer?.Stop();
+        _maintenanceTimer?.Stop();
+        _showWait?.Unregister(null);
+        _showWait = null;
+        _hotkeys?.Dispose(); _hotkeys = null;
+        _tray?.Dispose(); _tray = null;
+        _discordPresence.Dispose();
+        _meter.PauseForMaintenance();
+        foreach (Window window in Windows.Cast<Window>().ToArray()) { window.IsEnabled = false; window.Hide(); }
+        _restartAfterMaintenance = new MaintenanceWindow().ShowDialog() == true;
+        Shutdown();
+    }
+
     private async Task RecheckLicenseAsync()
     {
-        if (_licenseCheckInProgress || _meter is null) return;
+        if (_licenseCheckInProgress || _maintenanceBlocked || _meter is null) return;
         _licenseCheckInProgress = true;
         try
         {
@@ -296,7 +355,7 @@ public partial class App : Application
                 Log.Info("Saved Discord session is temporarily unavailable; keeping the app open and retrying.");
                 return;
             }
-            if (status?.HasActiveLicense == true) return;
+            if (_maintenanceBlocked || status?.HasActiveLicense == true) return;
             _licenseTimer?.Stop();
             MessageBox.Show("Dein Aetherion-Zugang ist abgelaufen oder wurde gesperrt. Bitte prüfe deinen Key oder eröffne ein Ticket im Discord.",
                 "Aetherion-Zugang beendet", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -304,6 +363,8 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
+            if (ex is AppMaintenanceException) { BlockForMaintenance(); return; }
+            if (_maintenanceBlocked) return;
             if (ex is AccountAccessBlockedException)
             {
                 _licenseTimer?.Stop();
@@ -448,6 +509,7 @@ public partial class App : Application
 
     public void SetOverlayVisible(bool visible)
     {
+        if (_maintenanceBlocked) return;
         _autoShown = false; // the user decided: automatic hiding no longer applies
         if (visible)
         {
@@ -628,6 +690,7 @@ public partial class App : Application
 
     public void ShowSettings()
     {
+        if (_maintenanceBlocked) return;
         if (_settingsWindow is { IsLoaded: true } existing)
         {
             if (!existing.IsVisible) existing.Show();
@@ -739,6 +802,7 @@ public partial class App : Application
     /// <summary>The update window for <paramref name="release"/>, by default the available update.</summary>
     public void ShowUpdate(Core.Updates.ReleaseInfo? release = null)
     {
+        if (_maintenanceBlocked) return;
         release ??= _meter.Updates.Available;
         if (release is null) return;
         if (_updateWindow is { IsLoaded: true } open && open.Release.Version == release.Version)
@@ -836,6 +900,15 @@ public partial class App : Application
             _meter.Dispose();
         }
         _singleInstance?.Dispose();
+        _maintenanceTimer?.Stop();
+        if (_restartAfterMaintenance && Environment.ProcessPath is { } executable)
+        {
+            var start = new System.Diagnostics.ProcessStartInfo(executable) { UseShellExecute = true };
+            if (Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                start.ArgumentList.Add(Path.Combine(AppContext.BaseDirectory, typeof(App).Assembly.GetName().Name + ".dll"));
+            try { System.Diagnostics.Process.Start(start); }
+            catch (Exception ex) { Log.Error("Restart after maintenance failed", ex); }
+        }
         base.OnExit(e);
     }
 }

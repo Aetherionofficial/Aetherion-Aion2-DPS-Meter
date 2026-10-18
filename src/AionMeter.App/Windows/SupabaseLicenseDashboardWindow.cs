@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -39,14 +39,21 @@ internal sealed class SupabaseLicenseDashboardWindow : Window
     private readonly Button _revokeButton = new();
     private readonly Button _resetDeviceButton = new();
 
+    private MaintenanceStatus? _maintenance;
+    private bool _savingMaintenance;
+    private readonly TextBlock _maintenanceState = new() { Text = "Status wird geladen …", FontWeight = FontWeights.Bold };
+    private readonly TextBox _maintenanceMessage = new() { MaxLength = 500, MinWidth = 250 };
+    private readonly Button _enableMaintenance = new();
+    private readonly Button _disableMaintenance = new();
+
     public SupabaseLicenseDashboardWindow(string accessToken)
     {
         _service = new SupabaseLicenseAdminService(accessToken);
         Title = "Aetherion · Lizenz-Dashboard";
         Width = 1280;
-        Height = 820;
+        Height = 920;
         MinWidth = 1050;
-        MinHeight = 680;
+        MinHeight = 780;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Brush(Bg);
         Foreground = Brush(Text);
@@ -88,10 +95,39 @@ internal sealed class SupabaseLicenseDashboardWindow : Window
         Grid.SetRow(stats, 1);
         root.Children.Add(stats);
 
+        root.RowDefinitions.Insert(2, new RowDefinition { Height = GridLength.Auto });
+        var maintenanceCard = Card();
+        maintenanceCard.Margin = new Thickness(0, 0, 0, 16);
+        var maintenancePanel = new Grid();
+        maintenancePanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
+        maintenancePanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        maintenancePanel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var maintenanceTitle = new StackPanel();
+        maintenanceTitle.Children.Add(new TextBlock { Text = "APP-WARTUNG", Foreground = Brush(Ember), FontWeight = FontWeights.Bold });
+        maintenanceTitle.Children.Add(_maintenanceState);
+        maintenancePanel.Children.Add(maintenanceTitle);
+        var messagePanel = new StackPanel { Margin = new Thickness(12, 0, 12, 0) };
+        messagePanel.Children.Add(new TextBlock { Text = "Hinweis für Kunden · maximal 500 Zeichen", Foreground = Brush(Muted), Margin = new Thickness(0, 0, 0, 5) });
+        StyleInput(_maintenanceMessage);
+        messagePanel.Children.Add(_maintenanceMessage);
+        Grid.SetColumn(messagePanel, 1); maintenancePanel.Children.Add(messagePanel);
+        var maintenanceButtons = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        _enableMaintenance.Content = "Wartung aktivieren / Text speichern";
+        _disableMaintenance.Content = "App freigeben";
+        StyleButton(_enableMaintenance, true); StyleButton(_disableMaintenance, false);
+        _disableMaintenance.Margin = new Thickness(8, 0, 0, 0);
+        _enableMaintenance.IsEnabled = _disableMaintenance.IsEnabled = false;
+        _enableMaintenance.Click += async (_, _) => await SaveMaintenanceAsync(true);
+        _disableMaintenance.Click += async (_, _) => await SaveMaintenanceAsync(false);
+        maintenanceButtons.Children.Add(_enableMaintenance); maintenanceButtons.Children.Add(_disableMaintenance);
+        Grid.SetColumn(maintenanceButtons, 2); maintenancePanel.Children.Add(maintenanceButtons);
+        maintenanceCard.Child = maintenancePanel;
+        Grid.SetRow(maintenanceCard, 2); root.Children.Add(maintenanceCard);
+
         var body = new Grid();
         body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(318) });
         body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        Grid.SetRow(body, 2);
+        Grid.SetRow(body, 3);
         root.Children.Add(body);
 
         var issueCard = Card();
@@ -150,7 +186,7 @@ internal sealed class SupabaseLicenseDashboardWindow : Window
             _message.Foreground = Brush(Muted);
         };
         issuePanel.Children.Add(clearIssued);
-        issueCard.Child = issuePanel;
+        issueCard.Child = new ScrollViewer { Content = issuePanel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         body.Children.Add(issueCard);
 
         var listCard = Card();
@@ -232,7 +268,7 @@ internal sealed class SupabaseLicenseDashboardWindow : Window
         Grid.SetRow(footer, 3);
 
         var globalMessage = new TextBlock { Text = "Nur für Aetherion-Administratoren · Änderungen werden sofort auf die Lizenzdatenbank angewendet.", Foreground = Brush(Muted), FontSize = 11, Margin = new Thickness(0, 12, 0, 0) };
-        Grid.SetRow(globalMessage, 3);
+        Grid.SetRow(globalMessage, 4);
         root.Children.Add(globalMessage);
     }
 
@@ -311,6 +347,7 @@ internal sealed class SupabaseLicenseDashboardWindow : Window
         try
         {
             _message.Text = "Lizenzdaten werden geladen …";
+            if (!_savingMaintenance) ShowMaintenanceState(await _service.GetMaintenanceAsync());
             var (keys, truncated) = await _service.ListAsync();
             _items.Clear();
             foreach (var key in keys) _items.Add(key);
@@ -324,6 +361,48 @@ internal sealed class SupabaseLicenseDashboardWindow : Window
             _message.Text = ex.Message;
             _message.Foreground = Brush(Color.FromRgb(255, 133, 123));
         }
+    }
+
+    internal void ShowMaintenancePreview() => ShowMaintenanceState(new MaintenanceStatus(false,
+        "Wir führen gerade Wartungsarbeiten durch. Bitte versuche es später erneut.", 0));
+
+    private void ShowMaintenanceState(MaintenanceStatus state)
+    {
+        _maintenance = state;
+        _maintenanceState.Text = state.Enabled ? "AKTIV · App gesperrt" : "AUS · App freigegeben";
+        _maintenanceState.Foreground = Brush(state.Enabled ? Ember : Green);
+        _maintenanceMessage.Text = state.Message;
+        _enableMaintenance.Content = state.Enabled ? "Wartungstext speichern" : "Wartung aktivieren";
+        _enableMaintenance.IsEnabled = true;
+        _disableMaintenance.IsEnabled = state.Enabled;
+    }
+
+    private async Task SaveMaintenanceAsync(bool enabled)
+    {
+        if (_maintenance is null || _savingMaintenance) return;
+        var message = _maintenanceMessage.Text.Trim();
+        if (message.Length == 0) { _message.Text = "Bitte einen Wartungstext eingeben."; return; }
+        if (enabled && !_maintenance.Enabled && MessageBox.Show(this,
+            "Die Hauptapp wird für alle Nutzer gesperrt. Laufende Apps erkennen die Wartung innerhalb von etwa 15 Sekunden. Wartung jetzt aktivieren?",
+            "Wartungsarbeiten aktivieren", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        _savingMaintenance = true;
+        _enableMaintenance.IsEnabled = _disableMaintenance.IsEnabled = false;
+        try
+        {
+            ShowMaintenanceState(await _service.SetMaintenanceAsync(enabled, message, _maintenance.Revision));
+            _message.Text = enabled ? "Wartung aktiv. Kunden sehen den Wartungshinweis." : "Wartung beendet. Kunden können die App wieder starten.";
+            _message.Foreground = Brush(Green);
+        }
+        catch (Exception ex)
+        {
+            _message.Text = ex.Message;
+            _message.Foreground = Brush(Ember);
+            // A failed or conflicting write must be reloaded before another change is submitted.
+            _maintenance = null;
+            _maintenanceState.Text = "Bitte aktualisieren";
+            _enableMaintenance.IsEnabled = _disableMaintenance.IsEnabled = false;
+        }
+        finally { _savingMaintenance = false; }
     }
 
     private async Task CreateKeysAsync()

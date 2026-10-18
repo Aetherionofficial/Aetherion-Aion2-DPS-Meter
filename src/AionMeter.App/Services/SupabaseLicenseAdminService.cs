@@ -1,4 +1,4 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -72,6 +72,18 @@ internal sealed class SupabaseLicenseAdminService
         return result.Events ?? [];
     }
 
+    public async Task<MaintenanceStatus> GetMaintenanceAsync()
+    {
+        using var response = await SendAsync(HttpMethod.Get, null, default, "?view=maintenance");
+        return MaintenanceStatus.Parse(await response.Content.ReadAsStringAsync());
+    }
+
+    public async Task<MaintenanceStatus> SetMaintenanceAsync(bool enabled, string message, long expectedRevision)
+    {
+        using var response = await SendAsync(HttpMethod.Post, new { action = "set_maintenance", enabled, message, expectedRevision }, default);
+        return MaintenanceStatus.Parse(await response.Content.ReadAsStringAsync());
+    }
+
     public async Task<IReadOnlyList<IssuedAdminLicense>> CreateAsync(string licenseType, int count, CancellationToken cancellationToken = default)
     {
         using var response = await SendAsync(HttpMethod.Post, new { action = "create", licenseType, count }, cancellationToken);
@@ -117,6 +129,8 @@ internal sealed class SupabaseLicenseAdminService
             var error = json.RootElement.TryGetProperty("error", out var value) ? value.GetString() : null;
             return error switch
             {
+                "maintenance_conflict" => "Der Wartungsstatus wurde inzwischen geändert. Bitte aktualisiere das Dashboard.",
+                "invalid_maintenance_request" => "Bitte einen Wartungstext mit 1 bis 500 Zeichen eingeben.",
                 "owner_access_required" => "Dieses Discord-Konto ist nicht als Lizenz-Administrator freigeschaltet.",
                 "license_admin_not_configured" => "Die Admin-Discord-User-ID ist in Supabase noch nicht eingetragen.",
                 "admin_backend_not_configured" => "Die Supabase-Adminfunktion ist noch nicht vollständig konfiguriert.",
