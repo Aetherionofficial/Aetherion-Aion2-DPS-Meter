@@ -13,7 +13,17 @@ public static class UpdateRecovery
     private static string Manifest => Path.Combine(Root, "previous.json");
     private sealed record Checkpoint(string Exe, string Target, string Sha256, string Version);
 
-    public static bool Available => File.Exists(Manifest);
+    public static bool Available
+    {
+        get
+        {
+            try { return Read() is not null; }
+            catch (Exception ex) when (IsCheckpointError(ex)) { return false; }
+        }
+    }
+
+    private static bool IsCheckpointError(Exception ex) => ex is IOException or InvalidDataException
+        or UnauthorizedAccessException or JsonException or ArgumentException or NotSupportedException;
 
     public static string? CreateCheckpoint()
     {
@@ -35,8 +45,15 @@ public static class UpdateRecovery
 
     public static string Description()
     {
-        var point = Read();
-        return point is null ? "Noch kein Update-Checkpoint vorhanden." : $"Vorherige Version: {point.Version}";
+        try
+        {
+            var point = Read();
+            return point is null ? "Noch kein Update-Checkpoint vorhanden." : $"Vorherige Version: {point.Version}";
+        }
+        catch (Exception ex) when (IsCheckpointError(ex))
+        {
+            return "Update-Wiederherstellung nicht verfügbar: " + ex.Message;
+        }
     }
 
     private static Checkpoint? Read()

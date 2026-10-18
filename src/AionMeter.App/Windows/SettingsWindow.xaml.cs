@@ -224,6 +224,7 @@ public partial class SettingsWindow : Window
         {
             "timer" => new[] { TimerSection },
             "fights" => new[] { HistorySection, CaptureSection },
+            "journal" => new[] { JournalSection },
             "appearance" => new[] { AppearanceSection, LanguageSection, DataFilesSection },
             "general" => new[] { OverlayBehaviorSection, MeterSection, HotkeysSection, LicenseSection, DataSection },
             "account" => new[] { PremiumSection, UpdatesSection },
@@ -233,7 +234,7 @@ public partial class SettingsWindow : Window
             _ => new[] { OverlaySection },
         };
         FrameworkElement[] allSections = new FrameworkElement[] { PremiumSection, LanguageSection, OverlaySection, MapSection, GuideSection, AppearanceSection, TimerSection, MeterSection,
-            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection, PvpSection };
+            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection, PvpSection, JournalSection };
         foreach (var section in allSections)
             section.Visibility = visible.Contains(section) ? Visibility.Visible : Visibility.Collapsed;
         DisclaimerText.Visibility = page == "general" ? Visibility.Visible : Visibility.Collapsed;
@@ -242,6 +243,7 @@ public partial class SettingsWindow : Window
         {
             "timer" => T.NavTimer,
             "fights" => T.NavFights,
+            "journal" => "Kampfbuch & Training",
             "appearance" => T.NavAppearance,
             "general" => T.NavGeneral,
             "account" => T.NavAccount,
@@ -253,6 +255,7 @@ public partial class SettingsWindow : Window
         PageSubtitle.Text = page switch
         {
             "timer" => T.TimerPageHint,
+            "journal" => "Boss-Tagebuch, Heilung, Trainingsziele und Discord – an einem Ort.",
             "pvp" => T.PvpPageHint,
             "map" => T.MapPageHint,
             "guide" => T.GuidePageHint,
@@ -261,7 +264,7 @@ public partial class SettingsWindow : Window
         SettingsScroll.ScrollToTop();
     }
 
-    internal void ShowSettingsPageForPreview(string page) => SelectSettingsPage(page);
+    internal void ShowSettingsPageForPreview(string page) => SelectSettingsPage(page, page == "journal" ? NavJournalButton : null);
 
     private void SizePreset_Click(object sender, RoutedEventArgs e)
     {
@@ -390,6 +393,12 @@ public partial class SettingsWindow : Window
     {
         Save_Click(sender, e);
         new CustomerToolsWindow(_meter).Show();
+    }
+
+    private void Journal_Click(object sender, RoutedEventArgs e)
+    {
+        Save_Click(sender, e);
+        AppHost.Current.ShowJournal(page: (sender as Button)?.Tag as string ?? "diary");
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => Close();

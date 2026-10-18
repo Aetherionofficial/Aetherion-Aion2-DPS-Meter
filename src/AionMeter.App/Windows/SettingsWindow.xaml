@@ -128,6 +128,7 @@
             </Grid>
 
             <Border Grid.Row="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="16,24,14,16">
                     <StackPanel Orientation="Horizontal" Margin="4,0,0,28">
                         <Border Width="34" Height="34" CornerRadius="10" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
@@ -142,6 +143,7 @@
                     <Button x:Name="NavOverlayButton" Style="{StaticResource SettingsNavButton}" Content="{Binding NavOverlay, Source={x:Static s:UiText.Current}}" Tag="overlay" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavTimer, Source={x:Static s:UiText.Current}}" Tag="timer" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavFights, Source={x:Static s:UiText.Current}}" Tag="fights" Click="SettingsNav_Click" />
+                    <Button x:Name="NavJournalButton" Style="{StaticResource SettingsNavButton}" Tag="journal" Click="SettingsNav_Click"><TextBlock Text="Kampfbuch &amp;&#10;Training" /></Button>
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Tag="appearance" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGeneral, Source={x:Static s:UiText.Current}}" Tag="general" Click="SettingsNav_Click" />
                     <TextBlock Text="AION2 EXTRAS" Foreground="{StaticResource TextMute}" FontSize="9" FontWeight="Bold" Margin="12,18,0,7" />
@@ -151,6 +153,7 @@
                     <TextBlock Text="KONTO" Foreground="{StaticResource TextMute}" FontSize="9" FontWeight="Bold" Margin="12,18,0,7" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAccount, Source={x:Static s:UiText.Current}}" Tag="account" Click="SettingsNav_Click" />
                 </StackPanel>
+                </ScrollViewer>
             </Border>
 
             <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="20,0,20,0">
@@ -184,9 +187,29 @@
                         </StackPanel>
                     </Border>
 
+                    <Border x:Name="JournalSection" Style="{StaticResource Section}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="DEINE KÄMPFE &amp; DEIN FORTSCHRITT" Style="{StaticResource SectionLabel}" Margin="0,0,0,12" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Wähle einen Bereich und anschließend einen gespeicherten Kampf. Alle Auswertungen bleiben lokal in deiner App." Margin="0,0,0,18" />
+                            <Button Content="Boss-Tagebuch öffnen" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Tag="diary" Click="Journal_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Versuche, Kills, persönliche Bestwerte und deine Entwicklung pro Boss." Margin="0,6,0,18" />
+                            <Button Content="Heiler-Auswertung öffnen" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Tag="healing" Click="Journal_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Erfasste Heilung nach Spieler, Fähigkeit und Empfänger. Neue Details benötigen neu gespeicherte Kämpfe." Margin="0,6,0,18" />
+                            <Button Content="Trainingsziele &amp; Notizen öffnen" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Tag="notes" Click="Journal_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Eigenes DPS-Ziel setzen und Ausrüstung oder Taktiken als Notiz festhalten." Margin="0,6,0,18" />
+                            <Button Content="Discord-Ergebniskarte vorbereiten" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Tag="diary" Click="Journal_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Kampf auswählen → Ergebniskarte für Discord. Vorschau mit anonymisierten Namen und lokaler PNG-Export." Margin="0,6,0,18" />
+                            <Button Content="Verlauf durchsuchen &amp; Favoriten" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Tag="diary" Click="Journal_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Nach Boss, Datum, Charakter oder Ergebnis filtern und wichtige Versuche markieren." Margin="0,6,0,18" />
+                            <Button Content="Datenqualität prüfen" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Tag="quality" Click="Journal_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Hinweise zu spätem Einstieg, fehlenden Gruppendaten und weiteren Einschränkungen." Margin="0,6,0,18" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Noch keine Kämpfe? Unter Kampf &amp; Verlauf die Kampfspeicherung aktivieren und einen Kampf erfassen. Beim Öffnen werden deine aktuellen Einstellungen gespeichert." />
+                        </StackPanel>
+                    </Border>
+
                     <!-- Overlay -->
                     <StackPanel x:Name="OverlaySection">
-                        <Button Content="Komfort &amp; Analyse öffnen" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,12" Click="CustomerTools_Click" />
+                        <Button x:Name="CustomerToolsButton" Content="Komfort &amp; Analyse öffnen" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,12" Click="CustomerTools_Click" />
                         <TextBlock Text="{Binding CombatOverlayLabel, Source={x:Static s:UiText.Current}}" Foreground="{StaticResource Gold}" FontWeight="Bold" FontSize="10" Margin="0,0,0,9" />
                         <Border Style="{StaticResource OverlayCard}">
                             <StackPanel>

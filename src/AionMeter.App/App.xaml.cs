@@ -606,11 +606,12 @@ public partial class App : Application
         _overlay.ShowSaved(entry);
     }
 
-    public void ShowJournal(Core.Storage.HistoryEntry? selected = null)
+    public void ShowJournal(Core.Storage.HistoryEntry? selected = null, string? page = null)
     {
         if (_maintenanceBlocked) return;
-        if (_journal is { IsLoaded: true }) { if (selected is not null) _journal.SelectEntry(selected); Activate(_journal); return; }
+        if (_journal is { IsLoaded: true }) { if (selected is not null) _journal.SelectEntry(selected); if (page is not null) _journal.ShowPage(page); Activate(_journal); return; }
         _journal = new FightJournalWindow(_meter, selected);
+        if (page is not null) _journal.ShowPage(page);
         _journal.Closed += (_, _) => _journal = null;
         _journal.Show();
     }

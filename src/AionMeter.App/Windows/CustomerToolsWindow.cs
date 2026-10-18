@@ -269,7 +269,7 @@ public sealed class CustomerToolsWindow : Window
     private void Guard(Action action)
     {
         try { action(); }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or ArgumentException or System.ComponentModel.Win32Exception)
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or InvalidOperationException or ArgumentException or System.ComponentModel.Win32Exception)
         { Say("Aktion konnte nicht abgeschlossen werden: " + ex.Message); }
     }
     private void Apply()

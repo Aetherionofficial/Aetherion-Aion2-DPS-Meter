@@ -123,7 +123,9 @@ public sealed class FightJournalWindow : Window
         Reload(entry.FileName);
     }
 
-    public void ShowPageForPreview(string? page) => _tabs.SelectedIndex = page switch
+    public void ShowPageForPreview(string? page) => ShowPage(page);
+
+    public void ShowPage(string? page) => _tabs.SelectedIndex = page switch
         { "notes" => 1, "healing" => 2, "quality" => 3, _ => 0 };
 
     private void HistoryChanged() => Dispatcher.BeginInvoke(() => { if (IsLoaded) _feedback.Text = "Neuer Kampf gespeichert. Mit „Aktualisieren“ in die Liste übernehmen."; });
