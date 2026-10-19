@@ -124,7 +124,7 @@ public sealed class PetTrackerWindow : Window
         Grid.SetColumn(info, 1);
         grid.Children.Add(info);
         var area = new Button { Content = "Gebiet öffnen", Padding = new Thickness(10, 6, 10, 6), Background = Brush("#261914"), Foreground = Flame, BorderBrush = Brush("#78391F"), Cursor = System.Windows.Input.Cursors.Hand, VerticalAlignment = VerticalAlignment.Center };
-        area.Click += (_, _) => AppHost.Current.ShowAionMap(pet.Area);
+        area.Click += (_, _) => AppHost.Current.ShowAionMap(pet.Area, pet.Name);
         Grid.SetColumn(area, 2);
         grid.Children.Add(area);
         row.Child = grid;

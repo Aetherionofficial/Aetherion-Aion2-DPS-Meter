@@ -26,12 +26,12 @@
         <sys:Double x:Key="NameMaxWidth">220</sys:Double>
         <sys:Double x:Key="RowHeight">42</sys:Double>
         <Thickness x:Key="RowMargin">0,0,0,2</Thickness>
-        <sys:Double x:Key="RowNameFont">13.5</sys:Double>
-        <sys:Double x:Key="RowGearFont">10.5</sys:Double>
-        <sys:Double x:Key="RowNumberFont">13</sys:Double>
-        <sys:Double x:Key="RowSubFont">10</sys:Double>
+        <sys:Double x:Key="RowNameFont">15</sys:Double>
+        <sys:Double x:Key="RowGearFont">11.5</sys:Double>
+        <sys:Double x:Key="RowNumberFont">14</sys:Double>
+        <sys:Double x:Key="RowSubFont">11</sys:Double>
         <sys:Double x:Key="RowGlyphSize">22</sys:Double>
-        <sys:Double x:Key="RowRankFont">12.5</sys:Double>
+        <sys:Double x:Key="RowRankFont">13.5</sys:Double>
         <sys:Double x:Key="RowAccentWidth">3</sys:Double>
 
         <!-- A soft dark halo under every text so it stays readable over any game scene -->
@@ -320,9 +320,9 @@
                         <TextBlock Text="{Binding T.OverlayLive}" FontSize="8" FontWeight="Bold" Foreground="#F28A45" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
-                        <TextBlock Text="DPS-Statistiken" FontSize="11" FontWeight="Bold"
+                        <TextBlock Text="DPS-Statistiken" FontSize="13" FontWeight="Bold"
                                    Foreground="{StaticResource StatsTeal}" Effect="{StaticResource TextShadow}" />
-                        <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="9" FontWeight="SemiBold"
+                        <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="10" FontWeight="SemiBold"
                                    Foreground="#C6D0D5" TextTrimming="CharacterEllipsis"
                                    Effect="{StaticResource TextShadow}" Background="Transparent"
                                    MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
@@ -358,10 +358,10 @@
                                 </Style>
                             </Ellipse.Style>
                         </Ellipse>
-                        <TextBlock Text="{Binding HeaderLabel}" Foreground="#B4B8BE" FontSize="9" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding HeaderLabel}" Foreground="#B4B8BE" FontSize="10" FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="13.5"
+                    <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="15"
                                Foreground="#F28A45" VerticalAlignment="Center" />
                     <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click"
                             ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" Margin="6,0,0,0" />

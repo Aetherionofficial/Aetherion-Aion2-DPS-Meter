@@ -669,15 +669,16 @@ public partial class App : Application
         _eventTimersWindow.Show();
     }
 
-    public void ShowAionMap(string? focusArea = null)
+    public void ShowAionMap(string? focusArea = null, string? focusMarker = null)
     {
         if (_mapWindow is { IsLoaded: true })
         {
-            if (!string.IsNullOrWhiteSpace(focusArea)) _mapWindow.NavigateToArea(focusArea);
+            if (!string.IsNullOrWhiteSpace(focusArea) || !string.IsNullOrWhiteSpace(focusMarker))
+                _mapWindow.NavigateToArea(focusArea, focusMarker);
             Activate(_mapWindow);
             return;
         }
-        _mapWindow = new MapWindow(focusArea);
+        _mapWindow = new MapWindow(focusArea, focusMarker);
         _mapWindow.Closed += (_, _) => _mapWindow = null;
         _mapWindow.Show();
     }

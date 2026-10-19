@@ -8,22 +8,25 @@ namespace AionMeter.App.Windows;
 /// <summary>AION 2 guides and map, displayed inside Aetherion using the system WebView2 runtime.</summary>
 public partial class MapWindow : Window
 {
-    private const string MapUrl = "https://questlog.gg/aion-2/de/map";
+    private const string MapUrl = "https://daevaos.com/maps";
     private const string OfficialNewsUrl = "https://aion2.plaync.com/en-us/board/update/list";
     private string? _focusArea;
+    private string? _focusMarker;
 
-    public MapWindow(string? focusArea = null)
+    public MapWindow(string? focusArea = null, string? focusMarker = null)
     {
         _focusArea = focusArea;
+        _focusMarker = focusMarker;
         InitializeComponent();
         Controls.DragAnywhere.Attach(this);
     }
 
-    public void NavigateToArea(string area)
+    public void NavigateToArea(string? area, string? marker = null)
     {
         _focusArea = area;
+        _focusMarker = marker;
         if (Browser.CoreWebView2 is { } core)
-            core.Navigate(BuildMapUrl(area));
+            core.Navigate(BuildMapUrl(area, marker));
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -40,11 +43,11 @@ public partial class MapWindow : Window
             };
             Browser.CoreWebView2.NavigationCompleted += (_, _) => UpdateNavigationButtons();
             Browser.CoreWebView2.HistoryChanged += (_, _) => UpdateNavigationButtons();
-            Browser.Source = new Uri(BuildMapUrl(_focusArea));
-            if (!string.IsNullOrWhiteSpace(_focusArea))
+            Browser.Source = new Uri(BuildMapUrl(_focusArea, _focusMarker));
+            if (!string.IsNullOrWhiteSpace(_focusArea) || !string.IsNullOrWhiteSpace(_focusMarker))
             {
                 RuntimeNotice.Visibility = Visibility.Visible;
-                RuntimeMessage.Text = $"Gebiet ausgewählt: {_focusArea}. Die interaktive Karte wurde direkt geöffnet.";
+                RuntimeMessage.Text = $"Pet-Fundort ausgewählt: {_focusMarker ?? "Pet-Marker"} · {_focusArea ?? "Gebiet"}. Die AION2-Karte wurde direkt geöffnet.";
             }
 
             // The official NC updates board is the source of truth. Keeping it live in its
@@ -67,9 +70,9 @@ public partial class MapWindow : Window
         }
     }
 
-    private static string BuildMapUrl(string? area) => string.IsNullOrWhiteSpace(area)
+    private static string BuildMapUrl(string? area, string? marker) => string.IsNullOrWhiteSpace(area) && string.IsNullOrWhiteSpace(marker)
         ? MapUrl
-        : $"{MapUrl}?search={Uri.EscapeDataString(area)}";
+        : $"{MapUrl}?search={Uri.EscapeDataString(marker ?? area ?? string.Empty)}";
 
     private void UpdateNavigationButtons()
     {
