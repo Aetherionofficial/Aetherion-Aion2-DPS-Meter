@@ -50,7 +50,7 @@ public sealed class AppSettings
     /// <summary>Bring the overlay up by itself when a boss is fought nearby or you hit anything.</summary>
     public bool AutoShow { get; set; } = true;
     /// <summary>An overlay that came up by itself hides again after this long out of combat; 0 = stays up.</summary>
-    public int AutoHideSeconds { get; set; } = 60;
+    public int AutoHideSeconds { get; set; }
     /// <summary>Bring the overlay up when the meter starts and when it finds the game, so a player sees it is running.</summary>
     public bool ShowOnStart { get; set; } = true;
 
@@ -140,7 +140,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 14;
+    private const int CurrentLayout = 15;
 
     public static AppSettings Load()
     {
@@ -231,6 +231,12 @@ public sealed class AppSettings
                     }
                     if (s.MaxRows == 8) s.MaxRows = 6;
                     if (s.RowSize == 65) s.RowSize = 60;
+                }
+                if (s.LayoutVersion < 15)
+                {
+                    // The live meter must remain visible during travel and combat pauses. The old default
+                    // hid it after 60 seconds, which made the overlay appear to vanish when no DPS was dealt.
+                    if (s.AutoHideSeconds == 60) s.AutoHideSeconds = 0;
                 }
                 s.OverlayTextScale = double.IsFinite(s.OverlayTextScale) ? Math.Clamp(s.OverlayTextScale, 0.8, 1.5) : 1;
                 s.LayoutProfiles ??= new();
