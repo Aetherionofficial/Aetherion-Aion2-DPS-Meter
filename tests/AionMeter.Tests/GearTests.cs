@@ -29,7 +29,7 @@ public class GearTests
             var m = members[i];
             b.Add(0x2C);
             b.Add((byte)(i + 1));
-            b.AddRange(BitConverter.GetBytes(((ulong)m.Server << 48) | (ulong)(1000 + i)));
+            b.AddRange(BitConverter.GetBytes(((ulong)(ushort)m.Server << 48) | (ulong)(1000 + i)));
             b.Add((byte)Encoding.UTF8.GetByteCount(m.Name));
             b.AddRange(Encoding.UTF8.GetBytes(m.Name));
             b.AddRange(BitConverter.GetBytes(m.Class));

@@ -212,6 +212,8 @@ public partial class SettingsWindow : Window
         SelectSettingsPage(section, button);
     }
 
+    private void PetTracker_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowPetTracker();
+
     private void SelectSettingsPage(string page, Button? button = null)
     {
         if (_activeSettingsNav is not null)

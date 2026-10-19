@@ -276,11 +276,7 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Grid>
-        <!-- Keep one fixed design surface and scale it as a whole when the overlay is resized. This keeps the
-             typography, icons, rows and spacing together like the reference video instead of stretching only the window. -->
-        <Viewbox x:Name="OverlayScale" Margin="8" Stretch="Uniform" StretchDirection="Both">
-        <Grid Width="584" Height="284">
+    <Grid Margin="8">
         <Border x:Name="Frame" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource CardFrame}">
             <Border.Background>
                 <SolidColorBrush x:Name="FrameBackground" Color="#09090B" Opacity="0.92" />
@@ -507,8 +503,6 @@
                 </Border>
             </StackPanel>
         </Grid>
-        </Grid>
-        </Viewbox>
 
         <!-- Resize grip -->
         <Thumb x:Name="ResizeGrip" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
