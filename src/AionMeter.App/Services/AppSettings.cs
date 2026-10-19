@@ -63,6 +63,8 @@ public sealed class AppSettings
     public bool SetupCompleted { get; set; }
     public bool ShowPersonalRecords { get; set; } = true;
     public Dictionary<string, LayoutProfile> LayoutProfiles { get; set; } = new();
+    /// <summary>Pet collection entries the player marked as owned in the local tracker.</summary>
+    public HashSet<string> OwnedPetIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     // Boss respawn timers
     /// <summary>Tray notification this many minutes before a tracked boss respawns; 0 = off.</summary>

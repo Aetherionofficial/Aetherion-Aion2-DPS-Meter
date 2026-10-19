@@ -60,6 +60,7 @@ public partial class App : Application
     private EventTimersWindow? _eventTimersWindow;
     private BossAlertToastWindow? _bossAlertToast;
     private MapWindow? _mapWindow;
+    private PetTrackerWindow? _petTrackerWindow;
     private WakayashiWindow? _wakayashiWindow;
     private readonly Dictionary<object, BreakdownWindow> _breakdowns = new();
     private int _ticks;
@@ -237,7 +238,7 @@ public partial class App : Application
             History: ShowHistory,
             BossTimers: ShowBossTimers,
             EventTimers: ShowEventTimers,
-            Map: ShowAionMap,
+            Map: () => ShowAionMap(),
             Settings: ShowSettings,
             DiscordSupport: OpenDiscordSupport,
             Demo: () => _meter.StartDemo(),
@@ -668,17 +669,34 @@ public partial class App : Application
         _eventTimersWindow.Show();
     }
 
-    public void ShowAionMap()
+    public void ShowAionMap(string? focusArea = null)
     {
         if (_mapWindow is { IsLoaded: true })
         {
+            if (!string.IsNullOrWhiteSpace(focusArea)) _mapWindow.NavigateToArea(focusArea);
             Activate(_mapWindow);
             return;
         }
-        _mapWindow = new MapWindow();
+        _mapWindow = new MapWindow(focusArea);
         _mapWindow.Closed += (_, _) => _mapWindow = null;
         _mapWindow.Show();
     }
+
+    public void ShowPetTracker()
+    {
+        if (_petTrackerWindow is { IsLoaded: true })
+        {
+            Activate(_petTrackerWindow);
+            return;
+        }
+        _petTrackerWindow = new PetTrackerWindow(_meter.Settings);
+        _petTrackerWindow.Closed += (_, _) => _petTrackerWindow = null;
+        _petTrackerWindow.Show();
+    }
+
+    public void NotifyPetCollectionComplete() => _tray?.ShowBalloon(
+        "Aetherion · Pet-Tracker",
+        "Pet-Sammlung vollständig — du hast alle aktuell erfassten Pets gesammelt.");
 
     public void ShowWakayashi()
     {

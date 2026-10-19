@@ -221,6 +221,9 @@
                     <Button DockPanel.Dock="Right" Style="{StaticResource SmallAction}" Content="×" Width="30" Padding="0" Click="ToolMenu_Click" />
                 </DockPanel>
                 <TextBlock Text="Schnellzugriff auf Aetherion-Funktionen" Foreground="#A7A9AE" FontSize="10" Margin="0,0,0,12" />
+                <Button Style="{StaticResource ToolMenuAction}" Click="PetTracker_Click">
+                    <StackPanel><TextBlock Text="◈  Pet-Tracker" FontWeight="SemiBold" /><TextBlock Text="Sammlung, fehlende Pets und Fundorte" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
                 <Button Style="{StaticResource ToolMenuAction}" Click="Details_Click">
                     <StackPanel><TextBlock Text="⚡  Echtzeit-DPS-Tracker" FontWeight="SemiBold" /><TextBlock Text="Aktuelle Gruppenleistung und Kampfdetails" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
                 </Button>

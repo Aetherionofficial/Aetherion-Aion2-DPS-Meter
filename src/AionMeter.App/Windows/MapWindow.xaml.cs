@@ -10,10 +10,20 @@ public partial class MapWindow : Window
 {
     private const string MapUrl = "https://questlog.gg/aion-2/de/map";
     private const string OfficialNewsUrl = "https://aion2.plaync.com/en-us/board/update/list";
-    public MapWindow()
+    private string? _focusArea;
+
+    public MapWindow(string? focusArea = null)
     {
+        _focusArea = focusArea;
         InitializeComponent();
         Controls.DragAnywhere.Attach(this);
+    }
+
+    public void NavigateToArea(string area)
+    {
+        _focusArea = area;
+        if (Browser.CoreWebView2 is { } core)
+            core.Navigate(BuildMapUrl(area));
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -30,7 +40,12 @@ public partial class MapWindow : Window
             };
             Browser.CoreWebView2.NavigationCompleted += (_, _) => UpdateNavigationButtons();
             Browser.CoreWebView2.HistoryChanged += (_, _) => UpdateNavigationButtons();
-            Browser.Source = new Uri(MapUrl);
+            Browser.Source = new Uri(BuildMapUrl(_focusArea));
+            if (!string.IsNullOrWhiteSpace(_focusArea))
+            {
+                RuntimeNotice.Visibility = Visibility.Visible;
+                RuntimeMessage.Text = $"Gebiet ausgewählt: {_focusArea}. Die interaktive Karte wurde direkt geöffnet.";
+            }
 
             // The official NC updates board is the source of truth. Keeping it live in its
             // own pane means newly published patch notes appear without shipping app updates.
@@ -51,6 +66,10 @@ public partial class MapWindow : Window
             Log.Error("Could not initialize the embedded AION2 map and news hub", ex);
         }
     }
+
+    private static string BuildMapUrl(string? area) => string.IsNullOrWhiteSpace(area)
+        ? MapUrl
+        : $"{MapUrl}?search={Uri.EscapeDataString(area)}";
 
     private void UpdateNavigationButtons()
     {

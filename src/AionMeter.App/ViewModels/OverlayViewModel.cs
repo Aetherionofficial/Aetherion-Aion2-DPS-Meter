@@ -506,7 +506,10 @@ public sealed class OverlayViewModel : ObservableObject
     }
 
     private static bool HasVisibleIdentity(CombatantSnapshot c) =>
-        c.IsUnknownSummons || c.IsSelf || !string.Equals(c.Name, $"#{c.ActorId}", StringComparison.Ordinal);
+        // Show active sources immediately, even when the name packet arrives a moment later.
+        // The old identity-only filter made a live fight look empty as "0 players".
+        c.IsUnknownSummons || c.IsSelf || c.Damage > 0 || c.Healing > 0 || c.Hits > 0 ||
+        !string.Equals(c.Name, $"#{c.ActorId}", StringComparison.Ordinal);
 
     /// <summary>Card label above the title. <paramref name="kind"/>: live / last / segment / saved.</summary>
     public void SetSegment(string kind, string? when = null)

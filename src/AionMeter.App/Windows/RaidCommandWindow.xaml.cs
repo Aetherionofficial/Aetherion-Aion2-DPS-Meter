@@ -297,6 +297,7 @@ public partial class RaidCommandWindow : Window
     private void Settings_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowSettings();
     private void Overlay_Click(object sender, RoutedEventArgs e) => AppHost.Current.SetOverlayVisible(!AppHost.Current.OverlayVisible);
     private void Details_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowCurrentBreakdown();
+    private void PetTracker_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowPetTracker();
     private void DamageMode_Click(object sender, RoutedEventArgs e) { _healingMode = false; UpdateModeButtons(); Refresh(); }
     private void HealingMode_Click(object sender, RoutedEventArgs e) { _healingMode = true; UpdateModeButtons(); Refresh(); }
     private void UpdateModeButtons()
