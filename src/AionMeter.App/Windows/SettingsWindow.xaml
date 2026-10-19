@@ -354,14 +354,38 @@
                         <StackPanel>
                             <TextBlock Text="{Binding NavTimer, Source={x:Static s:UiText.Current}}" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding TimerAlertLabel, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="280" />
-                                <TextBox x:Name="BossAlertMinutesBox" Width="70" />
+                                <TextBlock Text="Countdown-Stufen (Minuten)" Style="{StaticResource Label}" Width="280" />
+                                <TextBox x:Name="BossAlertStagesBox" Width="100" ToolTip="Beispiel: 10,5,2" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                 <TextBlock Text="{Binding TimerOpacityLabel, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" Width="280" />
                                 <Slider x:Name="EventTimerOpacity" Style="{StaticResource GoldSlider}" Width="220" Minimum="0" Maximum="1" />
                             </StackPanel>
-                            <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" Text="Timer-Fenster und Boss-Hinweise werden gemeinsam gespeichert." />
+                            <CheckBox x:Name="BossAlertSpeech" Style="{StaticResource DarkCheck}" Content="Sprachansage für Boss-Hinweise" Margin="0,10,0,0" />
+                            <CheckBox x:Name="BossAlertQuiet" Style="{StaticResource DarkCheck}" Content="Während eines laufenden Kampfes nur wichtige Hinweise zeigen" />
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="Hinweis sichtbar (Sekunden)" Style="{StaticResource Label}" Width="280" />
+                                <TextBox x:Name="BossAlertToastSeconds" Width="70" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="Ton" Style="{StaticResource Label}" Width="280" />
+                                <ComboBox x:Name="BossAlertSound" Width="150">
+                                    <ComboBoxItem Content="Aetherion · weich" Tag="aetherion" />
+                                    <ComboBoxItem Content="Alarm · deutlich" Tag="urgent" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="Lautstärke" Style="{StaticResource Label}" Width="280" />
+                                <Slider x:Name="BossAlertVolume" Style="{StaticResource GoldSlider}" Width="160" Minimum="0" Maximum="100" />
+                                <TextBlock x:Name="BossAlertVolumeText" Style="{StaticResource Hint}" Width="45" Margin="8,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="Toast-Größe" Style="{StaticResource Label}" Width="280" />
+                                <Slider x:Name="BossAlertScale" Style="{StaticResource GoldSlider}" Width="160" Minimum="0.8" Maximum="1.5" />
+                                <TextBlock x:Name="BossAlertScaleText" Style="{StaticResource Hint}" Width="45" Margin="8,0,0,0" />
+                            </StackPanel>
+                            <Button Content="Benachrichtigung testen" Style="{StaticResource Chip}" HorizontalAlignment="Left" Margin="0,10,0,0" Click="TestBossAlert_Click" />
+                            <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" Text="Die letzten Boss-Hinweise werden automatisch im lokalen Verlauf gespeichert. Im Overlay bleibt der nächste Respawn sichtbar." />
                         </StackPanel>
                     </Border>
 

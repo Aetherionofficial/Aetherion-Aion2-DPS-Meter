@@ -221,6 +221,15 @@ public partial class BossTimersWindow : Window
             UpdateAlertButton();
         });
 
+    private void AlertHistory_Click(object sender, RoutedEventArgs e)
+    {
+        var entries = BossAlertHistory.Load();
+        var text = entries.Count == 0
+            ? "Noch keine Boss-Hinweise gespeichert."
+            : string.Join(Environment.NewLine, entries.Select(x => $"{x.At:dd.MM. HH:mm}  {x.Boss} — {x.Message}"));
+        MessageBox.Show(this, text, "Boss-Hinweisverlauf", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
     /// <summary>"Markutan EU ▾": the server whose timers are shown.</summary>
     private void UpdateServerButton() => ServerButton.Content = ServerLabel(_server) + "  ▾";
 

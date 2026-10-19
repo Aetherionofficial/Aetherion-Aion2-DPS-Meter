@@ -14,6 +14,21 @@ namespace AionMeter.App.Services;
 /// </summary>
 public static class SampleRenderer
 {
+    public static void RenderAlert(string path)
+    {
+        var window = new BossAlertToastWindow("Blutkrieger Lannar", "Erscheint voraussichtlich in 5 Min. (01:40)", seconds: 8);
+        window.Show();
+        window.UpdateLayout();
+        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth), (int)Math.Ceiling(window.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(window);
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        using var output = File.Create(path);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        encoder.Save(output);
+        window.Close();
+    }
+
     /// <param name="Window">overlay (default), raid-command, overlay-update, overlay-crowd, breakdown, history, timers, settings, update or update-portable.</param>
     /// <param name="Width">Overlay width (default 560): narrow sizes show how the footer copes.</param>
     /// <param name="Tab">Breakdown tab: dps (default), accuracy, rotation or defense.</param>

@@ -33,6 +33,8 @@ public sealed record BossTimer(
     bool Watch = false,
     int ServerId = 0)
 {
+    /// <summary>Number of countdown stages already announced for AlertedFor.</summary>
+    public int AlertedStage { get; init; }
     /// <summary>Latest sign of death: a kill, a corpse, or the game list saying it is down.</summary>
     [JsonIgnore]
     public DateTimeOffset? DeadAt => Max(LastKill, LastSeenDead, ListedAt is { } at && !ListedAlive ? at : null);
@@ -252,7 +254,7 @@ public sealed class BossTimers
                     // Off the field maps a boss comes back with its instance, not on a clock: no timer for it.
                     t = t is null && !IsFieldMap(n.MapId)
                         ? null
-                        : (t ?? New(server, n.NpcCode)) with { LastKill = at, AlertedFor = null, Watch = true };
+                        : (t ?? New(server, n.NpcCode)) with { LastKill = at, AlertedFor = null, AlertedStage = 0, Watch = true };
                     break;
                 case BossNoticeKind.Alive when t is not null:
                     t = Learn(t, at) with { LastSeenAlive = at };
@@ -495,7 +497,7 @@ public sealed class BossTimers
         lock (_gate)
         {
             var t = _timers.TryGetValue((server, npcCode), out var old) ? old : New(server, npcCode);
-            _timers[(server, npcCode)] = t with { LastKill = DateTimeOffset.Now, AlertedFor = null, Watch = true };
+            _timers[(server, npcCode)] = t with { LastKill = DateTimeOffset.Now, AlertedFor = null, AlertedStage = 0, Watch = true };
         }
         Save();
     }
@@ -505,7 +507,7 @@ public sealed class BossTimers
         lock (_gate)
         {
             if (!_timers.TryGetValue((server, npcCode), out var t)) return;
-            _timers[(server, npcCode)] = t with { RespawnMinutes = Math.Max(0, minutes), RespawnLearned = false, AlertedFor = null };
+            _timers[(server, npcCode)] = t with { RespawnMinutes = Math.Max(0, minutes), RespawnLearned = false, AlertedFor = null, AlertedStage = 0 };
         }
         Save();
     }
@@ -515,7 +517,7 @@ public sealed class BossTimers
         lock (_gate)
         {
             if (!_timers.TryGetValue((server, npcCode), out var t)) return;
-            _timers[(server, npcCode)] = t with { Watch = watch, AlertedFor = null };
+            _timers[(server, npcCode)] = t with { Watch = watch, AlertedFor = null, AlertedStage = 0 };
         }
         Save();
     }
@@ -529,18 +531,22 @@ public sealed class BossTimers
 
     /// <summary>Watched timers of the current server whose respawn is <paramref name="leadMinutes"/> away (or just
     /// passed) and not announced yet; marks them announced.</summary>
-    public List<BossTimer> TakeDueAlerts(DateTimeOffset now, int leadMinutes)
+    public List<(BossTimer Timer, int LeadMinutes)> TakeDueAlerts(DateTimeOffset now, IReadOnlyList<int> leadMinutes)
     {
-        var due = new List<BossTimer>();
-        if (leadMinutes <= 0) return due;
+        var due = new List<(BossTimer Timer, int LeadMinutes)>();
+        if (leadMinutes.Count == 0) return due;
         lock (_gate)
         {
             foreach (var t in _timers.Values.Where(t => t.ServerId == _learned.LastServer).ToList())
             {
-                if (!t.Watch || t.NextSpawn is not { } next || t.AlertedFor == next || t.AliveNow) continue;
-                if (now < next.AddMinutes(-leadMinutes) || now > next.AddMinutes(10)) continue;
-                _timers[(t.ServerId, t.NpcCode)] = t with { AlertedFor = next };
-                due.Add(t);
+                if (!t.Watch || t.NextSpawn is not { } next || t.AliveNow) continue;
+                var stage = -1;
+                for (var i = 0; i < leadMinutes.Count; i++)
+                    if (now >= next.AddMinutes(-leadMinutes[i])) stage = i;
+                if (stage < 0 || stage < t.AlertedStage || now > next.AddMinutes(10)) continue;
+                var updated = t with { AlertedFor = next, AlertedStage = stage + 1 };
+                _timers[(t.ServerId, t.NpcCode)] = updated;
+                due.Add((updated, leadMinutes[stage]));
             }
         }
         if (due.Count > 0) Save();

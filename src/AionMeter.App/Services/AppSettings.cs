@@ -67,6 +67,13 @@ public sealed class AppSettings
     // Boss respawn timers
     /// <summary>Tray notification this many minutes before a tracked boss respawns; 0 = off.</summary>
     public int BossAlertMinutes { get; set; } = 2;
+    public string BossAlertStages { get; set; } = "10,5,2";
+    public bool BossAlertSpeech { get; set; }
+    public bool BossAlertQuietDuringFight { get; set; }
+    public int BossAlertToastSeconds { get; set; } = 8;
+    public int BossAlertVolume { get; set; } = 70;
+    public string BossAlertSound { get; set; } = "aetherion";
+    public double BossAlertToastScale { get; set; } = 1;
     public double BossTimersWidth { get; set; } = 620;
     public double BossTimersHeight { get; set; } = 500;
 

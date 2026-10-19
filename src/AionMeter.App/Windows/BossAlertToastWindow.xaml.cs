@@ -9,12 +9,14 @@ public partial class BossAlertToastWindow : Window
     private readonly DispatcherTimer _closeTimer = new() { Interval = TimeSpan.FromSeconds(8) };
     private readonly Action? _onClick;
 
-    public BossAlertToastWindow(string bossName, string countdown, Action? onClick = null)
+    public BossAlertToastWindow(string bossName, string countdown, Action? onClick = null, int seconds = 8, double scale = 1)
     {
         InitializeComponent();
         BossName.Text = bossName;
         Countdown.Text = countdown;
         _onClick = onClick;
+        _closeTimer.Interval = TimeSpan.FromSeconds(Math.Clamp(seconds, 3, 30));
+        LayoutTransform = new System.Windows.Media.ScaleTransform(Math.Clamp(scale, 0.8, 1.5), Math.Clamp(scale, 0.8, 1.5));
         _closeTimer.Tick += (_, _) => Close();
         _closeTimer.Start();
         MouseLeftButtonUp += Toast_Click;

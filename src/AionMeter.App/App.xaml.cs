@@ -125,6 +125,13 @@ public partial class App : Application
             Shutdown();
             return;
         }
+        if (ArgValue(e.Args, "--render-alert") is { } alertPath)
+        {
+            Log.Enabled = false;
+            SampleRenderer.RenderAlert(alertPath);
+            Shutdown();
+            return;
+        }
         _singleInstance = new Mutex(true, $"AionMeter.SingleInstance.{InstanceSuffix}", out var first);
         if (!first)
         {
@@ -689,7 +696,11 @@ public partial class App : Application
     private void CheckBossAlerts()
     {
         var t = UiText.Current;
-        foreach (var timer in _meter.Timers.TakeDueAlerts(DateTimeOffset.Now, _meter.Settings.BossAlertMinutes))
+        var stages = _meter.Settings.BossAlertStages.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => int.TryParse(s.Trim(), out var minutes) ? minutes : 0)
+            .Where(minutes => minutes > 0).Distinct().OrderByDescending(minutes => minutes).ToArray();
+        var effectiveStages = stages.Length > 0 ? stages : [_meter.Settings.BossAlertMinutes];
+        foreach (var (timer, leadMinutes) in _meter.Timers.TakeDueAlerts(DateTimeOffset.Now, effectiveStages))
         {
             var next = timer.NextSpawn!.Value;
             var minutes = (int)Math.Ceiling((next - DateTimeOffset.Now).TotalMinutes);
@@ -697,12 +708,26 @@ public partial class App : Application
             var text = minutes > 0
                 ? string.Format(t.AlertSoon, name, minutes, next.ToString("HH:mm"))
                 : string.Format(t.AlertNow, name, next.ToString("HH:mm"));
+            if (_meter.Tracker.LiveFight() is not null && _meter.Settings.BossAlertQuietDuringFight) continue;
             _bossAlertToast?.Close();
-            _bossAlertToast = new BossAlertToastWindow(name, text, ShowBossTimers);
+            _bossAlertToast = new BossAlertToastWindow(name, text, ShowBossTimers, _meter.Settings.BossAlertToastSeconds, _meter.Settings.BossAlertToastScale);
             _bossAlertToast.Closed += (_, _) => _bossAlertToast = null;
             _bossAlertToast.Show();
-            AlertChime.Play();
+            AlertChime.Play(_meter.Settings.BossAlertVolume, _meter.Settings.BossAlertSound);
+            BossAlertHistory.Add(name, text);
+            if (_meter.Settings.BossAlertSpeech)
+                VoiceAnnouncer.Speak(minutes > 0 ? $"Boss-Timer: {name} in {minutes} Minuten." : $"Boss-Timer: {name} ist jetzt verfügbar.");
         }
+    }
+
+    public void ShowBossAlertTest()
+    {
+        _bossAlertToast?.Close();
+        _bossAlertToast = new BossAlertToastWindow("Blutkrieger Lannar", "Testmeldung · erscheint voraussichtlich in 5 Min. (12:34)", ShowBossTimers, _meter.Settings.BossAlertToastSeconds, _meter.Settings.BossAlertToastScale);
+        _bossAlertToast.Closed += (_, _) => _bossAlertToast = null;
+        _bossAlertToast.Show();
+        AlertChime.Play(_meter.Settings.BossAlertVolume, _meter.Settings.BossAlertSound);
+        if (_meter.Settings.BossAlertSpeech) VoiceAnnouncer.Speak("Testmeldung: Boss-Timer Blutkrieger Lannar in 5 Minuten.");
     }
 
     public void ShowSettings()

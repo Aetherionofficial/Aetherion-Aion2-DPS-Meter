@@ -57,7 +57,17 @@ public partial class SettingsWindow : Window
         AutoShow.IsChecked = s.AutoShow;
         AutoHideSeconds.Text = s.AutoHideSeconds.ToString();
         ShowOnStart.IsChecked = s.ShowOnStart;
-        BossAlertMinutesBox.Text = s.BossAlertMinutes.ToString();
+        BossAlertStagesBox.Text = s.BossAlertStages;
+        BossAlertSpeech.IsChecked = s.BossAlertSpeech;
+        BossAlertQuiet.IsChecked = s.BossAlertQuietDuringFight;
+        BossAlertToastSeconds.Text = s.BossAlertToastSeconds.ToString();
+        BossAlertVolume.Value = s.BossAlertVolume;
+        BossAlertVolumeText.Text = $"{s.BossAlertVolume}%";
+        BossAlertScale.Value = s.BossAlertToastScale;
+        BossAlertScaleText.Text = $"{s.BossAlertToastScale:0.0}×";
+        BossAlertSound.SelectedItem = BossAlertSound.Items.Cast<ComboBoxItem>().FirstOrDefault(i => Equals(i.Tag, s.BossAlertSound)) ?? BossAlertSound.Items[0];
+        BossAlertVolume.ValueChanged += (_, e) => BossAlertVolumeText.Text = $"{(int)e.NewValue}%";
+        BossAlertScale.ValueChanged += (_, e) => BossAlertScaleText.Text = $"{e.NewValue:0.0}×";
         EventTimerOpacity.Value = s.EventTimersOpacity;
         DiscordPresence.IsChecked = s.DiscordPresenceEnabled;
         foreach (var n in new[] { 5, 8, 10, 12, 15, 20 }) MaxRows.Items.Add(n);
@@ -352,7 +362,17 @@ public partial class SettingsWindow : Window
         s.AutoShow = AutoShow.IsChecked == true;
         if (int.TryParse(AutoHideSeconds.Text, out var autoHide)) s.AutoHideSeconds = Math.Clamp(autoHide, 0, 3600);
         s.ShowOnStart = ShowOnStart.IsChecked == true;
-        if (int.TryParse(BossAlertMinutesBox.Text, out var alertMinutes)) s.BossAlertMinutes = Math.Clamp(alertMinutes, 0, 60);
+        s.BossAlertStages = string.Join(',', BossAlertStagesBox.Text.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => int.TryParse(x.Trim(), out var n) ? Math.Clamp(n, 1, 60) : 0)
+            .Where(n => n > 0).Distinct().OrderByDescending(n => n));
+        if (s.BossAlertStages.Length == 0) s.BossAlertStages = "2";
+        s.BossAlertMinutes = s.BossAlertStages.Split(',').Select(int.Parse).Last();
+        s.BossAlertSpeech = BossAlertSpeech.IsChecked == true;
+        s.BossAlertQuietDuringFight = BossAlertQuiet.IsChecked == true;
+        if (int.TryParse(BossAlertToastSeconds.Text, out var toastSeconds)) s.BossAlertToastSeconds = Math.Clamp(toastSeconds, 3, 30);
+        s.BossAlertVolume = (int)Math.Round(BossAlertVolume.Value);
+        s.BossAlertSound = (BossAlertSound.SelectedItem as ComboBoxItem)?.Tag as string ?? "aetherion";
+        s.BossAlertToastScale = Math.Clamp(BossAlertScale.Value, 0.8, 1.5);
         s.EventTimersOpacity = Math.Clamp(EventTimerOpacity.Value, 0.2, 1);
         s.DiscordPresenceEnabled = DiscordPresence.IsChecked == true;
         s.MaxRows = MaxRows.SelectedItem is int rows ? rows : 10;
@@ -402,6 +422,12 @@ public partial class SettingsWindow : Window
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void TestBossAlert_Click(object sender, RoutedEventArgs e)
+    {
+        Save_Click(sender, e);
+        AppHost.Current.ShowBossAlertTest();
+    }
 
     /// <summary>The overlay follows the slider at once, so the size can be judged on the real rows.</summary>
     private void RowSize_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)

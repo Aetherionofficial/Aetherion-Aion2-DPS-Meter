@@ -6,16 +6,34 @@ namespace AionMeter.App.Services;
 /// <summary>A small branded two-note cue, independent of the Windows notification sound.</summary>
 internal static class AlertChime
 {
-    private static readonly SoundPlayer Player = CreatePlayer();
+    private static readonly Dictionary<string, SoundPlayer> Players = new(StringComparer.OrdinalIgnoreCase);
 
-    public static void Play() => Player.Play();
+    public static void Play(int volume, string style)
+    {
+        var key = $"{style}:{volume}";
+        if (!Players.TryGetValue(key, out var player))
+        {
+            player = CreatePlayer(Math.Clamp(volume, 0, 100), style);
+            Players[key] = player;
+        }
+        player.Play();
+    }
 
-    private static SoundPlayer CreatePlayer()
+    private static SoundPlayer CreatePlayer(int volume, string style)
     {
         const int sampleRate = 44100;
         var samples = new List<short>();
-        AddTone(samples, 660, 115, sampleRate);
-        AddTone(samples, 880, 185, sampleRate);
+        if (style.Equals("urgent", StringComparison.OrdinalIgnoreCase))
+        {
+            AddTone(samples, 880, 100, sampleRate, volume);
+            AddTone(samples, 660, 100, sampleRate, volume);
+            AddTone(samples, 880, 160, sampleRate, volume);
+        }
+        else
+        {
+            AddTone(samples, 660, 115, sampleRate, volume);
+            AddTone(samples, 880, 185, sampleRate, volume);
+        }
         using var stream = new MemoryStream(44 + samples.Count * 2);
         using (var writer = new BinaryWriter(stream, System.Text.Encoding.ASCII, leaveOpen: true))
         {
@@ -33,13 +51,13 @@ internal static class AlertChime
         return player;
     }
 
-    private static void AddTone(List<short> output, double frequency, int milliseconds, int sampleRate)
+    private static void AddTone(List<short> output, double frequency, int milliseconds, int sampleRate, int volume)
     {
         var count = milliseconds * sampleRate / 1000;
         for (var i = 0; i < count; i++)
         {
             var envelope = Math.Min(1, i / 500d) * Math.Min(1, (count - i) / 1800d);
-            output.Add((short)(Math.Sin(2 * Math.PI * frequency * i / sampleRate) * 6500 * envelope));
+            output.Add((short)(Math.Sin(2 * Math.PI * frequency * i / sampleRate) * 6500 * envelope * volume / 100d));
         }
         output.AddRange(new short[sampleRate / 1000 * 25]);
     }
