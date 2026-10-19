@@ -46,11 +46,8 @@ public partial class OverlayWindow : Window
 
         OpacitySlider.Value = _settings.BackgroundOpacity;
         ApplyBackgroundOpacity(_settings.BackgroundOpacity);
-        if (_settings.BackgroundOpacity <= 0.001)
-        {
-            ToolbarTray.Visibility = Visibility.Visible;
-            Toolbar.Visibility = Visibility.Visible;
-        }
+        // The overlay keeps its controls limited to the four essential footer actions.
+        ToolbarTray.Visibility = Visibility.Collapsed;
         ApplyResponsiveLayout();
         ApplyLock();
         ApplyRowSize(_settings.RowSize);
@@ -63,21 +60,6 @@ public partial class OverlayWindow : Window
 
         // Drag the card by any part of it (unless locked); a click without movement still opens a breakdown.
         _drag = DragAnywhere.Attach(this, canDrag: () => !_settings.Locked, dropped: SavePlacement);
-
-        // Keep the combat card clean; hover reveals a grounded control tray at the bottom.
-        MouseEnter += (_, _) =>
-        {
-            ToolbarTray.Visibility = Visibility.Visible;
-            Toolbar.Visibility = Visibility.Visible;
-        };
-        MouseLeave += (_, _) =>
-        {
-            // Keep controls available at full transparency; otherwise a zero-alpha gap can trigger
-            // MouseLeave and collapse the toolbar before the pointer reaches the next button.
-            if (_settings.BackgroundOpacity <= 0.001) return;
-            ToolbarTray.Visibility = Visibility.Collapsed;
-            Toolbar.Visibility = Visibility.Collapsed;
-        };
 
         SourceInitialized += (_, _) =>
         {
@@ -399,9 +381,10 @@ public partial class OverlayWindow : Window
         // Keep footer actions clear of the corner resize handle at narrow sizes.
         if (FooterDetailsButton is null) return;
         FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterResetButton.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
         FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
-        FooterCompareButton.Visibility = Width >= 390 ? Visibility.Visible : Visibility.Collapsed;
-        FooterRankingButton.Visibility = Width >= 440 ? Visibility.Visible : Visibility.Collapsed;
+        FooterCompareButton.Visibility = Width >= 430 ? Visibility.Visible : Visibility.Collapsed;
+        FooterSettingsButton.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
         CustomerToolsToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         StreamerToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         var compactToolbar = Width < 480;
@@ -409,7 +392,6 @@ public partial class OverlayWindow : Window
         MapToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
         GuideToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
         EventsToolButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
-        RestartButton.Visibility = compactToolbar ? Visibility.Collapsed : Visibility.Visible;
     }
 
     /// <summary>Preview a Settings size preset without saving it until the player presses Save.</summary>
@@ -749,7 +731,7 @@ public partial class OverlayWindow : Window
 
     /// <summary>Tooltips that name a hotkey the user can change.</summary>
     public void ApplyHotkeyTips() =>
-        RestartButton.ToolTip = string.Format(UiText.Current.TipRestart, _settings.HotkeyReset);
+        FooterResetButton.ToolTip = string.Format(UiText.Current.TipRestart, _settings.HotkeyReset);
 
     private void Lock_Click(object sender, RoutedEventArgs e)
     {
@@ -764,8 +746,7 @@ public partial class OverlayWindow : Window
 
     internal void ShowToolbarPreview()
     {
-        ToolbarTray.Visibility = Visibility.Visible;
-        Toolbar.Visibility = Visibility.Visible;
+        ToolbarTray.Visibility = Visibility.Collapsed;
     }
 
     private void Opacity_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)

@@ -41,8 +41,8 @@ public sealed class AppSettings
     // Overlay window
     public double OverlayLeft { get; set; } = 125;
     public double OverlayTop { get; set; } = 129;
-    public double OverlayWidth { get; set; } = 678;
-    public double OverlayHeight { get; set; } = 330;
+    public double OverlayWidth { get; set; } = 600;
+    public double OverlayHeight { get; set; } = 300;
     public double BackgroundOpacity { get; set; } = 0;
     public bool Locked { get; set; }
     public bool ClickThrough { get; set; }
@@ -91,7 +91,7 @@ public sealed class AppSettings
     public int MaxRows { get; set; } = 8;
     public const int MinRowSize = 50, MaxRowSize = 100;
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
-    public int RowSize { get; set; } = 80;
+    public int RowSize { get; set; } = 65;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
     public bool ShowGear { get; set; } = false;
     public bool ShowHealingPanel { get; set; } = true;
@@ -138,7 +138,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 12;
+    private const int CurrentLayout = 13;
 
     public static AppSettings Load()
     {
@@ -208,6 +208,16 @@ public sealed class AppSettings
                     s.RowSize = 80;
                     s.BackgroundOpacity = 0;
                     s.ShowGear = false;
+                }
+                if (s.LayoutVersion < 13)
+                {
+                    // v13 keeps the live overlay compact: the previous wide card and 80% rows covered too much of the game.
+                    if (Math.Abs(s.OverlayWidth - 678) < 1 && Math.Abs(s.OverlayHeight - 330) < 1)
+                    {
+                        s.OverlayWidth = 600;
+                        s.OverlayHeight = 300;
+                    }
+                    if (s.RowSize == 80) s.RowSize = 65;
                 }
                 s.OverlayTextScale = double.IsFinite(s.OverlayTextScale) ? Math.Clamp(s.OverlayTextScale, 0.8, 1.5) : 1;
                 s.LayoutProfiles ??= new();
