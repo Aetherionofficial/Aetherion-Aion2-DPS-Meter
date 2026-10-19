@@ -286,6 +286,9 @@ public partial class RaidCommandWindow : Window
 
     private void NoDrag(object sender, MouseButtonEventArgs e) => e.Handled = true;
     private void Home_Click(object sender, RoutedEventArgs e) { WindowState = WindowState.Normal; base.Activate(); }
+    private void ToolMenu_Click(object sender, RoutedEventArgs e) => ToolDrawer.Visibility = ToolDrawer.Visibility == Visibility.Visible
+        ? Visibility.Collapsed : Visibility.Visible;
+    internal void ShowToolMenuPreview() => ToolDrawer.Visibility = Visibility.Visible;
     private void History_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowHistory();
     private void Timers_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowBossTimers();
     private void EventTimers_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowEventTimers();
@@ -312,14 +315,14 @@ public partial class RaidCommandWindow : Window
 
     private static Brush ClassColor(GameClass gameClass) => gameClass switch
     {
-        GameClass.Gladiator => new SolidColorBrush(Color.FromRgb(0xF0, 0x9A, 0x55)),
-        GameClass.Templar => new SolidColorBrush(Color.FromRgb(0xEA, 0xC4, 0x69)),
-        GameClass.Assassin => new SolidColorBrush(Color.FromRgb(0xB5, 0x8B, 0xFF)),
-        GameClass.Ranger => new SolidColorBrush(Color.FromRgb(0x66, 0xBD, 0xF1)),
-        GameClass.Sorcerer => new SolidColorBrush(Color.FromRgb(0x72, 0xBA, 0xFF)),
-        GameClass.Elementalist => new SolidColorBrush(Color.FromRgb(0xE0, 0x86, 0xD7)),
-        GameClass.Cleric => new SolidColorBrush(Color.FromRgb(0x73, 0xD8, 0xA0)),
-        GameClass.Chanter => new SolidColorBrush(Color.FromRgb(0x56, 0xD6, 0xC8)),
+        GameClass.Gladiator => new SolidColorBrush(Color.FromRgb(0xF2, 0x8A, 0x45)),
+        GameClass.Templar => new SolidColorBrush(Color.FromRgb(0xFF, 0xB0, 0x6A)),
+        GameClass.Assassin => new SolidColorBrush(Color.FromRgb(0xD6, 0x6A, 0x2A)),
+        GameClass.Ranger => new SolidColorBrush(Color.FromRgb(0xFF, 0x8F, 0x4A)),
+        GameClass.Sorcerer => new SolidColorBrush(Color.FromRgb(0xC8, 0x54, 0x1E)),
+        GameClass.Elementalist => new SolidColorBrush(Color.FromRgb(0xF6, 0xC0, 0x9A)),
+        GameClass.Cleric => new SolidColorBrush(Color.FromRgb(0xB8, 0x4B, 0x1B)),
+        GameClass.Chanter => new SolidColorBrush(Color.FromRgb(0xE4, 0x7A, 0x35)),
         _ => new SolidColorBrush(Color.FromRgb(0xA2, 0xB1, 0xB9)),
     };
 

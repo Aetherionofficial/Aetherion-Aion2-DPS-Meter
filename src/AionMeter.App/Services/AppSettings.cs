@@ -41,7 +41,7 @@ public sealed class AppSettings
     // Overlay window
     public double OverlayLeft { get; set; } = 125;
     public double OverlayTop { get; set; } = 129;
-    public double OverlayWidth { get; set; } = 600;
+    public double OverlayWidth { get; set; } = 500;
     public double OverlayHeight { get; set; } = 300;
     public double BackgroundOpacity { get; set; } = 0;
     public bool Locked { get; set; }
@@ -88,10 +88,10 @@ public sealed class AppSettings
     public TargetMode TargetMode { get; set; } = TargetMode.BossOnly;
     /// <summary>True: the leader's bar is full and the rest are sized against it. False: bars show share of party damage.</summary>
     public bool BarsRelativeToTop { get; set; } = true;
-    public int MaxRows { get; set; } = 8;
+    public int MaxRows { get; set; } = 6;
     public const int MinRowSize = 50, MaxRowSize = 100;
     /// <summary>Overlay row size in percent of the original (Settings → Overlay, or Ctrl + wheel over the rows).</summary>
-    public int RowSize { get; set; } = 65;
+    public int RowSize { get; set; } = 60;
     /// <summary>Gear score and combat power after the names in the overlay (when the party roster gave them).</summary>
     public bool ShowGear { get; set; } = false;
     public bool ShowHealingPanel { get; set; } = true;
@@ -138,7 +138,7 @@ public sealed class AppSettings
 
     /// <summary>Bumped when the overlay layout changes enough that saved sizes no longer fit.</summary>
     public int LayoutVersion { get; set; } // 0 when missing from an older settings file; new installs get it in Load()
-    private const int CurrentLayout = 13;
+    private const int CurrentLayout = 14;
 
     public static AppSettings Load()
     {
@@ -218,6 +218,17 @@ public sealed class AppSettings
                         s.OverlayHeight = 300;
                     }
                     if (s.RowSize == 80) s.RowSize = 65;
+                }
+                if (s.LayoutVersion < 14)
+                {
+                    // v14 uses a smaller default footprint so the DPS meter does not cover the game view.
+                    if (Math.Abs(s.OverlayWidth - 600) < 1 && Math.Abs(s.OverlayHeight - 300) < 1)
+                    {
+                        s.OverlayWidth = 500;
+                        s.OverlayHeight = 300;
+                    }
+                    if (s.MaxRows == 8) s.MaxRows = 6;
+                    if (s.RowSize == 65) s.RowSize = 60;
                 }
                 s.OverlayTextScale = double.IsFinite(s.OverlayTextScale) ? Math.Clamp(s.OverlayTextScale, 0.8, 1.5) : 1;
                 s.LayoutProfiles ??= new();

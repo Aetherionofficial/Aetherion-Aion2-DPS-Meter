@@ -10,15 +10,15 @@ public static class ClassVisuals
     // Bar colours sampled from the in-game class emblems, brightened to read well as fills.
     private static readonly Dictionary<GameClass, Color> Colors = new()
     {
-        [GameClass.Gladiator] = Color.FromRgb(0x5F, 0xC0, 0xD6),
-        [GameClass.Templar] = Color.FromRgb(0x6E, 0x91, 0xEE),
-        [GameClass.Ranger] = Color.FromRgb(0x4D, 0xBE, 0x90),
-        [GameClass.Assassin] = Color.FromRgb(0x6F, 0xC8, 0x5F),
-        [GameClass.Sorcerer] = Color.FromRgb(0x9B, 0x66, 0xEC),
-        [GameClass.Elementalist] = Color.FromRgb(0xCF, 0x55, 0xD0),
-        [GameClass.Cleric] = Color.FromRgb(0xE8, 0xBE, 0x52),
-        [GameClass.Chanter] = Color.FromRgb(0xE5, 0x9B, 0x4A),
-        [GameClass.Brawler] = Color.FromRgb(0xDE, 0x3A, 0x41),
+        [GameClass.Gladiator] = Color.FromRgb(0xF2, 0x8A, 0x45),
+        [GameClass.Templar] = Color.FromRgb(0xFF, 0xB0, 0x6A),
+        [GameClass.Ranger] = Color.FromRgb(0xFF, 0x8F, 0x4A),
+        [GameClass.Assassin] = Color.FromRgb(0xD6, 0x6A, 0x2A),
+        [GameClass.Sorcerer] = Color.FromRgb(0xC8, 0x54, 0x1E),
+        [GameClass.Elementalist] = Color.FromRgb(0xF6, 0xC0, 0x9A),
+        [GameClass.Cleric] = Color.FromRgb(0xFF, 0xC0, 0x74),
+        [GameClass.Chanter] = Color.FromRgb(0xE4, 0x7A, 0x35),
+        [GameClass.Brawler] = Color.FromRgb(0xB8, 0x4B, 0x1B),
         [GameClass.Unknown] = Color.FromRgb(0x94, 0xA3, 0xB8),
     };
 
@@ -31,15 +31,15 @@ public static class ClassVisuals
     // Saturated fills for the full-height damage bars (the emblem hues, pushed so a whole row reads at a glance).
     private static readonly Dictionary<GameClass, Color> BarColors = new()
     {
-        [GameClass.Gladiator] = Color.FromRgb(0x1F, 0xA2, 0xC8),
-        [GameClass.Templar] = Color.FromRgb(0x3B, 0x7C, 0xE6),
-        [GameClass.Ranger] = Color.FromRgb(0x1C, 0xAE, 0x7E),
-        [GameClass.Assassin] = Color.FromRgb(0x46, 0xB8, 0x4E),
-        [GameClass.Sorcerer] = Color.FromRgb(0x86, 0x4C, 0xE0),
-        [GameClass.Elementalist] = Color.FromRgb(0xC2, 0x3F, 0xC4),
-        [GameClass.Cleric] = Color.FromRgb(0xD8, 0xA2, 0x2A),
-        [GameClass.Chanter] = Color.FromRgb(0xEA, 0x7D, 0x2C),
-        [GameClass.Brawler] = Color.FromRgb(0xD6, 0x33, 0x3E),
+        [GameClass.Gladiator] = Color.FromRgb(0xD6, 0x6A, 0x2A),
+        [GameClass.Templar] = Color.FromRgb(0xE4, 0x7A, 0x35),
+        [GameClass.Ranger] = Color.FromRgb(0xFF, 0x8F, 0x4A),
+        [GameClass.Assassin] = Color.FromRgb(0xB8, 0x4B, 0x1B),
+        [GameClass.Sorcerer] = Color.FromRgb(0xC8, 0x54, 0x1E),
+        [GameClass.Elementalist] = Color.FromRgb(0xF2, 0x8A, 0x45),
+        [GameClass.Cleric] = Color.FromRgb(0xFF, 0xA0, 0x58),
+        [GameClass.Chanter] = Color.FromRgb(0xE4, 0x7A, 0x35),
+        [GameClass.Brawler] = Color.FromRgb(0x9E, 0x3D, 0x16),
         [GameClass.Unknown] = Color.FromRgb(0x5E, 0x6B, 0x84),
     };
 

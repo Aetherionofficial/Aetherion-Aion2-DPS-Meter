@@ -6,7 +6,7 @@
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" FontFamily="Segoe UI" FontSize="12">
     <Window.Resources>
         <Style x:Key="NavButton" TargetType="Button">
-            <Setter Property="Foreground" Value="#82949F"/><Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#A7A9AE"/><Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="12,11"/>
             <Setter Property="Margin" Value="0,2"/><Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Cursor" Value="Hand"/><Setter Property="FontSize" Value="12"/>
@@ -15,7 +15,7 @@
                     <ContentPresenter VerticalAlignment="Center"/>
                 </Border>
                 <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#261914"/><Setter Property="Foreground" Value="#FFAC72"/></Trigger>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#261914"/><Setter Property="Foreground" Value="#F28A45"/></Trigger>
                     <Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Background" Value="#30201A"/></Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate></Setter.Value></Setter>
@@ -30,14 +30,21 @@
         </Style>
         <Style x:Key="SmallAction" TargetType="Button">
             <Setter Property="Foreground" Value="#E5E7EA"/><Setter Property="Background" Value="#1B191A"/>
-            <Setter Property="BorderBrush" Value="#393337"/><Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#493B39"/><Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,8"/><Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
                 <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="9" Padding="{TemplateBinding Padding}">
                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
-                <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#30201A"/><Setter Property="BorderBrush" Value="#A55023"/></Trigger></ControlTemplate.Triggers>
+                <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#261914"/><Setter Property="BorderBrush" Value="#F28A45"/></Trigger></ControlTemplate.Triggers>
             </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="ToolMenuAction" TargetType="Button" BasedOn="{StaticResource SmallAction}">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Margin" Value="0,0,0,7" />
+            <Setter Property="Background" Value="#1B191A" />
+            <Setter Property="BorderBrush" Value="#493B39" />
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="Foreground" Value="#E5E7EA"/><Setter Property="Background" Value="#1B191A"/>
@@ -60,30 +67,30 @@
                         </DockPanel>
                     </Border>
                     <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                        <Border MinWidth="{TemplateBinding ActualWidth}" MaxHeight="300" Background="#171518" BorderBrush="#493B39" BorderThickness="1" CornerRadius="7">
+                        <Border MinWidth="{TemplateBinding ActualWidth}" MaxHeight="300" Background="#1B191A" BorderBrush="#493B39" BorderThickness="1" CornerRadius="7">
                             <ScrollViewer CanContentScroll="True"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
                         </Border>
                     </Popup>
                 </Grid><ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="#A55023"/></Trigger>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="#F28A45"/></Trigger>
                     <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value=".55"/></Trigger>
                 </ControlTemplate.Triggers></ControlTemplate>
             </Setter.Value></Setter>
         </Style>
         <Style TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="#E5E7EA"/><Setter Property="Background" Value="#171518"/>
+            <Setter Property="Foreground" Value="#E5E7EA"/><Setter Property="Background" Value="#1B191A"/>
             <Setter Property="Padding" Value="8,5"/><Setter Property="Template"><Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem"><Border x:Name="Surface" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border>
-                    <ControlTemplate.Triggers><Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Surface" Property="Background" Value="#30201A"/><Setter Property="Foreground" Value="#FFAC72"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter TargetName="Surface" Property="Background" Value="#261914"/><Setter Property="Foreground" Value="#FFAC72"/></Trigger></ControlTemplate.Triggers>
+                    <ControlTemplate.Triggers><Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Surface" Property="Background" Value="#261914"/><Setter Property="Foreground" Value="#F28A45"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter TargetName="Surface" Property="Background" Value="#30201A"/><Setter Property="Foreground" Value="#F28A45"/></Trigger></ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value></Setter>
         </Style>
         <DataTemplate x:Key="PlayerRow">
             <Grid Height="62" Margin="0,2">
-                <Border x:Name="RowBack" Background="#171619" CornerRadius="11"/>
+                    <Border x:Name="RowBack" Background="#1B191A" CornerRadius="11"/>
                 <Grid Margin="12,0">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition Width="36"/><ColumnDefinition Width="230"/><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/><ColumnDefinition Width="92"/></Grid.ColumnDefinitions>
-                    <Border Width="28" Height="28" CornerRadius="14" Background="#261914" VerticalAlignment="Center"><TextBlock Text="{Binding RankText}" Foreground="#F28A45" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                    <Border Width="28" Height="28" CornerRadius="14" Background="#30201A" VerticalAlignment="Center"><TextBlock Text="{Binding RankText}" Foreground="#F28A45" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
                     <Border Grid.Column="1" Width="25" Height="25" CornerRadius="9" Background="#201B1B" VerticalAlignment="Center"><TextBlock Text="{Binding ClassGlyph}" Foreground="{Binding ClassBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
                     <StackPanel Grid.Column="2" VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"/><TextBlock Text="{Binding ClassLabel}" FontSize="9" Foreground="#82949F" Margin="0,2,0,0"/></StackPanel>
                     <Grid Grid.Column="3" VerticalAlignment="Center" Margin="8,0,18,0"><Border Height="5" Background="#393337" CornerRadius="3"/><Border Height="5" HorizontalAlignment="Left" Width="{Binding BarWidth}" Background="{Binding BarBrush}" CornerRadius="3"/></Grid>
@@ -91,7 +98,7 @@
                     <TextBlock Grid.Column="5" Text="{Binding RateText}" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="13" FontWeight="Bold"/>
                 </Grid>
             </Grid>
-            <DataTemplate.Triggers><DataTrigger Binding="{Binding IsSelf}" Value="True"><Setter TargetName="RowBack" Property="Background" Value="#211610"/></DataTrigger></DataTemplate.Triggers>
+            <DataTemplate.Triggers><DataTrigger Binding="{Binding IsSelf}" Value="True"><Setter TargetName="RowBack" Property="Background" Value="#261914"/></DataTrigger></DataTemplate.Triggers>
         </DataTemplate>
     </Window.Resources>
 
@@ -103,10 +110,10 @@
         <Border Grid.RowSpan="2" Background="#0C0C0F" BorderBrush="#393337" BorderThickness="0,0,1,0">
             <DockPanel Margin="13,18,13,14">
                 <StackPanel DockPanel.Dock="Top">
-                    <Border Width="42" Height="42" CornerRadius="13" Background="#171316" BorderBrush="#78391F" BorderThickness="1" Margin="0,0,0,30">
+                    <Border Width="42" Height="42" CornerRadius="13" Background="#1B191A" BorderBrush="#F28A45" BorderThickness="1" Margin="0,0,0,30">
                         <Image Source="pack://application:,,,/Assets/aetherion-mark.png" Width="38" Height="38" Stretch="Uniform"/>
                     </Border>
-                    <Button Style="{StaticResource NavButton}" Background="#261914" Foreground="#FFAC72" ToolTip="Kampfzentrum" Click="Home_Click"><TextBlock Text="◈" FontSize="21" HorizontalAlignment="Center"/></Button>
+                    <Button Style="{StaticResource NavButton}" Background="#261914" Foreground="#F28A45" ToolTip="Kampfzentrum" Click="Home_Click"><TextBlock Text="◈" FontSize="21" HorizontalAlignment="Center"/></Button>
                     <Button Style="{StaticResource NavButton}" ToolTip="Kampfverlauf" Click="History_Click"><TextBlock Text="◷" FontSize="21" HorizontalAlignment="Center"/></Button>
                     <Button Style="{StaticResource NavButton}" ToolTip="Boss-Timer" Click="Timers_Click"><TextBlock Text="◴" FontSize="21" HorizontalAlignment="Center"/></Button>
                     <Button Style="{StaticResource NavButton}" ToolTip="Event- und Weltboss-Timer" Click="EventTimers_Click"><TextBlock Text="◷" FontSize="21" HorizontalAlignment="Center"/></Button>
@@ -116,7 +123,7 @@
                 <StackPanel DockPanel.Dock="Bottom">
                     <Button Style="{StaticResource NavButton}" ToolTip="Overlay im Spiel ein-/ausblenden" Click="Overlay_Click"><TextBlock Text="▣" FontSize="19" HorizontalAlignment="Center"/></Button>
                     <Button Style="{StaticResource NavButton}" ToolTip="Einstellungen" Click="Settings_Click"><TextBlock Text="⚙" FontSize="20" HorizontalAlignment="Center"/></Button>
-                    <Border Width="38" Height="38" CornerRadius="19" Background="#171619" BorderBrush="#393337" BorderThickness="1" Margin="9,14,9,0"><TextBlock Text="A" FontWeight="Bold" Foreground="#C3C5C9" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                    <Border Width="38" Height="38" CornerRadius="19" Background="#1B191A" BorderBrush="#493B39" BorderThickness="1" Margin="9,14,9,0"><TextBlock Text="A" FontWeight="Bold" Foreground="#F28A45" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -127,7 +134,8 @@
             <Grid Grid.Row="0" Background="Transparent" Cursor="SizeAll" ToolTip="Zum Verschieben hier ziehen" MouseLeftButtonDown="Header_Drag">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left"><TextBlock Text="AETHERION  /  RAID COMMAND" FontSize="10" FontWeight="Bold" Foreground="#F28A45"/><TextBlock Text="Kampfzentrum" FontSize="24" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock x:Name="LocationText" Text="Live-Kampfanalyse · Asmodae" FontSize="11" Foreground="#A7A9AE" Margin="0,2,0,0"/></StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" MouseLeftButtonDown="NoDrag">
-                    <Border Background="#1B191A" BorderBrush="#393337" BorderThickness="1" CornerRadius="10" Padding="13,9" Margin="0,0,10,0"><StackPanel Orientation="Horizontal"><Ellipse Width="7" Height="7" Fill="#F28A45" Margin="0,0,9,0"/><TextBlock x:Name="CaptureStateText" Text="BEREIT" FontSize="10" FontWeight="Bold"/></StackPanel></Border>
+                    <Border Background="#1B191A" BorderBrush="#493B39" BorderThickness="1" CornerRadius="10" Padding="13,9" Margin="0,0,10,0"><StackPanel Orientation="Horizontal"><Ellipse Width="7" Height="7" Fill="#F28A45" Margin="0,0,9,0"/><TextBlock x:Name="CaptureStateText" Text="BEREIT" FontSize="10" FontWeight="Bold"/></StackPanel></Border>
+                    <Button Style="{StaticResource SmallAction}" Content="Spieltools" Click="ToolMenu_Click" Margin="0,0,10,0" />
                     <Button Style="{StaticResource SmallAction}" Content="Ansicht ▾" Click="ViewMenu_Click" Margin="0,0,10,0">
                         <Button.ContextMenu>
                             <ContextMenu>
@@ -146,17 +154,17 @@
 
             <!-- boss encounter -->
             <Border Grid.Row="1" CornerRadius="18" BorderBrush="#78391F" BorderThickness="1" Padding="22" Margin="0,4,0,10">
-                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0.2"><GradientStop Color="#21140F"/><GradientStop Offset=".55" Color="#171518"/><GradientStop Offset="1" Color="#1C171A"/></LinearGradientBrush></Border.Background>
+                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0.2"><GradientStop Color="#21140F"/><GradientStop Offset=".55" Color="#1B191A"/><GradientStop Offset="1" Color="#261914"/></LinearGradientBrush></Border.Background>
                 <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="142"/><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/><ColumnDefinition Width="260"/></Grid.ColumnDefinitions>
                     <Border Width="118" Height="118" CornerRadius="18" Background="#151316" BorderBrush="#493B39" BorderThickness="1" VerticalAlignment="Center">
-                        <Grid><Ellipse Width="82" Height="82" Stroke="#A7A9AE" StrokeThickness="2"/><Ellipse Width="60" Height="60" Stroke="#F06A22" StrokeThickness="1.5"/><TextBlock Text="✧" FontSize="54" Foreground="#FFAC72" HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid>
+                        <Grid><Ellipse Width="82" Height="82" Stroke="#A7A9AE" StrokeThickness="2"/><Ellipse Width="60" Height="60" Stroke="#F28A45" StrokeThickness="1.5"/><TextBlock Text="✧" FontSize="54" Foreground="#FFAC72" HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid>
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,22,0">
                         <TextBlock Text="BOSS-BEGEGNUNG" FontSize="10" FontWeight="Bold" Foreground="#F28A45"/>
                         <TextBlock x:Name="BossNameText" Text="Warte auf Kampf" FontSize="26" FontWeight="Bold" Margin="0,7,0,2" TextTrimming="CharacterEllipsis"/>
                         <TextBlock x:Name="BossMetaText" Text="Boss-Lebenspunkte und Phase erscheinen, sobald das Spiel sie überträgt." FontSize="11" Foreground="#A3B5BC" TextWrapping="Wrap"/>
-                        <ProgressBar x:Name="BossHpBar" Minimum="0" Maximum="1" Value="0" Height="9" Margin="0,14,0,7" Background="#393337" Foreground="#F06A22" BorderThickness="0"/>
-                        <DockPanel LastChildFill="False"><TextBlock Text="BOSS-LEBEN" FontSize="9" FontWeight="Bold" Foreground="#A7A9AE"/><TextBlock x:Name="BossPercentText" DockPanel.Dock="Right" Text="—" FontWeight="Bold" Foreground="#FFAC72"/></DockPanel>
+                        <ProgressBar x:Name="BossHpBar" Minimum="0" Maximum="1" Value="0" Height="9" Margin="0,14,0,7" Background="#493B39" Foreground="#F28A45" BorderThickness="0"/>
+                        <DockPanel LastChildFill="False"><TextBlock Text="BOSS-LEBEN" FontSize="9" FontWeight="Bold" Foreground="#A7A9AE"/><TextBlock x:Name="BossPercentText" DockPanel.Dock="Right" Text="—" FontWeight="Bold" Foreground="#F28A45"/></DockPanel>
                     </StackPanel>
                     <Border Grid.Column="2" BorderBrush="#493B39" BorderThickness="1,0,0,0" Padding="24,0,0,0" Margin="0,0,14,0"><StackPanel VerticalAlignment="Center"><TextBlock Text="KAMPFZEIT" FontSize="10" FontWeight="Bold" Foreground="#A7A9AE"/><TextBlock x:Name="EncounterTimeText" Text="00:00" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock x:Name="EncounterStatusText" Text="Noch kein Kampf erkannt" FontSize="11" Foreground="#B4B8BE" Margin="0,3,0,0"/></StackPanel></Border>
                     <Border Grid.Column="3" Background="#110F12" BorderBrush="#78391F" BorderThickness="1" CornerRadius="14" Padding="18,16"><StackPanel VerticalAlignment="Center"><TextBlock Text="KAMPFSTATUS" FontSize="10" FontWeight="Bold" Foreground="#F28A45"/><TextBlock x:Name="MechanicTitleText" Text="Warte auf Kampfdaten" FontSize="15" FontWeight="Bold" Margin="0,12,0,3"/><TextBlock x:Name="MechanicDetailText" Text="Mechaniken und Boss-Phasen werden nur angezeigt, wenn AION2 sie im Netzwerkverkehr bereitstellt." FontSize="11" Foreground="#B4B8BE" TextWrapping="Wrap"/></StackPanel></Border>
@@ -165,7 +173,7 @@
 
             <!-- metrics -->
             <Grid x:Name="MetricsPanel" Grid.Row="2" Margin="0,2,0,10"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource Metric}" BorderBrush="#78391F"><Border.BorderThickness>1</Border.BorderThickness><DockPanel><Border DockPanel.Dock="Left" Width="3" Background="#F06A22" CornerRadius="2" Margin="0,0,14,0"/><StackPanel><TextBlock Text="GRUPPEN-DPS" FontSize="10" FontWeight="Bold" Foreground="#B4B8BE"/><TextBlock x:Name="PartyDpsText" Text="—" FontSize="28" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock x:Name="TotalDamageText" Text="Gesamtschaden —" FontSize="10" Foreground="#A7A9AE"/></StackPanel></DockPanel></Border>
+                <Border Grid.Column="0" Style="{StaticResource Metric}" BorderBrush="#78391F"><Border.BorderThickness>1</Border.BorderThickness><DockPanel><Border DockPanel.Dock="Left" Width="3" Background="#F28A45" CornerRadius="2" Margin="0,0,14,0"/><StackPanel><TextBlock Text="GRUPPEN-DPS" FontSize="10" FontWeight="Bold" Foreground="#B4B8BE"/><TextBlock x:Name="PartyDpsText" Text="—" FontSize="28" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock x:Name="TotalDamageText" Text="Gesamtschaden —" FontSize="10" Foreground="#A7A9AE"/></StackPanel></DockPanel></Border>
                 <Border Grid.Column="1" Style="{StaticResource Metric}" BorderBrush="#494A4E"><DockPanel><Border DockPanel.Dock="Left" Width="3" Background="#C3C5C9" CornerRadius="2" Margin="0,0,14,0"/><StackPanel><TextBlock Text="GRUPPEN-HPS" FontSize="10" FontWeight="Bold" Foreground="#B4B8BE"/><TextBlock x:Name="PartyHpsText" Text="—" FontSize="28" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock Text="Heilung pro Sekunde" FontSize="10" Foreground="#A7A9AE"/></StackPanel></DockPanel></Border>
                 <Border Grid.Column="2" Style="{StaticResource Metric}" BorderBrush="#78391F"><DockPanel><Border DockPanel.Dock="Left" Width="3" Background="#FFAC72" CornerRadius="2" Margin="0,0,14,0"/><StackPanel><TextBlock Text="PEAK DPS · 5 SEK." FontSize="10" FontWeight="Bold" Foreground="#B4B8BE"/><TextBlock x:Name="PeakDpsText" Text="—" FontSize="28" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock Text="Bester Gruppen-Schadensburst" FontSize="10" Foreground="#A7A9AE"/></StackPanel></DockPanel></Border>
                 <Border Grid.Column="3" Style="{StaticResource Metric}" Margin="0" BorderBrush="#4C333D"><DockPanel><Border DockPanel.Dock="Left" Width="3" Background="#FF7582" CornerRadius="2" Margin="0,0,14,0"/><StackPanel><TextBlock Text="EINGEHENDER SCHADEN" FontSize="10" FontWeight="Bold" Foreground="#91A5AA"/><TextBlock x:Name="DamageTakenText" Text="—" FontSize="28" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock x:Name="DeathCountText" Text="Todesfälle —" FontSize="10" Foreground="#82949F"/></StackPanel></DockPanel></Border>
@@ -179,14 +187,14 @@
                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,0"><Grid Width="118" Height="34" Margin="0,0,7,0"><TextBox x:Name="PlayerSearchBox" VerticalContentAlignment="Center" Padding="8,5" ToolTip="Spieler suchen" TextChanged="PlayerFilter_Changed"/><TextBlock x:Name="PlayerSearchPlaceholder" Text="Spieler suchen" Foreground="#8B898C" VerticalAlignment="Center" Margin="9,0,0,0" IsHitTestVisible="False"/></Grid><ComboBox x:Name="ClassFilterBox" Width="120" Height="34" Margin="0,0,7,0" Background="#1B191A" Foreground="#E5E7EA" BorderBrush="#493B39" SelectedIndex="0" SelectionChanged="PlayerFilter_Changed" ToolTip="Nach Klasse filtern"><ComboBoxItem Content="Alle Klassen" Tag="*"/><ComboBoxItem Content="Gladiator" Tag="Gladiator"/><ComboBoxItem Content="Templer" Tag="Templar"/><ComboBoxItem Content="Assassine" Tag="Assassin"/><ComboBoxItem Content="Jäger" Tag="Ranger"/><ComboBoxItem Content="Zauberer" Tag="Sorcerer"/><ComboBoxItem Content="Beschwörer" Tag="Elementalist"/><ComboBoxItem Content="Kleriker" Tag="Cleric"/><ComboBoxItem Content="Kantor" Tag="Chanter"/></ComboBox><ComboBox x:Name="SortBox" Width="128" Height="34" Background="#1B191A" Foreground="#E5E7EA" BorderBrush="#493B39" SelectedIndex="0" SelectionChanged="PlayerFilter_Changed" ToolTip="Rangliste sortieren"><ComboBoxItem Content="DPS / HPS ↓" Tag="rate"/><ComboBoxItem Content="Gesamtwert ↓" Tag="value"/><ComboBoxItem Content="Burst / HPS ↓" Tag="burst"/><ComboBoxItem Content="Name A–Z" Tag="name"/><ComboBoxItem Content="Klasse A–Z" Tag="class"/></ComboBox></StackPanel>
                         <Grid Grid.Row="2" Margin="8,12,8,8"><Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition Width="36"/><ColumnDefinition Width="230"/><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/><ColumnDefinition Width="92"/></Grid.ColumnDefinitions><TextBlock Text="RANG" FontSize="9" FontWeight="Bold" Foreground="#82949F"/><TextBlock Grid.Column="2" Text="SPIELER" FontSize="9" FontWeight="Bold" Foreground="#82949F"/><TextBlock Grid.Column="3" Text="ANTEIL AM GRUPPENWERT" FontSize="9" FontWeight="Bold" Foreground="#82949F"/><TextBlock Grid.Column="4" Text="ANTEIL" FontSize="9" FontWeight="Bold" Foreground="#82949F" HorizontalAlignment="Right"/><TextBlock x:Name="RateColumnText" Grid.Column="5" Text="DPS" FontSize="9" FontWeight="Bold" Foreground="#82949F" HorizontalAlignment="Right"/></Grid>
                         <Grid Grid.Row="3"><ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><ItemsControl x:Name="PlayersList" ItemTemplate="{StaticResource PlayerRow}"/></ScrollViewer><StackPanel x:Name="EmptyPlayersPanel" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360"><TextBlock x:Name="EmptyPlayersTitle" Text="Noch keine Kampfdaten" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center"/><TextBlock x:Name="EmptyPlayersDetail" Text="Sobald Aetherion Treffer aus einem Kampf erkennt, erscheinen hier Spielernamen und Werte." FontSize="11" Foreground="#A7A9AE" TextAlignment="Center" TextWrapping="Wrap" Margin="0,7,0,0"/></StackPanel></Grid>
-                        <DockPanel Grid.Row="4" Margin="0,12,0,0"><Ellipse Width="7" Height="7" Fill="#F06A22" Margin="0,0,8,0"/><TextBlock x:Name="PlayerCountText" Text="Warte auf Spieler" FontSize="10" Foreground="#9AABB1"/><Button DockPanel.Dock="Right" Style="{StaticResource SmallAction}" Content="Kampfdetails öffnen" Click="Details_Click" Padding="12,6"/></DockPanel>
+                        <DockPanel Grid.Row="4" Margin="0,12,0,0"><Ellipse Width="7" Height="7" Fill="#F28A45" Margin="0,0,8,0"/><TextBlock x:Name="PlayerCountText" Text="Warte auf Spieler" FontSize="10" Foreground="#9AABB1"/><Button DockPanel.Dock="Right" Style="{StaticResource SmallAction}" Content="Kampfdetails öffnen" Click="Details_Click" Padding="12,6"/></DockPanel>
                     </Grid>
                 </Border>
                 <Grid x:Name="RightPanelsGrid" Grid.Column="1"><Grid.RowDefinitions><RowDefinition x:Name="ChartRow" Height="1.18*"/><RowDefinition x:Name="TeamRow" Height=".92*"/></Grid.RowDefinitions>
                     <Border x:Name="FightChartPanel" Grid.Row="0" Style="{StaticResource Panel}" Margin="0,0,0,14">
                         <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                             <StackPanel><TextBlock Text="Kampfverlauf" FontSize="17" FontWeight="Bold"/><TextBlock Text="Gruppen-DPS im Verlauf des aktuellen Fights" FontSize="11" Foreground="#82949F" Margin="0,4,0,0"/></StackPanel>
-                            <Grid Grid.Row="1" Margin="4,14,4,4" ClipToBounds="True"><Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions><Border Grid.Row="0" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Border Grid.Row="1" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Border Grid.Row="2" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Border Grid.Row="3" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Polygon x:Name="DpsArea" Fill="#28F06A22"/><Polyline x:Name="DpsLine" Stroke="#F28A45" StrokeThickness="2.3" StrokeLineJoin="Round"/></Grid>
+                            <Grid Grid.Row="1" Margin="4,14,4,4" ClipToBounds="True"><Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions><Border Grid.Row="0" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Border Grid.Row="1" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Border Grid.Row="2" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Border Grid.Row="3" BorderBrush="#393337" BorderThickness="0,0,0,1"/><Polygon x:Name="DpsArea" Fill="#28F28A45"/><Polyline x:Name="DpsLine" Stroke="#F28A45" StrokeThickness="2.3" StrokeLineJoin="Round"/></Grid>
                             <DockPanel Grid.Row="2" Margin="0,5,0,0"><TextBlock Text="00:00" FontSize="9" Foreground="#8B898C"/><TextBlock x:Name="ChartRangeText" Text="LIVE" FontSize="9" Foreground="#F28A45" HorizontalAlignment="Right" DockPanel.Dock="Right"/></DockPanel>
                         </Grid>
                     </Border>
@@ -203,6 +211,42 @@
                 </Grid>
             </Grid>
         </Grid>
+        <!-- Launcher-style tool drawer, opened from the header and kept separate from the fight dashboard. -->
+        <Border x:Name="ToolDrawer" Grid.Column="1" Grid.RowSpan="2" Width="312" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,76,12,0" Padding="14" Background="#E91B191A" BorderBrush="#493B39" BorderThickness="1" CornerRadius="16"
+                Visibility="Collapsed" Panel.ZIndex="20">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,12">
+                    <TextBlock Text="✦  Spieltools" Foreground="#F28A45" FontSize="14" FontWeight="Bold" />
+                    <Button DockPanel.Dock="Right" Style="{StaticResource SmallAction}" Content="×" Width="30" Padding="0" Click="ToolMenu_Click" />
+                </DockPanel>
+                <TextBlock Text="Schnellzugriff auf Aetherion-Funktionen" Foreground="#A7A9AE" FontSize="10" Margin="0,0,0,12" />
+                <Button Style="{StaticResource ToolMenuAction}" Click="Details_Click">
+                    <StackPanel><TextBlock Text="⚡  Echtzeit-DPS-Tracker" FontWeight="SemiBold" /><TextBlock Text="Aktuelle Gruppenleistung und Kampfdetails" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Button Style="{StaticResource ToolMenuAction}" Click="History_Click">
+                    <StackPanel><TextBlock Text="◷  Kampfverlauf" FontWeight="SemiBold" /><TextBlock Text="Vergleiche vergangene Kämpfe" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Button Style="{StaticResource ToolMenuAction}" Click="Timers_Click">
+                    <StackPanel><TextBlock Text="◴  Boss-Timer" FontWeight="SemiBold" /><TextBlock Text="Respawns und Hinweise im Blick behalten" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Button Style="{StaticResource ToolMenuAction}" Click="Map_Click">
+                    <StackPanel><TextBlock Text="⌖  Interaktive Karte" FontWeight="SemiBold" /><TextBlock Text="AION2-Karte und Positionshilfe" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Button Style="{StaticResource ToolMenuAction}" Click="Guide_Click">
+                    <StackPanel><TextBlock Text="◇  Wakayashi-Guide" FontWeight="SemiBold" /><TextBlock Text="Builds und Klasseninformationen öffnen" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Button Style="{StaticResource ToolMenuAction}" Click="Overlay_Click">
+                    <StackPanel><TextBlock Text="▣  Overlay im Spiel" FontWeight="SemiBold" /><TextBlock Text="Overlay ein- oder ausblenden" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Button Style="{StaticResource ToolMenuAction}" Click="Settings_Click" Margin="0,3,0,0">
+                    <StackPanel><TextBlock Text="⚙  Einstellungen" FontWeight="SemiBold" /><TextBlock Text="Benachrichtigungen, Overlay und Hotkeys" FontSize="10" Foreground="#A7A9AE" Margin="24,2,0,0" /></StackPanel>
+                </Button>
+                <Border Background="#261914" CornerRadius="9" Padding="10,7" Margin="0,5,0,0">
+                    <TextBlock Text="Alle Tools" HorizontalAlignment="Center" Foreground="#FFE0C8" FontWeight="SemiBold" />
+                </Border>
+            </StackPanel>
+        </Border>
         <TextBlock Grid.Column="1" Grid.Row="1" Text="KAMPFDATEN AUS DEINER LOKALEN SPIELVERBINDUNG" FontSize="8" Foreground="#52636E" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="25,0,0,0"/>
     </Grid>
 </Window>

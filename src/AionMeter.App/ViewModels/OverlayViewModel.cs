@@ -147,12 +147,11 @@ public sealed class RowViewModel : ObservableObject
             fill.GradientStops.Add(new GradientStop(Color.FromArgb(0xC8, (byte)(v.R * 0.72), (byte)(v.G * 0.72), (byte)(v.B * 0.72)), 1));
             FillBrush = Freeze(fill);
             DpsBrush = Freeze(new SolidColorBrush(Lighten(v, 0.55)));
-            // Keep the overlay's progress wash in the app's ember palette; class identity stays on the narrow strip/icon.
-            var ember = Color.FromRgb(0xF0, 0x6A, 0x22);
+            // Use the class colour for the soft row wash, matching the compact reference overlay.
             var soft = new LinearGradientBrush { StartPoint = new System.Windows.Point(0, 0), EndPoint = new System.Windows.Point(1, 0) };
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, ember.R, ember.G, ember.B), 0));
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x20, ember.R, ember.G, ember.B), 0.6));
-            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x08, ember.R, ember.G, ember.B), 1));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x62, v.R, v.G, v.B), 0));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x28, v.R, v.G, v.B), 0.6));
+            soft.GradientStops.Add(new GradientStop(Color.FromArgb(0x08, v.R, v.G, v.B), 1));
             SoftFillBrush = Freeze(soft);
             AccentBrush = Freeze(new SolidColorBrush(Lighten(v, 0.1)));
             Raise(nameof(SoftFillBrush));

@@ -24,13 +24,13 @@
         <GridLength x:Key="ColGlyphWidth">26</GridLength>
         <Thickness x:Key="ColGap">10,0,0,0</Thickness>
         <sys:Double x:Key="NameMaxWidth">220</sys:Double>
-        <sys:Double x:Key="RowHeight">28</sys:Double>
-        <Thickness x:Key="RowMargin">0,0,0,3</Thickness>
-        <sys:Double x:Key="RowNameFont">17</sys:Double>
-        <sys:Double x:Key="RowGearFont">14</sys:Double>
-        <sys:Double x:Key="RowNumberFont">15.5</sys:Double>
-        <sys:Double x:Key="RowSubFont">13.5</sys:Double>
-        <sys:Double x:Key="RowGlyphSize">20</sys:Double>
+        <sys:Double x:Key="RowHeight">42</sys:Double>
+        <Thickness x:Key="RowMargin">0,0,0,2</Thickness>
+        <sys:Double x:Key="RowNameFont">13.5</sys:Double>
+        <sys:Double x:Key="RowGearFont">10.5</sys:Double>
+        <sys:Double x:Key="RowNumberFont">13</sys:Double>
+        <sys:Double x:Key="RowSubFont">10</sys:Double>
+        <sys:Double x:Key="RowGlyphSize">22</sys:Double>
         <sys:Double x:Key="RowRankFont">12.5</sys:Double>
         <sys:Double x:Key="RowAccentWidth">3</sys:Double>
 
@@ -93,6 +93,7 @@
         <SolidColorBrush x:Key="Cream" Color="#E5E7EA" />
         <SolidColorBrush x:Key="Soft" Color="#B4B8BE" />
         <SolidColorBrush x:Key="SelfGold" Color="#F28A45" />
+        <SolidColorBrush x:Key="StatsTeal" Color="#F28A45" />
 
         <!-- A hairline frame, a touch lighter at the top -->
         <LinearGradientBrush x:Key="CardFrame" StartPoint="0,0" EndPoint="0,1">
@@ -243,22 +244,25 @@
                     <c:ClassGlyph Grid.Column="1" Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}"
                                   Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
 
-                    <!-- As wide as the longest name, up to what the other columns leave (OverlayWindow.FitNames) -->
-                    <TextBlock x:Name="NameText" Grid.Column="2" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
-                               Foreground="#FFF8F1" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="2,0,0,1"
-                               MaxWidth="{DynamicResource NameMaxWidth}" />
+                    <!-- Reference layout: player name and power on two compact lines. -->
+                    <StackPanel Grid.Column="2" Grid.ColumnSpan="3" VerticalAlignment="Center" Margin="2,0,0,0"
+                                MaxWidth="{DynamicResource NameMaxWidth}">
+                        <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
+                                   Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" />
+                        <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
+                            <TextBlock Style="{StaticResource GearText}" Margin="0" Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}"
+                                       ToolTip="{Binding DataContext.T.TipGs, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="✦ " Foreground="#D9E3EA" /><Run Text="{Binding GearScore, Mode=OneWay}" Foreground="#F2A06B" /></TextBlock>
+                            <TextBlock Style="{StaticResource GearText}" Margin="8,0,0,0" Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}"
+                                       ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="⚔ " Foreground="#D9E3EA" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#FFB078" /></TextBlock>
+                        </StackPanel>
+                    </StackPanel>
 
-                    <!-- Gear score and combat power, right by the name: only players of your party have them (the party roster) -->
-                    <TextBlock Grid.Column="3" Style="{StaticResource GearText}" Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}"
-                               ToolTip="{Binding DataContext.T.TipGs, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="GS " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding GearScore, Mode=OneWay}" Foreground="#FFAC72" /></TextBlock>
-                    <TextBlock Grid.Column="4" Style="{StaticResource GearText}" Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}"
-                               ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="CP " FontWeight="SemiBold" Foreground="#D5DAE4" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#E5E7EA" /></TextBlock>
-
-                    <TextBlock Grid.Column="6" Text="{Binding Dps}" Style="{StaticResource RowNumber}"
-                               ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <TextBlock Grid.Column="7" Text="{Binding Damage}" Style="{StaticResource RowSub}"
-                               ToolTip="{Binding DataContext.T.TipDamage, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <TextBlock Grid.Column="8" Text="{Binding Share}" Style="{StaticResource RowSub}" />
+                    <StackPanel Grid.Column="6" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <TextBlock Text="{Binding Dps}" Style="{StaticResource RowNumber}" Margin="0" />
+                        <TextBlock Text="{Binding Damage}" Style="{StaticResource RowSub}" Margin="0" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="8" Text="{Binding Share}" Style="{StaticResource RowSub}" Foreground="{Binding DpsBrush}" />
                 </Grid>
             </Grid>
             <DataTemplate.Triggers>
@@ -304,7 +308,7 @@
 
             <!-- The one top line: the fight's title on the left (the toolbar while the mouse is over the overlay), the state
                  and the timer on the right -->
-            <Grid x:Name="Header" Background="Transparent" Height="22">
+            <Grid x:Name="Header" Background="Transparent" Height="30">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -315,10 +319,14 @@
                         <Border Background="#F06A22" CornerRadius="1" Width="3" Height="10" Margin="0,0,6,0" />
                         <TextBlock Text="{Binding T.OverlayLive}" FontSize="8" FontWeight="Bold" Foreground="#F28A45" />
                     </StackPanel>
-                    <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="13.5" FontWeight="SemiBold"
-                           Foreground="#EEF0F5" TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center" Margin="0,1,10,0" Effect="{StaticResource TextShadow}" Background="Transparent"
-                           MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <TextBlock Text="DPS-Statistiken" FontSize="11" FontWeight="Bold"
+                                   Foreground="{StaticResource StatsTeal}" Effect="{StaticResource TextShadow}" />
+                        <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="9" FontWeight="SemiBold"
+                                   Foreground="#C6D0D5" TextTrimming="CharacterEllipsis"
+                                   Effect="{StaticResource TextShadow}" Background="Transparent"
+                                   MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
+                    </StackPanel>
                     </StackPanel>
 
                 <Border Grid.Column="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" CornerRadius="0" Padding="0" VerticalAlignment="Center">
@@ -355,6 +363,8 @@
                     </StackPanel>
                     <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="13.5"
                                Foreground="#F28A45" VerticalAlignment="Center" />
+                    <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click"
+                            ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" Margin="6,0,0,0" />
                 </StackPanel>
                 </Border>
             </Grid>
@@ -420,9 +430,9 @@
 
                 <Grid Grid.Row="0" Margin="0,0,10,4">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="28" /><ColumnDefinition Width="28" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                    <TextBlock Grid.ColumnSpan="3" Text="RANG · SPIELER" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="3" Text="DPS" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" Margin="0,0,14,0" />
-                    <TextBlock Grid.Column="4" Text="{Binding T.OverlayShare}" FontSize="9" FontWeight="Bold" Foreground="#D0C4BB" VerticalAlignment="Center" />
+                    <TextBlock Grid.ColumnSpan="3" Text="RANG · SPIELER" FontSize="8" FontWeight="Bold" Foreground="#91A3A9" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="DPS" FontSize="8" FontWeight="Bold" Foreground="{StaticResource StatsTeal}" Margin="0,0,14,0" />
+                    <TextBlock Grid.Column="4" Text="%" FontSize="8" FontWeight="Bold" Foreground="{StaticResource StatsTeal}" VerticalAlignment="Center" />
                 </Grid>
                 <ScrollViewer x:Name="PlayerRowsViewport" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">

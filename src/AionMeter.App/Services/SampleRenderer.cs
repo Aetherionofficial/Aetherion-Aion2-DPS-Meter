@@ -131,6 +131,7 @@ public static class SampleRenderer
                 break;
             case "raid-command":
                 var command = new RaidCommandWindow(meter) { Width = o.Width ?? 1480, Height = o.Height ?? 920 };
+                command.ShowToolMenuPreview();
                 host = command;
                 refresh = command.Refresh;
                 break;

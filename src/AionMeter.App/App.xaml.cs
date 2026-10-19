@@ -250,10 +250,10 @@ public partial class App : Application
                 Log.Info("Exit chosen in the tray menu");
                 Shutdown();
             }));
-        // Start in the requested workspace: live DPS overlay at the left with the full settings panel beside it.
-        SetOverlayVisible(true);
-        if (_meter.Settings.SetupCompleted) ShowSettings();
-        else new CustomerToolsWindow(_meter, firstRun: true).Show();
+        // Start with one clear workspace: the normal settings menu. The overlay and
+        // Comfort & Analyse window can be opened from there when the user chooses them.
+        SetOverlayVisible(false);
+        ShowSettings();
         SessionEnding += (_, end) => Log.Info($"Windows {end.ReasonSessionEnding}: closing");
 
         // A new player's first start: without Npcap nothing can be measured — say so and offer the download.
