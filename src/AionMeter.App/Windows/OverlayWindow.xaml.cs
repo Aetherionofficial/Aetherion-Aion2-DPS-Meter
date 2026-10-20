@@ -382,6 +382,12 @@ public partial class OverlayWindow : Window
     {
         // Keep footer actions clear of the corner resize handle at narrow sizes.
         if (FooterDetailsButton is null) return;
+        // Keep every visible element in proportion when the user resizes the overlay.  A RenderTransform is used so
+        // the transparent hit area and the resize grips keep their normal window geometry while text, bars, icons and
+        // buttons shrink/grow together instead of producing a cramped mix of old and new sizes.
+        var scale = Math.Clamp((Width - 16) / 584.0, 0.72, 1.0);
+        CardBodyScale.ScaleX = scale;
+        CardBodyScale.ScaleY = scale;
         var compact = _settings.CompactDpsOnly;
         CompactTopActions.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
         FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;

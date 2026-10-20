@@ -297,7 +297,10 @@
             </Border.Background>
         </Border>
 
-        <Grid x:Name="CardBody" Margin="12,8,12,8">
+        <Grid x:Name="CardBody" Margin="12,8,12,8" RenderTransformOrigin="0,0">
+            <Grid.RenderTransform>
+                <ScaleTransform x:Name="CardBodyScale" ScaleX="1" ScaleY="1" />
+            </Grid.RenderTransform>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />

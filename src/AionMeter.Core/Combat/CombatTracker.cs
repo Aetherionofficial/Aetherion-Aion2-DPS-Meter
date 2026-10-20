@@ -103,6 +103,7 @@ public sealed class CombatTracker
                     selfName = s.Name;
                     break;
                 case PartyRosterEvent roster:
+                    _entities.ApplyRoster(roster.Members);
                     foreach (var m in roster.Members) _entities.SetGear(m.Name, m.GearScore, m.CombatPower, m.Level);
                     _pendingRosters.Add(roster);
                     break;

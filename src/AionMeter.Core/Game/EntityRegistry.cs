@@ -234,6 +234,27 @@ public sealed class EntityRegistry
         CacheVersion++;
     }
 
+    /// <summary>
+    /// Party rosters contain the authoritative character names, while combat packets can announce the same player
+    /// with a temporary actor id and no name. Reconcile by server id so the overlay does not show "Class #id".
+    /// </summary>
+    public void ApplyRoster(IEnumerable<PartyMemberInfo> members)
+    {
+        foreach (var member in members)
+        {
+            if (member.ServerId == 0) continue;
+            foreach (var player in _players.Values.Where(p => p.ServerId == member.ServerId))
+            {
+                if (string.IsNullOrWhiteSpace(player.Name) || player.Name.StartsWith('#'))
+                    player.Name = member.Name;
+                if (player.Class == GameClass.Unknown) player.Class = member.Class;
+                player.ServerId = member.ServerId;
+                ApplyGear(player);
+                CacheVersion++;
+            }
+        }
+    }
+
     private void ApplyGear(PlayerInfo p)
     {
         if (!_gearByName.TryGetValue(p.Name, out var g)) return;
