@@ -249,12 +249,12 @@
                                 MaxWidth="{DynamicResource NameMaxWidth}">
                         <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
                                    Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" />
-                        <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
-                            <TextBlock Style="{StaticResource GearText}" Margin="0" Visibility="{Binding HasGearScore, Converter={StaticResource VisibleIf}}"
-                                       ToolTip="{Binding DataContext.T.TipGs, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="✦ " Foreground="#D9E3EA" /><Run Text="{Binding GearScore, Mode=OneWay}" Foreground="#F2A06B" /></TextBlock>
-                            <TextBlock Style="{StaticResource GearText}" Margin="8,0,0,0" Visibility="{Binding HasCombatPower, Converter={StaticResource VisibleIf}}"
-                                       ToolTip="{Binding DataContext.T.TipCp, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="⚔ " Foreground="#D9E3EA" /><Run Text="{Binding CombatPower, Mode=OneWay}" Foreground="#FFB078" /></TextBlock>
-                        </StackPanel>
+                        <!-- The compact reference shows the damage total under the name. Gear/CP stays available in the
+                             row tooltip, so the overlay keeps its most useful information readable at small sizes. -->
+                        <TextBlock Style="{StaticResource GearText}" Margin="0" ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}">
+                            <Run Text="✦ " Foreground="#D9E3EA" />
+                            <Run Text="{Binding Damage, Mode=OneWay}" Foreground="#DDE7EA" />
+                        </TextBlock>
                     </StackPanel>
 
                     <StackPanel Grid.Column="6" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Right"
@@ -441,7 +441,7 @@
                     </Grid.ColumnDefinitions>
                 </Grid>
 
-                <Grid Grid.Row="0" Margin="0,0,10,4">
+                <Grid Grid.Row="0" Margin="0,0,10,4" Visibility="Collapsed">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="28" /><ColumnDefinition Width="28" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <TextBlock Grid.ColumnSpan="3" Text="RANG · SPIELER" FontSize="8" FontWeight="Bold" Foreground="#91A3A9" VerticalAlignment="Center" />
                     <TextBlock Grid.Column="3" Text="DPS" FontSize="8" FontWeight="Bold" Foreground="{StaticResource StatsTeal}" Margin="0,0,14,0" />

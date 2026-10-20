@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AionMeter.Tests", "tests\Ai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AionMeter.App.Tests", "tests\AionMeter.App.Tests\AionMeter.App.Tests.csproj", "{319B2727-0212-4457-9B0F-47528CF329C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AetherionLiveAlerts", "src\AetherionLiveAlerts\AetherionLiveAlerts.csproj", "{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{319B2727-0212-4457-9B0F-47528CF329C5}.Release|x64.Build.0 = Release|Any CPU
 		{319B2727-0212-4457-9B0F-47528CF329C5}.Release|x86.ActiveCfg = Release|Any CPU
 		{319B2727-0212-4457-9B0F-47528CF329C5}.Release|x86.Build.0 = Release|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Debug|x64.Build.0 = Debug|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Debug|x86.Build.0 = Debug|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Release|x64.ActiveCfg = Release|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Release|x64.Build.0 = Release|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Release|x86.ActiveCfg = Release|Any CPU
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +111,6 @@ Global
 		{1AB8551F-7A34-40F4-909C-A4817ED9B76E} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{9E100371-57ED-4683-9E6E-2BF9687465B2} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{319B2727-0212-4457-9B0F-47528CF329C5} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{950DA846-AAA7-4C7F-B299-FA1D699CBDD9} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

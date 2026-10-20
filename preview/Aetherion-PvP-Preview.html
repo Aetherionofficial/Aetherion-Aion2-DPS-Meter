@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aetherion · PvP Vorschau</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:"Segoe UI",Arial,sans-serif;color:#f1eee9;background:#090a0d}
+body{display:grid;place-items:center;background:radial-gradient(ellipse at 72% 18%,#38271c 0,transparent 35%),radial-gradient(ellipse at 12% 88%,#201c20 0,transparent 38%),#08090c}
+.window{width:1210px;height:790px;border:1px solid #75502f;background:#0d0e12;box-shadow:0 28px 90px #000b;display:grid;grid-template-columns:226px 1fr;overflow:hidden}
+.side{background:#121318;border-right:1px solid #29272a;padding:24px 16px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:12px;padding:2px 4px 28px}.mark{width:42px;height:42px;border:1px solid #6a4727;border-radius:12px;background:radial-gradient(circle,#48301c,#19171a 70%);display:grid;place-items:center;color:#ffc06d;font-size:27px;font-weight:800;text-shadow:0 0 15px #f08235}.brand strong{font-size:13px;letter-spacing:.1em}.brand small{display:block;color:#85838a;font-size:9px;margin-top:4px;letter-spacing:.09em}
+.group{font-size:9px;letter-spacing:.16em;color:#77767d;font-weight:700;padding:0 12px;margin:12px 0 7px}.nav{height:43px;border-radius:8px;display:flex;align-items:center;gap:11px;padding:0 12px;color:#bab8bd;font-size:13px;margin:2px 0}.nav .ico{width:17px;text-align:center;color:#99969b;font-size:15px}.nav.active{color:#ffc078;background:linear-gradient(90deg,#623d26,#332319);border:1px solid #694329}.nav.active .ico{color:#ff9a4b}.nav .soon{font-size:8px;margin-left:auto;color:#f2a760;border:1px solid #71482b;border-radius:8px;padding:3px 6px;letter-spacing:.04em}
+.bottom{margin-top:auto;border-top:1px solid #28272b;padding:15px 8px 2px;color:#817f86;font-size:10px;display:flex;gap:8px;align-items:center}.dot{width:7px;height:7px;border-radius:50%;background:#d7833f;box-shadow:0 0 8px #dc7837}
+.main{padding:32px 38px 28px;overflow:hidden}.kicker{font-size:10px;font-weight:700;letter-spacing:.14em;color:#e1914d;margin-bottom:8px}.title{font-size:29px;font-weight:700;letter-spacing:-.02em}.subtitle{font-size:13px;color:#a9a6ac;margin-top:7px}.top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #29282b;padding-bottom:23px}.badge{display:flex;align-items:center;gap:8px;background:#261b15;border:1px solid #674328;border-radius:20px;color:#ffbd70;font-size:10px;font-weight:700;letter-spacing:.08em;padding:9px 13px;margin-top:4px}
+.hero{margin-top:23px;border:1px solid #57402e;border-radius:14px;background:linear-gradient(115deg,#171619 0%,#171518 58%,#211812 100%);padding:22px 24px;display:grid;grid-template-columns:1fr auto;align-items:center;min-height:190px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:280px;height:280px;border:1px solid #593b24;border-radius:50%;right:46px;top:-65px;box-shadow:0 0 0 23px #bd74210a,0 0 0 47px #bd742107}.hero-left{position:relative;z-index:1}.eyebrow{font-size:10px;color:#f1a15c;letter-spacing:.13em;font-weight:700}.hero h2{font-size:24px;margin:12px 0 7px}.hero p{font-size:13px;color:#b5b0b3;line-height:1.6;max-width:620px;margin:0}.chips{display:flex;gap:9px;margin-top:18px}.chip{padding:7px 11px;border-radius:7px;border:1px solid #40373a;background:#1e1b1e;color:#ded8d3;font-size:10px;font-weight:600}.seal{position:relative;z-index:1;width:118px;height:118px;border:1px solid #80532e;border-radius:50%;background:radial-gradient(circle,#38271c 0,#1b1717 68%);display:grid;place-items:center;margin:0 24px}.seal:before,.seal:after{content:"";position:absolute;inset:9px;border:1px solid #5b422e;border-radius:50%}.seal:after{inset:19px;border-color:#79502c}.lock{font-size:37px;color:#ffb761;text-shadow:0 0 18px #e67d32}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}.section-head h3{font-size:14px;margin:0}.section-head span{color:#858188;font-size:10px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{border:1px solid #332f31;border-radius:11px;background:#141519;padding:17px 17px 15px;min-height:150px;position:relative;overflow:hidden}.card:before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:3px;background:#b86b35;border-radius:0 3px 3px 0}.card:nth-child(2):before{background:#d29c51}.card:nth-child(3):before{background:#80669a}.card-top{display:flex;justify-content:space-between;align-items:center}.card-icon{width:30px;height:30px;border-radius:8px;background:#27201b;border:1px solid #493523;color:#efa65d;display:grid;place-items:center;font-size:15px}.mini-lock{font-size:12px;color:#8d8580}.card h4{font-size:14px;margin:13px 0 5px}.card p{font-size:11px;line-height:1.45;color:#96939a;margin:0}.status{margin-top:13px;color:#e7a15b;font-size:9px;letter-spacing:.1em;font-weight:700}
+.bottom-card{margin-top:15px;border:1px solid #342f31;border-radius:11px;background:#121317;padding:16px 18px;display:grid;grid-template-columns:1fr auto;align-items:center}.bottom-card strong{font-size:12px}.bottom-card p{font-size:11px;color:#99969c;margin:5px 0 0}.bottom-card .status{margin:0;padding:8px 11px;border:1px solid #624127;border-radius:8px;background:#251b15}
+@media(max-width:1240px){.window{transform:scale(.88)}}
+</style>
+</head>
+<body>
+<main class="window">
+  <aside class="side">
+    <div class="brand"><div class="mark">Λ</div><div><strong>AETHERION</strong><small>CONTROL CENTER</small></div></div>
+    <div class="group">METER</div>
+    <div class="nav"><span class="ico">O</span>Overlay</div>
+    <div class="nav"><span class="ico">T</span>Timer</div>
+    <div class="nav"><span class="ico">K</span>Kampf &amp; Verlauf</div>
+    <div class="nav"><span class="ico">D</span>Darstellung</div>
+    <div class="nav"><span class="ico">A</span>Allgemein</div>
+    <div class="group">AION2 EXTRAS</div>
+    <div class="nav active"><span class="ico">P</span>PvP<span class="soon">BALD</span></div>
+    <div class="nav"><span class="ico">M</span>AION2-Karte</div>
+    <div class="nav"><span class="ico">W</span>Wakayashi.gg</div>
+    <div class="group">KONTO</div>
+    <div class="nav"><span class="ico">P</span>Aetherion Premium</div>
+    <div class="bottom"><span class="dot"></span>Vorschau · PvP-Funktionen in Vorbereitung</div>
+  </aside>
+  <section class="main">
+    <header class="top"><div><div class="kicker">AETHERION · EINSTELLUNGEN</div><div class="title">Abyss &amp; PvP</div><div class="subtitle">Deine PvP-Übersicht – geplant für ein kommendes Update.</div></div><div class="badge"><span>◈</span> BALD VERFÜGBAR</div></header>
+    <section class="hero">
+      <div class="hero-left"><div class="eyebrow">AETHERION PVP · FEATURE-VORSCHAU</div><h2>Dein nächster Rang im Blick.</h2><p>Eine zentrale Übersicht für Abyss-Punkte, Rangfortschritt und Bestenlisten. Die Seite ist schon als Vorschau verfügbar; echte Werte erscheinen, sobald wir sie zuverlässig aus dem Spiel erfassen können.</p><div class="chips"><span class="chip">Abyss-Punkte &amp; Verlauf</span><span class="chip">Rang &amp; Abzeichen</span><span class="chip">Server-Ranglisten</span></div></div>
+      <div class="seal"><span class="lock">A</span></div>
+    </section>
+    <div class="section-head"><h3>Das ist geplant</h3><span>VORSCHAU · NOCH KEINE LIVE-DATEN</span></div>
+    <section class="cards">
+      <article class="card"><div class="card-top"><div class="card-icon">A</div><span class="mini-lock">●</span></div><h4>Abyss-Punkte</h4><p>Punktestand, Veränderungen und dein Fortschritt auf einen Blick.</p><div class="status">IN VORBEREITUNG</div></article>
+      <article class="card"><div class="card-top"><div class="card-icon">R</div><span class="mini-lock">●</span></div><h4>Rang &amp; Abzeichen</h4><p>Deinen aktuellen Rang und die Entwicklung deiner PvP-Wertung verfolgen.</p><div class="status">IN VORBEREITUNG</div></article>
+      <article class="card"><div class="card-top"><div class="card-icon">#</div><span class="mini-lock">●</span></div><h4>Ranglisten</h4><p>Platzierungen nach Server und Fraktion – übersichtlich sortiert.</p><div class="status">IN VORBEREITUNG</div></article>
+    </section>
+    <section class="bottom-card"><div><strong>Transparenter Entwicklungsstand</strong><p>Die angezeigten Inhalte sind eine Vorschau. Es werden keine PvP-Punkte oder Rangdaten simuliert.</p></div><div class="status">BALD VERFÜGBAR</div></section>
+  </section>
+</main>
+</body>
+</html>

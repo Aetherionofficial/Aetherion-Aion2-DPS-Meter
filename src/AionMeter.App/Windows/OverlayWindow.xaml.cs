@@ -389,7 +389,9 @@ public partial class OverlayWindow : Window
         // buttons shrink/grow together instead of producing a cramped mix of old and new sizes.
         // Scale the visible surface and all of its contents together, like the reference meter. The lower bound keeps
         // the compact preset usable; the upper bound lets a larger overlay remain crisp instead of leaving tiny text.
-        var scale = Math.Clamp((Width - 16) / 520.0, 0.80, 1.35);
+        // Keep the text crisp and readable when the card is made compact. The reference overlay scales as one
+        // surface, but never shrinks its typography to the point where names and percentages disappear.
+        var scale = Math.Clamp((Width - 16) / 520.0, 0.92, 1.35);
         CardBodyScale.ScaleX = scale;
         CardBodyScale.ScaleY = scale;
         FrameScale.ScaleX = scale;

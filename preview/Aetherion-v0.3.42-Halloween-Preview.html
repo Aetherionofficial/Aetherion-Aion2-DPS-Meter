@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aetherion 0.3.42 · Halloween Patch Vorschau</title>
+  <style>
+    :root { color-scheme: dark; --bg:#09090b; --panel:#121216; --line:#393337; --ember:#f06a22; --silver:#e5e7ea; --muted:#a7a9ae; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(ellipse at 15% 0%,#28150e 0,transparent 34rem),var(--bg); color:var(--silver); font:15px/1.55 "Segoe UI",sans-serif; }
+    main { width:min(1120px,calc(100% - 32px)); margin:38px auto 64px; }
+    header { display:flex; align-items:center; gap:18px; padding:22px 24px; border:1px solid #714126; border-radius:16px; background:linear-gradient(120deg,#1b1110,#121216 65%); box-shadow:0 18px 60px #0008; }
+    header img { width:64px; height:64px; border-radius:14px; object-fit:cover; box-shadow:0 0 24px #f06a2238; }
+    .eyebrow { color:#f28a45; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:3px 0 2px; font-size:26px; line-height:1.2; }
+    header p,.sub { margin:0; color:var(--muted); }
+    .screens { display:grid; grid-template-columns:minmax(280px,.8fr) minmax(360px,1.2fr); gap:18px; margin:22px 0; align-items:start; }
+    figure.featured { grid-column:1 / -1; }
+    figure { margin:0; padding:14px; border:1px solid var(--line); border-radius:14px; background:#121216e8; }
+    figure h2 { margin:0 0 4px; font-size:16px; }
+    figure p { margin:0 0 12px; color:var(--muted); font-size:13px; }
+    figure img { display:block; width:100%; height:auto; border:1px solid #3b3435; border-radius:9px; }
+    section { margin-top:18px; padding:22px 24px; border:1px solid var(--line); border-radius:14px; background:#121216e8; }
+    section h2 { margin:0 0 12px; font-size:18px; }
+    ul { margin:0; padding-left:21px; }
+    li { margin:7px 0; }
+    li::marker { color:var(--ember); }
+    .tag { display:inline-block; padding:3px 9px; border:1px solid #78391f; border-radius:99px; color:#ffac72; background:#f06a2215; font-size:11px; font-weight:700; letter-spacing:.07em; }
+    footer { margin:18px 4px; color:#8f9298; font-size:12px; }
+    @media(max-width:760px) { .screens { grid-template-columns:1fr; } header { align-items:flex-start; } h1 { font-size:22px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../src/AionMeter.App/Assets/aetherion-halloween-mark.png" alt="Aetherion Glut- und Silberlogo">
+      <div>
+        <div class="eyebrow">Aetherion · Saisonaler Patch <span class="tag">VORSCHAU · 0.3.42</span></div>
+        <h1>Schwarz. Glut-Orange. Silber.</h1>
+    <p>Das aktuelle Raid-Command-Dashboard in Schwarz, Glut-Orange und Silber – plus der überarbeitete Timer.</p>
+      </div>
+    </header>
+
+    <div class="screens">
+      <figure class="featured">
+        <h2>Startansicht · Raid Command</h2>
+        <p>Die echte Startansicht mit Kampfstatus, Boss-Lebensbalken, Gruppen-DPS/HPS, Schadensverlauf und Team-Status.</p>
+        <a href="Aetherion-v0.3.42-Halloween-RaidCommand.png"><img src="Aetherion-v0.3.42-Halloween-RaidCommand.png" alt="Aetherion Raid-Command-Startansicht im Schwarz-Orange-Silber-Look"></a>
+      </figure>
+      <figure>
+        <h2>Timer in deiner Nähe</h2>
+        <p>Logo-Branding, klare Countdown-Akzente und kompakte Event-Zeilen. Die Fensterkopfzeile ist zum Ziehen nutzbar.</p>
+        <a href="Aetherion-v0.3.42-Halloween-Timer.png"><img src="Aetherion-v0.3.42-Halloween-Timer.png" alt="Aetherion Event-Timer im Schwarz-Orange-Silber-Look"></a>
+      </figure>
+    </div>
+
+    <section>
+      <h2>Was im Patch enthalten ist</h2>
+      <ul>
+        <li>Neue Markenfarben Schwarz, Glut-Orange und Silber mit dem bereitgestellten Aetherion-Emblem in der Startansicht und im Timer.</li>
+        <li>Unbekannte IDs aus entfernten Bosskämpfen bleiben ausgeblendet. Sobald AION den echten Spielernamen meldet, erscheint die Zeile normal.</li>
+        <li>Der Timer lässt sich an der ganzen Kopfzeile verschieben; Klicks auf Regler und Schaltflächen bleiben davon unberührt.</li>
+        <li>Der Deckkraftregler macht nur den Hintergrund transparent. Text, Rahmen und Bedienelemente verschwinden auch bei 0 % Hintergrunddeckkraft nicht.</li>
+        <li>Der verbesserte Kontrast des Boss-Lebensbalkens sowie übersichtlichere Gruppenwerte und Kampfverlauf sind in der Startansicht sichtbar.</li>
+      </ul>
+    </section>
+    <footer>Vorschau der Änderungen für Aetherion DPS Meter. Die Veröffentlichung erfolgt erst nach deiner Freigabe.</footer>
+  </main>
+</body>
+</html>

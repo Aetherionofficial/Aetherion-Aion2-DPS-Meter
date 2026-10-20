@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 *.env
+**/node_modules/
+aetherion-site*.tar.gz
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

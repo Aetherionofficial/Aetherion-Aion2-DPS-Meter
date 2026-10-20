@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aetherion 0.3.43 · Kundenpreview</title>
+  <style>
+    :root{color-scheme:dark;--bg:#09090b;--panel:#121216;--line:#393337;--ember:#f06a22;--silver:#e5e7ea;--muted:#a7a9ae}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% 0%,#28150e 0,transparent 36rem),var(--bg);color:var(--silver);font:15px/1.55 "Segoe UI",sans-serif}
+    main{width:min(1120px,calc(100% - 32px));margin:36px auto 64px}header{display:flex;align-items:center;gap:18px;padding:22px 24px;border:1px solid #714126;border-radius:16px;background:linear-gradient(120deg,#1b1110,#121216 65%);box-shadow:0 18px 60px #0008}
+    header img{width:64px;height:64px;border-radius:14px;object-fit:cover;box-shadow:0 0 24px #f06a2238}.eyebrow{color:#f28a45;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}h1{margin:3px 0 2px;font-size:26px;line-height:1.2}header p,.sub{margin:0;color:var(--muted)}
+    .tag{display:inline-block;padding:3px 9px;border:1px solid #78391f;border-radius:99px;color:#ffac72;background:#f06a2215;font-size:11px;font-weight:700;letter-spacing:.07em}
+    .screens{display:grid;grid-template-columns:1fr;gap:18px;margin:22px 0}figure,section{margin:0;padding:16px;border:1px solid var(--line);border-radius:14px;background:#121216e8}figure h2,section h2{margin:0 0 4px;font-size:17px}figure p{margin:0 0 12px;color:var(--muted);font-size:13px}figure img{display:block;width:100%;height:auto;border:1px solid #3b3435;border-radius:9px}section{margin-top:18px;padding:22px 24px}section h2{margin-bottom:12px;font-size:19px}.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.feature{padding:14px;border:1px solid #393337;border-radius:11px;background:#171518}.feature b{display:block;margin-bottom:4px;color:#ffac72}.feature p{margin:0;color:var(--muted);font-size:13px}
+    ul{margin:0;padding-left:21px}li{margin:7px 0}li::marker{color:var(--ember)}footer{margin:18px 4px;color:#8f9298;font-size:12px}
+    @media(max-width:700px){.features{grid-template-columns:1fr}header{align-items:flex-start}h1{font-size:22px}}
+  </style>
+</head>
+<body><main>
+  <header><img src="../src/AionMeter.App/Assets/aetherion-mark.png" alt="Aetherion A-Emblem"><div><div class="eyebrow">Aetherion · Patch-Vorschau <span class="tag">0.3.43 · NICHT VERÖFFENTLICHT</span></div><h1>Klarer im Kampf. Lesbar bei Transparenz.</h1><p>Verbesserungen für Kampfzentrum, Rangliste und In-Game-Overlay.</p></div></header>
+  <div class="screens">
+    <figure><h2>Startansicht · Raid Command</h2><p>Suche, Klassenfilter und Sortierung stehen getrennt unter dem Titel. Das Ansichtsmenü schaltet Kennzahlen, Kampfverlauf und Team-Status frei.</p><a href="Aetherion-v0.3.43-RaidCommand.png"><img src="Aetherion-v0.3.43-RaidCommand.png" alt="Aetherion Raid-Command-Startansicht mit Ranglistenfiltern"></a></figure>
+    <figure><h2>Overlay · abgestimmt auf das Kampfzentrum</h2><p>Anthrazit, Glut-Orange und Silber bilden die gemeinsame Palette. Das Vorschaubild nutzt einen warmen, dunklen Spielhintergrund statt des zuvor grünlichen Platzhalters. Die Overlay-Flächen bleiben einstellbar transparent; die Bedienleiste bleibt gut lesbar.</p><a href="Aetherion-v0.3.43-Transparent-Overlay.png"><img src="Aetherion-v0.3.43-Transparent-Overlay.png" alt="Aetherion Kampf-Overlay in Anthrazit, Glut-Orange und Silber vor warmem dunklem Hintergrund"></a></figure>
+    <figure><h2>Verbindungscheck · Probleme schneller finden</h2><p>In den Einstellungen werden Spielprozess, Npcap, Erfassung, Paketfluss, Kampfdaten und Overlay geprüft. Der Supportbericht kopiert nur technische Statuswerte.</p><a href="Aetherion-v0.3.43-Connection-Check.png"><img src="Aetherion-v0.3.43-Connection-Check.png" alt="Aetherion Einstellungen mit Verbindungscheck und datensparsamem Supportbericht"></a></figure>
+  </div>
+  <section><h2>Was neu ist</h2><div class="features">
+    <div class="feature"><b>Rangliste filtern und sortieren</b><p>Spielernamen suchen, nach Klasse filtern sowie DPS/HPS, Gesamtwert, Burst, Namen oder Klassen ordnen.</p></div>
+    <div class="feature"><b>DPS und HPS klar umschalten</b><p>Der aktive Modus ist farblich hervorgehoben; die Spaltenüberschrift wechselt passend zwischen DPS und HPS.</p></div>
+    <div class="feature"><b>Ansicht selbst aufräumen</b><p>Kennzahlen, Kampfverlauf und Team-Status sind einzeln ein- und ausblendbar. Die rechte Spalte passt sich an.</p></div>
+    <div class="feature"><b>Kampfstatus verständlicher</b><p>Die App zeigt, ob sie auf AION2 oder Kampfdaten wartet, einen Kampf erfasst oder eine Zusammenfassung anzeigt.</p></div>
+    <div class="feature"><b>Zusammenfassung nach dem Kampf</b><p>Nach Ende erscheinen Spieleranzahl, Gesamtschaden und Kampfzeit direkt im Kampfstatus.</p></div>
+    <div class="feature"><b>Overlay-Steuerung am unteren Rand</b><p>Die Bedienelemente erscheinen in einer dunklen Leiste und bleiben auch bei 0 % Hintergrunddeckkraft gut erkennbar.</p></div>
+    <div class="feature"><b>Verbindungscheck für schnellere Hilfe</b><p>Prüft AION2, Npcap, Erfassung, Paketfluss, Kampfdaten und Overlay. Ein Supportbericht kopiert nur technische Statuswerte – keine Spielernamen oder Mitschnitte.</p></div>
+  </div></section>
+  <section><h2>Fehlerbehebungen und weitere enthaltene Änderungen</h2><ul>
+    <li>Der Boss-Lebensbalken ist aufgeräumt: HP-Zahl und Prozent stehen oberhalb der separaten, schmalen Füllleiste.</li>
+    <li>Bei leerer Rangliste wird erklärt, ob noch keine Kampfdaten eingetroffen sind oder der aktuelle Filter keine Spieler findet.</li>
+    <li>Das Aetherion-Schwarz-/Glut-Orange-/Silber-Branding mit saisonalem Emblem zieht sich durch Kampfzentrum, Timer und Overlay.</li>
+    <li>Der Timer „In deiner Nähe“ lässt sich über seine Kopfzeile ziehen; sein Transparenzregler verändert die Fläche, während Text und Bedienelemente sichtbar bleiben.</li>
+    <li>Unbekannte IDs entfernter Spieler werden nicht als echte Charakternamen ausgegeben.</li>
+    <li>Das neue Aetherion-Zeichen sitzt jetzt in App- und Tray-Icon, Kampfzentrum, Timer und Einstellungen.</li>
+  </ul></section>
+  <section><h2>Hinweis zur Datenlage</h2><p class="sub">Die Filter verwenden Spieler- und Klassendaten, die AION2 tatsächlich übermittelt. Gruppenzuordnung oder Ziele einzelner Spieler werden nicht erfunden, wenn das Spiel sie nicht liefert.</p></section>
+  <footer>Lokale Kundenvorschau für Aetherion DPS Meter v0.3.43. Diese Fassung wurde noch nicht veröffentlicht; der Release wartet auf deine Freigabe.</footer>
+</main></body></html>

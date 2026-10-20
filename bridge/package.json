@@ -1,0 +1,11 @@
+{
+  "name": "aetherion-tiktok-live-bridge",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.0.0"
+  }
+}
