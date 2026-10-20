@@ -150,6 +150,8 @@
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavPvp, Source={x:Static s:UiText.Current}}" Tag="pvp" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavMap, Source={x:Static s:UiText.Current}}" Tag="map" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="Pet-Tracker" Click="PetTracker_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="Weltboss-Timer" Click="WorldBossTimers_Click" />
+                    <Button Style="{StaticResource SettingsNavButton}" Content="Event-Timer" Click="EventTimers_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGuide, Source={x:Static s:UiText.Current}}" Tag="guide" Click="SettingsNav_Click" />
                     <TextBlock Text="KONTO" Foreground="{StaticResource TextMute}" FontSize="9" FontWeight="Bold" Margin="12,18,0,7" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAccount, Source={x:Static s:UiText.Current}}" Tag="account" Click="SettingsNav_Click" />

@@ -305,6 +305,10 @@ public partial class SettingsWindow : Window
 
     private void OpenMap_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowAionMap();
 
+    private void WorldBossTimers_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowBossTimers();
+
+    private void EventTimers_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowEventTimers();
+
     private void OpenGuide_Click(object sender, RoutedEventArgs e) => AppHost.Current.ShowWakayashi();
 
     private void DiscordSupport_Click(object sender, RoutedEventArgs e) =>
