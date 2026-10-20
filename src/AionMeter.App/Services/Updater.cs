@@ -219,7 +219,14 @@ public sealed class Updater : IDisposable
     /// </summary>
     public static void LaunchInstaller(string path, bool quiet = false)
     {
-        if (!UpdateFeed.IsProductName(FileVersionInfo.GetVersionInfo(path).ProductName, AppInfo.Name))
+        // Inno Setup installers expose the application name through VersionInfoDescription,
+        // while ProductName can be empty. Accept the signed release naming convention as
+        // the fallback so a valid GitHub asset is not rejected after downloading.
+        var product = FileVersionInfo.GetVersionInfo(path);
+        var fileName = Path.GetFileNameWithoutExtension(path);
+        var knownSetupName = fileName.StartsWith("Aetherion-DPS-Meter-Setup", StringComparison.OrdinalIgnoreCase);
+        if (!UpdateFeed.IsProductName(product.ProductName, AppInfo.Name) &&
+            !knownSetupName)
             throw new InvalidDataException($"{Path.GetFileName(path)} is not the {AppInfo.Name} installer");
         UpdateRecovery.CreateCheckpoint();
         Process.Start(new ProcessStartInfo(path, (quiet ? "/VERYSILENT" : "/SILENT") + " /SUPPRESSMSGBOXES /NORESTART /RELAUNCH=1")
