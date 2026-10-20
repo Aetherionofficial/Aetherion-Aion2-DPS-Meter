@@ -204,6 +204,8 @@ public partial class OverlayWindow : Window
         var showHealing = _settings.ShowHealingPanel && !_settings.CompactDpsOnly;
         GroupHpsCard.Visibility = showHealing ? Visibility.Visible : Visibility.Collapsed;
         Grid.SetColumnSpan(GroupDpsCard, showHealing ? 1 : 3);
+        if (_settings.CompactDpsOnly) BossHealthPanel.Visibility = Visibility.Collapsed;
+        else BossHealthPanel.ClearValue(UIElement.VisibilityProperty);
     }
 
     private void ApplyBackgroundOpacity(double opacity)
@@ -380,11 +382,13 @@ public partial class OverlayWindow : Window
     {
         // Keep footer actions clear of the corner resize handle at narrow sizes.
         if (FooterDetailsButton is null) return;
+        var compact = _settings.CompactDpsOnly;
+        CompactTopActions.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
         FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
-        FooterResetButton.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterResetButton.Visibility = !compact && Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
         FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
         FooterCompareButton.Visibility = Width >= 430 ? Visibility.Visible : Visibility.Collapsed;
-        FooterSettingsButton.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterSettingsButton.Visibility = !compact && Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
         CustomerToolsToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         StreamerToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         var compactToolbar = Width < 480;

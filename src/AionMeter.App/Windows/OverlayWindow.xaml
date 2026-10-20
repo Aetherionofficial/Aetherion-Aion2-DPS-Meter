@@ -363,6 +363,12 @@
                     </StackPanel>
                     <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="15"
                                Foreground="#F28A45" VerticalAlignment="Center" />
+                    <StackPanel x:Name="CompactTopActions" Orientation="Horizontal" Visibility="Collapsed" VerticalAlignment="Center">
+                        <Button x:Name="CompactResetButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click"
+                                ToolTip="DPS zurücksetzen" AutomationProperties.Name="DPS zurücksetzen" Margin="0,0,2,0" />
+                        <Button x:Name="CompactSettingsButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click"
+                                ToolTip="Einstellungen" AutomationProperties.Name="Einstellungen" Margin="0,0,2,0" />
+                    </StackPanel>
                     <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click"
                             ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" Margin="6,0,0,0" />
                 </StackPanel>
@@ -370,7 +376,7 @@
             </Grid>
 
             <!-- Boss health: separate label row and inset track keep text crisp and the fill easy to read. -->
-            <Border Grid.Row="1" Margin="0,5,0,0" Padding="8,4,8,5" CornerRadius="6"
+            <Border x:Name="BossHealthPanel" Grid.Row="1" Margin="0,5,0,0" Padding="8,4,8,5" CornerRadius="6"
                     Background="#F0121216" BorderBrush="#493B39" BorderThickness="1"
                     Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
                 <Grid>
@@ -491,7 +497,7 @@
                         <TextBlock Text="LIVE" FontSize="9" FontWeight="Bold" Foreground="#F2A06B" />
                     </StackPanel>
                 </Grid>
-                <Border Background="#B90F1318" BorderBrush="#26323A43" BorderThickness="1" CornerRadius="8" Padding="4,3" HorizontalAlignment="Left">
+                <Border x:Name="FooterActions" Background="#B90F1318" BorderBrush="#26323A43" BorderThickness="1" CornerRadius="8" Padding="4,3" HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Button x:Name="FooterResetButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click"
                                 ToolTip="{Binding T.TipRestart}" AutomationProperties.Name="DPS zurücksetzen" Margin="0,0,4,0" />

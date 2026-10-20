@@ -170,7 +170,10 @@ public sealed class RowViewModel : ObservableObject
 
     private void UpdateNameBrush()
     {
-        NameBrush = IsSelf ? Brushes.White : Freeze(new SolidColorBrush(Lighten(ClassVisuals.ColorOf(Class), 0.18)));
+        // Class colours are used for the row fill. Reusing a lightened class colour for the name
+        // made turquoise and yellow rows lose contrast, especially in the compact layout.
+        // Keep the name neutral white and let the text shadow separate it from any class colour.
+        NameBrush = Brushes.White;
         Raise(nameof(NameBrush));
     }
 
