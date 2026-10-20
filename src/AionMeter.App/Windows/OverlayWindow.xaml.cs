@@ -395,12 +395,14 @@ public partial class OverlayWindow : Window
         FrameScale.ScaleX = scale;
         FrameScale.ScaleY = scale;
         var compact = _settings.CompactDpsOnly;
-        CompactTopActions.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
+        // Keep the three essential controls in the header at every size, matching the reference meter. The footer
+        // remains reserved for details and comparison so the controls never appear twice.
+        CompactTopActions.Visibility = Visibility.Visible;
         FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
-        FooterResetButton.Visibility = !compact && Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterResetButton.Visibility = Visibility.Collapsed;
         FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
         FooterCompareButton.Visibility = Width >= 430 ? Visibility.Visible : Visibility.Collapsed;
-        FooterSettingsButton.Visibility = !compact && Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterSettingsButton.Visibility = Visibility.Collapsed;
         CustomerToolsToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         StreamerToolButton.Visibility = Width < 540 ? Visibility.Collapsed : Visibility.Visible;
         var compactToolbar = Width < 480;
