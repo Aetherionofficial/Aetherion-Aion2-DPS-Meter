@@ -277,7 +277,11 @@
     </Window.Resources>
 
     <Grid Margin="8">
-        <Border x:Name="Frame" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource CardFrame}">
+        <Border x:Name="Frame" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource CardFrame}"
+                RenderTransformOrigin="0,0">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="FrameScale" ScaleX="1" ScaleY="1" />
+            </Border.RenderTransform>
             <Border.Background>
                 <SolidColorBrush x:Name="FrameBackground" Color="#09090B" Opacity="0.92" />
             </Border.Background>

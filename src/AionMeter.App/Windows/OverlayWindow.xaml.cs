@@ -387,10 +387,13 @@ public partial class OverlayWindow : Window
         // Keep every visible element in proportion when the user resizes the overlay.  A RenderTransform is used so
         // the transparent hit area and the resize grips keep their normal window geometry while text, bars, icons and
         // buttons shrink/grow together instead of producing a cramped mix of old and new sizes.
-        // Never shrink below the readable base size. Larger overlays may still grow proportionally.
-        var scale = Math.Clamp((Width - 16) / 520.0, 1.0, 1.18);
+        // Scale the visible surface and all of its contents together, like the reference meter. The lower bound keeps
+        // the compact preset usable; the upper bound lets a larger overlay remain crisp instead of leaving tiny text.
+        var scale = Math.Clamp((Width - 16) / 520.0, 0.80, 1.35);
         CardBodyScale.ScaleX = scale;
         CardBodyScale.ScaleY = scale;
+        FrameScale.ScaleX = scale;
+        FrameScale.ScaleY = scale;
         var compact = _settings.CompactDpsOnly;
         CompactTopActions.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
         FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
