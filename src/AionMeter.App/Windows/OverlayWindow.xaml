@@ -447,9 +447,13 @@
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">
                     <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
                 </ScrollViewer>
-                <TextBlock Grid.RowSpan="2" Text="{Binding T.EmptyParty}" FontSize="12"
-                           Foreground="#6B7590" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
-                           Visibility="{Binding HasData, Converter={StaticResource VisibleIf}, ConverterParameter=!}" />
+                <StackPanel Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="330"
+                            Visibility="{Binding HasData, Converter={StaticResource VisibleIf}, ConverterParameter=!}">
+                    <TextBlock Text="{Binding T.EmptyParty}" FontSize="13" Foreground="#B4B8BE"
+                               TextWrapping="Wrap" TextAlignment="Center" />
+                    <TextBlock Text="{Binding WaitingPlayer}" FontSize="12" Foreground="#F28A45"
+                               TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0" />
+                </StackPanel>
             </Grid>
 
             <!-- Footer -->

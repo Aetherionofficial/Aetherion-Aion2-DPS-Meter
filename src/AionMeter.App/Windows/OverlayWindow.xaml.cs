@@ -112,6 +112,8 @@ public partial class OverlayWindow : Window
             }
             _vm.Apply(snap, _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
             _vm.SetSegment(_segment is null ? "live" : "session", snap?.StartedAt.ToString("HH:mm"));
+            if (!_vm.HasData && _meter.Tracker.SelfName is { Length: > 0 } selfName)
+                _vm.WaitingPlayer = $"Spieler: {selfName}";
         }
         if (!_settings.ShowBossPanel) _vm.HasBoss = false;
         // The instance's time limit (or the wait after entering), whatever fight is shown: it is about where you are now.
@@ -237,7 +239,7 @@ public partial class OverlayWindow : Window
     public void ApplyRowSize(int percent)
     {
         var k = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize) / 100.0;
-        var f = Math.Sqrt(k) * _settings.OverlayTextScale;
+        var f = Math.Max(0.9, Math.Sqrt(k) * _settings.OverlayTextScale);
         var height = Math.Max(Math.Round(72 * k), Math.Ceiling(22 * f + 8));
         Resources["RowHeight"] = height;
         Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(8 * k)));
@@ -385,7 +387,7 @@ public partial class OverlayWindow : Window
         // Keep every visible element in proportion when the user resizes the overlay.  A RenderTransform is used so
         // the transparent hit area and the resize grips keep their normal window geometry while text, bars, icons and
         // buttons shrink/grow together instead of producing a cramped mix of old and new sizes.
-        var scale = Math.Clamp((Width - 16) / 584.0, 0.72, 1.0);
+        var scale = Math.Clamp((Width - 16) / 584.0, 0.90, 1.0);
         CardBodyScale.ScaleX = scale;
         CardBodyScale.ScaleY = scale;
         var compact = _settings.CompactDpsOnly;

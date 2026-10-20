@@ -337,6 +337,9 @@ public sealed class OverlayViewModel : ObservableObject
     private string _titleTip = "";
     /// <summary>"5 players · party 4.0M/s" (the fight's length is the clock in the header).</summary>
     public string Footer { get => _footer; set => Set(ref _footer, value); }
+    /// <summary>Known local character shown while no encounter is active.</summary>
+    public string WaitingPlayer { get => _waitingPlayer; set => Set(ref _waitingPlayer, value); }
+    private string _waitingPlayer = "";
 
     /// <summary>The shown fight is one where the server kept most players' damage from us (see
     /// <see cref="EncounterSnapshot.MostDamageUnsent"/>).</summary>
@@ -385,6 +388,7 @@ public sealed class OverlayViewModel : ObservableObject
             TotalDamage = "—";
             TopHit = "";
             Footer = "";
+            WaitingPlayer = "";
             MostDamageUnsent = false;
             SelfPlace = "";
             HasGear = false;
@@ -394,6 +398,7 @@ public sealed class OverlayViewModel : ObservableObject
 
         SegmentId = snap.Id;
         HasData = true;
+        WaitingPlayer = "";
         IsActive = snap.IsActive;
         Title = T.FightTitle(snap);
         // Running: wall clock since the pull. Finished: the fight's real length (first to last hit).
