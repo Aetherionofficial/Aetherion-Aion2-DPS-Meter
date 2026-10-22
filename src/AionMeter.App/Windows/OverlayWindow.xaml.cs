@@ -206,14 +206,13 @@ public partial class OverlayWindow : Window
         var showHealing = _settings.ShowHealingPanel && !_settings.CompactDpsOnly;
         GroupHpsCard.Visibility = showHealing ? Visibility.Visible : Visibility.Collapsed;
         Grid.SetColumnSpan(GroupDpsCard, showHealing ? 1 : 3);
-        if (_settings.CompactDpsOnly) BossHealthPanel.Visibility = Visibility.Collapsed;
-        else BossHealthPanel.ClearValue(UIElement.VisibilityProperty);
+        BossHealthPanel.Visibility = Visibility.Collapsed;
     }
 
     private void ApplyBackgroundOpacity(double opacity)
     {
         var value = _settings.HighContrast ? 1 : Math.Clamp(opacity, 0, 1);
-        FrameBackground.Opacity = value;
+        FrameBackground.Opacity = _settings.HighContrast ? 1 : value * 0.75;
 
         // Fade the toolbar's empty surface with the main panel too. Keeping its fixed opaque backing
         // prevented mouse clicks from reaching the game underneath, even at zero background opacity.
@@ -239,10 +238,10 @@ public partial class OverlayWindow : Window
     public void ApplyRowSize(int percent)
     {
         var k = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize) / 100.0;
-        var f = Math.Max(1.1, Math.Sqrt(k) * _settings.OverlayTextScale);
-        var height = Math.Max(Math.Round(72 * k), Math.Ceiling(22 * f + 8));
+        var f = Math.Max(0.8, Math.Sqrt(k) * _settings.OverlayTextScale);
+        var height = Math.Max(Math.Round(44 * k), Math.Ceiling(26 * f + 8));
         Resources["RowHeight"] = height;
-        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(3, Math.Round(8 * k)));
+        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(2, Math.Round(3 * k)));
         Resources["RowNameFont"] = Math.Round(15 * f, 1);
         Resources["RowGearFont"] = Math.Round(11.5 * f, 1);
         Resources["RowNumberFont"] = Math.Round(14 * f, 1);
@@ -360,9 +359,10 @@ public partial class OverlayWindow : Window
     private void ApplyAutomaticHeight()
     {
         if (!_settings.AutoOverlayHeight || !IsVisible || ActualHeight <= 0 || PlayerRowsViewport.ActualHeight <= 0) return;
-        var chrome = ActualHeight - PlayerRowsViewport.ActualHeight;
+        var scale = (CardBody.LayoutTransform as ScaleTransform)?.ScaleY ?? 1;
+        var chrome = ActualHeight - PlayerRowsViewport.ActualHeight * scale;
         var row = (double)Resources["RowHeight"] + ((Thickness)Resources["RowMargin"]).Bottom;
-        var content = Math.Max(1, _vm.Rows.Count) * row;
+        var content = Math.Max(1, _vm.Rows.Count) * row * scale;
         var target = Math.Clamp(Math.Ceiling(chrome + content), MinHeight, Math.Max(MinHeight, _settings.OverlayHeight));
         if (Math.Abs(Height - target) > 1) Height = target;
     }
@@ -384,23 +384,17 @@ public partial class OverlayWindow : Window
     {
         // Keep footer actions clear of the corner resize handle at narrow sizes.
         if (FooterDetailsButton is null) return;
-        // Keep every visible element in proportion when the user resizes the overlay.  A RenderTransform is used so
-        // the transparent hit area and the resize grips keep their normal window geometry while text, bars, icons and
-        // buttons shrink/grow together instead of producing a cramped mix of old and new sizes.
-        // Scale the visible surface and all of its contents together, like the reference meter. The lower bound keeps
-        // the compact preset usable; the upper bound lets a larger overlay remain crisp instead of leaving tiny text.
-        // Keep the text crisp and readable when the card is made compact. The reference overlay scales as one
-        // surface, but never shrinks its typography to the point where names and percentages disappear.
-        var scale = Math.Clamp((Width - 16) / 520.0, 0.92, 1.35);
-        CardBodyScale.ScaleX = scale;
-        CardBodyScale.ScaleY = scale;
-        FrameScale.ScaleX = scale;
-        FrameScale.ScaleY = scale;
+        // LayoutTransform reserves the scaled space, keeping content inside the actual window bounds.
+        // The panel and edge hit areas retain the window geometry while text, icons and bars scale together.
+        var scale = Math.Clamp((Width - 16) / 520.0, 0.5, 1.5);
+        CardBody.LayoutTransform = new ScaleTransform(scale, scale);
+        CardBodyScale.ScaleX = CardBodyScale.ScaleY = 1;
+        FrameScale.ScaleX = FrameScale.ScaleY = 1;
         var compact = _settings.CompactDpsOnly;
         // Keep the three essential controls in the header at every size, matching the reference meter. The footer
         // remains reserved for details and comparison so the controls never appear twice.
         CompactTopActions.Visibility = Visibility.Visible;
-        FooterStatus.Visibility = Width >= 320 ? Visibility.Visible : Visibility.Collapsed;
+        FooterStatus.Visibility = Visibility.Visible;
         FooterResetButton.Visibility = Visibility.Collapsed;
         FooterDetailsButton.Visibility = Width >= 340 ? Visibility.Visible : Visibility.Collapsed;
         FooterCompareButton.Visibility = Width >= 430 ? Visibility.Visible : Visibility.Collapsed;

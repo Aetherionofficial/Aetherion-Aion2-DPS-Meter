@@ -17,7 +17,7 @@
     <Product>Aetherion</Product>
     <AssemblyTitle>Aetherion — AION 2 DPS Meter</AssemblyTitle>
     <ApplicationIcon>Assets\aetherion-mark.ico</ApplicationIcon>
-    <Version>0.3.73</Version>
+    <Version>0.3.74</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);WFO0003</NoWarn>

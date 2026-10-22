@@ -12,6 +12,7 @@
         FontFamily="{StaticResource UiFont}">
     <Window.Resources>
         <c:VisibleIf x:Key="VisibleIf" />
+        <c:OverlayDisplayConverter x:Key="OverlayDisplay" />
 
         <Storyboard x:Key="Pulse" RepeatBehavior="Forever" AutoReverse="True">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.25" Duration="0:0:0.8" />
@@ -93,7 +94,7 @@
         <SolidColorBrush x:Key="Cream" Color="#E5E7EA" />
         <SolidColorBrush x:Key="Soft" Color="#B4B8BE" />
         <SolidColorBrush x:Key="SelfGold" Color="#F28A45" />
-        <SolidColorBrush x:Key="StatsTeal" Color="#F28A45" />
+        <SolidColorBrush x:Key="StatsTeal" Color="#50D6CF" />
 
         <!-- A hairline frame, a touch lighter at the top -->
         <LinearGradientBrush x:Key="CardFrame" StartPoint="0,0" EndPoint="0,1">
@@ -210,59 +211,40 @@
         <DataTemplate x:Key="RowTemplate" DataType="{x:Type vm:RowViewModel}">
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
-                <!-- track -->
-                <Border x:Name="Track" CornerRadius="4" Background="{Binding TrackBrush}" />
-                <!-- fill -->
-                <Border CornerRadius="4" Background="{Binding SoftFillBrush}" RenderTransformOrigin="0,0.5">
-                    <Border.RenderTransform>
-                        <ScaleTransform ScaleX="{Binding Fill}" />
-                    </Border.RenderTransform>
-                </Border>
-                <!-- class strip -->
-                <Border Width="{DynamicResource RowAccentWidth}" HorizontalAlignment="Left" CornerRadius="4,0,0,4" Background="{Binding AccentBrush}" />
-                <!-- your own row -->
-                <Border CornerRadius="4" BorderThickness="1" BorderBrush="Transparent"
-                        Visibility="{Binding IsSelf, Converter={StaticResource VisibleIf}}" />
-
+                <Border x:Name="Track" Background="#181A2028" CornerRadius="3" />
                 <Grid Margin="8,0,10,0" Effect="{StaticResource TextShadow}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{DynamicResource ColRankWidth}" />
-                        <ColumnDefinition Width="{DynamicResource ColGlyphWidth}" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Gs" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Cp" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" SharedSizeGroup="Dps" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Damage" />
                         <ColumnDefinition Width="Auto" SharedSizeGroup="Share" />
                     </Grid.ColumnDefinitions>
-
-                    <!-- Place: plain digits, the top three in medal colours -->
-                    <TextBlock Text="{Binding RankText}" FontFamily="{StaticResource NumberFont}" FontSize="{DynamicResource RowRankFont}"
-                               FontWeight="Bold" Foreground="{Binding RankColor}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-
-                    <c:ClassGlyph Grid.Column="1" Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}"
-                                  Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
-
-                    <!-- Reference layout: player name and power on two compact lines. -->
-                    <StackPanel Grid.Column="2" Grid.ColumnSpan="3" VerticalAlignment="Center" Margin="2,0,0,0"
-                                MaxWidth="{DynamicResource NameMaxWidth}">
-                        <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
-                                   Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" />
-                        <!-- The compact reference shows the damage total under the name. Gear/CP stays available in the
-                             row tooltip, so the overlay keeps its most useful information readable at small sizes. -->
-                        <TextBlock Style="{StaticResource GearText}" Margin="0" ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}">
-                            <Run Text="✦ " Foreground="#D9E3EA" />
-                            <Run Text="{Binding Damage, Mode=OneWay}" Foreground="#DDE7EA" />
-                        </TextBlock>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="6" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                ToolTip="{Binding DataContext.T.TipDps, RelativeSource={RelativeSource AncestorType=Window}}">
-                        <TextBlock Text="{Binding Dps}" Style="{StaticResource RowNumber}" Margin="0" />
+                    <!-- Only the identity area carries the class-coloured relative bar. -->
+                    <Border Background="{Binding SoftFillBrush}" CornerRadius="3" HorizontalAlignment="Left" Margin="-8,0,0,0">
+                        <Border.Width>
+                            <MultiBinding Converter="{StaticResource OverlayDisplay}">
+                                <Binding Path="Fill" />
+                                <Binding Path="DataContext.Rows[0].Fill" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                <Binding Path="ColumnDefinitions[0].ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                            </MultiBinding>
+                        </Border.Width>
+                    </Border>
+                    <Grid Grid.Column="0" Margin="0,0,8,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="{DynamicResource ColGlyphWidth}" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <c:ClassGlyph Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}"
+                                      Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="2,0,0,0">
+                            <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
+                                       Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Style="{StaticResource GearText}" Margin="0">
+                                <Run Text="✦ " Foreground="#AFBBC5" /><Run Text="{Binding Damage, Mode=OneWay}" Foreground="#BFCBD2" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0">
+                        <TextBlock Text="{Binding Dps, Converter={StaticResource OverlayDisplay}}" Style="{StaticResource RowNumber}" Margin="0" />
                         <TextBlock Text="{Binding Damage}" Style="{StaticResource RowSub}" Margin="0" />
                     </StackPanel>
-                    <TextBlock Grid.Column="8" Text="{Binding Share}" Style="{StaticResource RowSub}" Foreground="{Binding DpsBrush}" />
+                    <TextBlock Grid.Column="2" Text="{Binding Share}" Style="{StaticResource RowSub}" Foreground="#75E5A1" MinWidth="48" />
                 </Grid>
             </Grid>
             <DataTemplate.Triggers>
@@ -277,13 +259,13 @@
     </Window.Resources>
 
     <Grid Margin="8">
-        <Border x:Name="Frame" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource CardFrame}"
+        <Border x:Name="Frame" CornerRadius="5" BorderThickness="0" BorderBrush="Transparent"
                 RenderTransformOrigin="0,0">
             <Border.RenderTransform>
                 <ScaleTransform x:Name="FrameScale" ScaleX="1" ScaleY="1" />
             </Border.RenderTransform>
             <Border.Background>
-                <SolidColorBrush x:Name="FrameBackground" Color="#09090B" Opacity="0.92" />
+                <SolidColorBrush x:Name="FrameBackground" Color="#090E14" Opacity="0.72" />
             </Border.Background>
             <Border.Effect>
                 <DropShadowEffect BlurRadius="14" ShadowDepth="0" Opacity="0.5" Color="Black" />
@@ -313,79 +295,25 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- The one top line: the fight's title on the left (the toolbar while the mouse is over the overlay), the state
-                 and the timer on the right -->
-            <Grid x:Name="Header" Background="Transparent" Height="30">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                    <StackPanel x:Name="FightTitlePanel" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Visibility="Collapsed">
-                        <Border Background="#F06A22" CornerRadius="1" Width="3" Height="10" Margin="0,0,6,0" />
-                        <TextBlock Text="{Binding T.OverlayLive}" FontSize="8" FontWeight="Bold" Foreground="#F28A45" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
-                        <TextBlock Text="DPS-Statistiken" FontSize="13" FontWeight="Bold"
-                                   Foreground="{StaticResource StatsTeal}" Effect="{StaticResource TextShadow}" />
-                        <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="10" FontWeight="SemiBold"
-                                   Foreground="#C6D0D5" TextTrimming="CharacterEllipsis"
-                                   Effect="{StaticResource TextShadow}" Background="Transparent"
-                                   MouseWheel="Title_MouseWheel" ToolTip="{Binding TitleTip}" />
-                    </StackPanel>
-                    </StackPanel>
-
-                <Border Grid.Column="1" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" CornerRadius="0" Padding="0" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Effect="{StaticResource TextShadow}">
-                    <TextBlock x:Name="PartnerBadge" Text="✦ PARTNER" Visibility="Collapsed" Foreground="{StaticResource Gold}"
-                               FontWeight="Bold" FontSize="9" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <!-- The game's time limit for this instance: stays in view while the toolbar shows, like the clock -->
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0" Background="Transparent"
-                                ToolTip="{Binding LimitTip}" Visibility="{Binding HasLimit, Converter={StaticResource VisibleIf}}">
-                        <TextBlock Text="&#xE916;" FontFamily="{StaticResource IconFont}" FontSize="11" Foreground="{Binding LimitBrush}"
-                                   Margin="0,1,4,0" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding LimitText}" FontFamily="{StaticResource NumberFont}" FontWeight="SemiBold" FontSize="12.5"
-                                   Foreground="{Binding LimitBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <StackPanel x:Name="LabelPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-                        <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,6,0" Fill="{Binding HeaderBrush}">
-                            <Ellipse.Style>
-                                <Style TargetType="Ellipse">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard x:Name="PulseBegin" Storyboard="{StaticResource Pulse}" />
-                                            </DataTrigger.EnterActions>
-                                            <DataTrigger.ExitActions>
-                                                <StopStoryboard BeginStoryboardName="PulseBegin" />
-                                            </DataTrigger.ExitActions>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Ellipse.Style>
-                        </Ellipse>
-                        <TextBlock Text="{Binding HeaderLabel}" Foreground="#B4B8BE" FontSize="10" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                    <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource NumberFont}" FontWeight="Bold" FontSize="15"
-                               Foreground="#F28A45" VerticalAlignment="Center" />
-                    <StackPanel x:Name="CompactTopActions" Orientation="Horizontal" Visibility="Collapsed" VerticalAlignment="Center">
-                        <Button x:Name="CompactResetButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click"
-                                ToolTip="DPS zurücksetzen" AutomationProperties.Name="DPS zurücksetzen" Margin="0,0,2,0" />
-                        <Button x:Name="CompactSettingsButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click"
-                                ToolTip="Einstellungen" AutomationProperties.Name="Einstellungen" Margin="0,0,2,0" />
-                    </StackPanel>
-                    <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click"
-                            ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" Margin="6,0,0,0" />
+            <!-- Compact statistics header; actions retain their existing handlers. -->
+            <Grid x:Name="Header" Background="Transparent" Height="32">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="DPS-Statistiken" Foreground="{StaticResource StatsTeal}" FontSize="14" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Clock, Converter={StaticResource OverlayDisplay}, ConverterParameter=clock}" FontFamily="{StaticResource NumberFont}" Foreground="#DAE6EA" FontSize="12" Margin="10,1,0,0" />
                 </StackPanel>
-                </Border>
+                <StackPanel x:Name="CompactTopActions" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="CompactResetButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" ToolTip="DPS zurücksetzen" AutomationProperties.Name="DPS zurücksetzen" />
+                    <Button x:Name="CompactSettingsButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="Einstellungen" AutomationProperties.Name="Einstellungen" />
+                    <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click" ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" />
+                </StackPanel>
+                <StackPanel Visibility="Collapsed"><TextBlock x:Name="PartnerBadge" /><Ellipse x:Name="StatusDot" /></StackPanel>
             </Grid>
 
             <!-- Boss health: separate label row and inset track keep text crisp and the fill easy to read. -->
             <Border x:Name="BossHealthPanel" Grid.Row="1" Margin="0,5,0,0" Padding="8,4,8,5" CornerRadius="6"
                     Background="#F0121216" BorderBrush="#493B39" BorderThickness="1"
-                    Visibility="{Binding HasBoss, Converter={StaticResource VisibleIf}}">
+                    Visibility="Collapsed">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -500,15 +428,17 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel x:Name="FooterStatus" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding Status}">
-                        <TextBlock x:Name="FooterText" FontSize="11" Foreground="#A9B1C0" TextTrimming="CharacterEllipsis"
+                        <TextBlock Text="✦" FontSize="10" Foreground="{StaticResource StatsTeal}" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding TotalDamage}" FontFamily="{StaticResource NumberFont}" FontSize="10" Foreground="#AFBBC5" />
+                        <TextBlock x:Name="FooterText" Visibility="Collapsed" FontSize="11" Foreground="#A9B1C0" TextTrimming="CharacterEllipsis"
                                    Effect="{StaticResource TextShadow}" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,35,0">
+                    <StackPanel Grid.Column="1" Visibility="Collapsed" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,35,0">
                         <Ellipse Width="5" Height="5" Fill="#F06A22" Margin="0,0,5,0" />
                         <TextBlock Text="LIVE" FontSize="9" FontWeight="Bold" Foreground="#F2A06B" />
                     </StackPanel>
                 </Grid>
-                <Border x:Name="FooterActions" Background="#B90F1318" BorderBrush="#26323A43" BorderThickness="1" CornerRadius="8" Padding="4,3" HorizontalAlignment="Left">
+                <Border x:Name="FooterActions" Visibility="Collapsed" Background="#B90F1318" BorderBrush="#26323A43" BorderThickness="1" CornerRadius="8" Padding="4,3" HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Button x:Name="FooterResetButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click"
                                 ToolTip="{Binding T.TipRestart}" AutomationProperties.Name="DPS zurücksetzen" Margin="0,0,4,0" />
@@ -522,7 +452,7 @@
         </Grid>
 
         <!-- Resize grip -->
-        <Thumb x:Name="ResizeGrip" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+        <Thumb x:Name="ResizeGrip" Width="0" Height="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
                Cursor="SizeNWSE" ToolTip="Fenstergröße ändern · am Eck ziehen" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
             <Thumb.Template>
                 <ControlTemplate TargetType="Thumb">
@@ -533,9 +463,11 @@
             </Thumb.Template>
         </Thumb>
         <!-- Separate edge handles let users change the width or height without also changing the other dimension. -->
-        <Thumb x:Name="ResizeWidthGrip" Width="8" Height="72" HorizontalAlignment="Right" VerticalAlignment="Center"
-               Margin="0,0,1,0" Cursor="SizeWE" Tag="width" ToolTip="Breite ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
-        <Thumb x:Name="ResizeHeightGrip" Width="72" Height="8" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+        <Thumb x:Name="ResizeWidthGrip" Width="7" HorizontalAlignment="Right" VerticalAlignment="Stretch"
+               Margin="0,4,0,4" Background="#01000000" Cursor="SizeWE" Tag="width" ToolTip="Breite ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
+            <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="{TemplateBinding Background}" /></ControlTemplate></Thumb.Template>
+        </Thumb>
+        <Thumb x:Name="ResizeHeightGrip" Width="0" Height="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                Margin="0,0,0,1" Cursor="SizeNS" Tag="height" ToolTip="Höhe ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
     </Grid>
 </Window>

@@ -45,9 +45,9 @@ public sealed class WindowSmokeTests
                     Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
                     overlay.Refresh(); overlay.UpdateLayout();
                     // The compact overlay intentionally fits the footer into a shorter card.
-                    Assert.InRange(overlay.Height, 180, 499);
+                    Assert.InRange(overlay.Height, 160, 499);
                     Assert.Equal(500, settings.OverlayHeight);
-                    var footer = Assert.IsType<System.Windows.Controls.Button>(overlay.FindName("FooterDetailsButton"));
+                    var footer = Assert.IsType<System.Windows.Controls.StackPanel>(overlay.FindName("FooterStatus"));
                     Assert.True(footer.IsVisible);
                     Assert.True(footer.TranslatePoint(new Point(0, footer.ActualHeight), overlay).Y <= overlay.ActualHeight);
                     foreach (var language in new[] { "de", "en", "ru" })
