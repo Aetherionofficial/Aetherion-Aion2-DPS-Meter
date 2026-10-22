@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:AionMeter.App.Controls"
         xmlns:vm="clr-namespace:AionMeter.App.ViewModels"
+        xmlns:local="clr-namespace:AionMeter.App.Windows"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
         Title="AION2 DPS Meter" Width="600" Height="300" MinWidth="300" MinHeight="160"
@@ -13,6 +14,7 @@
     <Window.Resources>
         <c:VisibleIf x:Key="VisibleIf" />
         <c:OverlayDisplayConverter x:Key="OverlayDisplay" />
+        <local:OverlayExactNumberConverter x:Key="ExactNumber" />
 
         <Storyboard x:Key="Pulse" RepeatBehavior="Forever" AutoReverse="True">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.25" Duration="0:0:0.8" />
@@ -35,8 +37,25 @@
         <sys:Double x:Key="RowRankFont">13.5</sys:Double>
         <sys:Double x:Key="RowAccentWidth">3</sys:Double>
 
+        <!-- All visible typography derives from OverlayBaseFont in ApplyRowSize. -->
+        <sys:Double x:Key="OverlayBaseFont">14</sys:Double>
+        <sys:Double x:Key="HeaderFont">14.5</sys:Double>
+        <sys:Double x:Key="HintFont">13.5</sys:Double>
+        <sys:Double x:Key="IconFontSize">18</sys:Double>
+        <sys:Double x:Key="IconHitSize">24</sys:Double>
+        <sys:Double x:Key="FooterFont">12</sys:Double>
+        <sys:Double x:Key="FooterIconFont">16</sys:Double>
+        <sys:Double x:Key="HeaderHeight">32</sys:Double>
+        <sys:Double x:Key="ShareWidth">48</sys:Double>
+        <GridLength x:Key="DpsColumnWidth">84</GridLength>
+        <GridLength x:Key="ShareColumnWidth">48</GridLength>
+        <sys:Double x:Key="TextShadowBlur">2</sys:Double>
+        <sys:Double x:Key="TextShadowDepth">1</sys:Double>
+        <Thickness x:Key="HeaderIconGap">0,0,10,0</Thickness>
+        <Thickness x:Key="TimerGap">10,0,0,0</Thickness>
+
         <!-- A soft dark halo under every text so it stays readable over any game scene -->
-        <DropShadowEffect x:Key="TextShadow" BlurRadius="4" ShadowDepth="1" Direction="300" Opacity="0.9" Color="Black" />
+        <DropShadowEffect x:Key="TextShadow" BlurRadius="{DynamicResource TextShadowBlur}" ShadowDepth="{DynamicResource TextShadowDepth}" Direction="270" Opacity="0.8" Color="Black" />
 
         <!-- DPS: the figure that matters, white and a little bolder -->
         <Style x:Key="RowNumber" TargetType="TextBlock">
@@ -71,9 +90,10 @@
         <Style x:Key="ToolIcon" TargetType="ButtonBase" BasedOn="{StaticResource IconButton}">
             <!-- A 1/255-alpha hit surface keeps layered-window icon buttons clickable over fully transparent areas. -->
             <Setter Property="Background" Value="#01000000" />
-            <Setter Property="Width" Value="22" />
-            <Setter Property="Height" Value="22" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Width" Value="{DynamicResource IconHitSize}" />
+            <Setter Property="Height" Value="{DynamicResource IconHitSize}" />
+            <Setter Property="FontSize" Value="{DynamicResource IconFontSize}" />
+            <Setter Property="Foreground" Value="#DDE9EFF4" />
         </Style>
         <Style x:Key="ToolToggle" TargetType="ToggleButton" BasedOn="{StaticResource IconToggle}">
             <Setter Property="Background" Value="#01000000" />
@@ -215,8 +235,8 @@
                 <Grid Margin="8,0,10,0" Effect="{StaticResource TextShadow}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Dps" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Share" />
+                        <ColumnDefinition Width="{DynamicResource DpsColumnWidth}" />
+                        <ColumnDefinition Width="{DynamicResource ShareColumnWidth}" />
                     </Grid.ColumnDefinitions>
                     <!-- Only the identity area carries the class-coloured relative bar. -->
                     <Border Background="{Binding SoftFillBrush}" CornerRadius="3" HorizontalAlignment="Left" Margin="-8,0,0,0">
@@ -234,17 +254,21 @@
                                       Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="2,0,0,0">
                             <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
-                                       Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" />
+                                       Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
                             <TextBlock Style="{StaticResource GearText}" Margin="0">
                                 <Run Text="✦ " Foreground="#AFBBC5" /><Run Text="{Binding Damage, Mode=OneWay}" Foreground="#BFCBD2" />
                             </TextBlock>
                         </StackPanel>
                     </Grid>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0">
-                        <TextBlock Text="{Binding Dps, Converter={StaticResource OverlayDisplay}}" Style="{StaticResource RowNumber}" Margin="0" />
-                        <TextBlock Text="{Binding Damage}" Style="{StaticResource RowSub}" Margin="0" />
+                        <TextBlock x:Name="DpsText" Style="{StaticResource RowNumber}" Margin="0">
+                            <TextBlock.Text><MultiBinding Converter="{StaticResource ExactNumber}"><Binding Path="ActorId" /><Binding Path="DisplayNumbers" RelativeSource="{RelativeSource AncestorType=Window}" /></MultiBinding></TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock x:Name="DamageText" Style="{StaticResource RowSub}" Margin="0">
+                            <TextBlock.Text><MultiBinding Converter="{StaticResource ExactNumber}" ConverterParameter="total"><Binding Path="ActorId" /><Binding Path="DisplayNumbers" RelativeSource="{RelativeSource AncestorType=Window}" /></MultiBinding></TextBlock.Text>
+                        </TextBlock>
                     </StackPanel>
-                    <TextBlock Grid.Column="2" Text="{Binding Share}" Style="{StaticResource RowSub}" Foreground="#75E5A1" MinWidth="48" />
+                    <TextBlock x:Name="ShareText" Grid.Column="2" Text="{Binding Share}" Style="{StaticResource RowNumber}" Foreground="#75E5A1" MinWidth="{DynamicResource ShareWidth}" />
                 </Grid>
             </Grid>
             <DataTemplate.Triggers>
@@ -259,13 +283,9 @@
     </Window.Resources>
 
     <Grid Margin="8">
-        <Border x:Name="Frame" CornerRadius="5" BorderThickness="0" BorderBrush="Transparent"
-                RenderTransformOrigin="0,0">
-            <Border.RenderTransform>
-                <ScaleTransform x:Name="FrameScale" ScaleX="1" ScaleY="1" />
-            </Border.RenderTransform>
+        <Border x:Name="Frame" CornerRadius="5" BorderThickness="0" BorderBrush="Transparent">
             <Border.Background>
-                <SolidColorBrush x:Name="FrameBackground" Color="#090E14" Opacity="0.72" />
+                <SolidColorBrush x:Name="FrameBackground" Color="#090E14" />
             </Border.Background>
             <Border.Effect>
                 <DropShadowEffect BlurRadius="14" ShadowDepth="0" Opacity="0.5" Color="Black" />
@@ -283,10 +303,7 @@
             </Border.Background>
         </Border>
 
-        <Grid x:Name="CardBody" Margin="12,8,12,8" RenderTransformOrigin="0,0">
-            <Grid.RenderTransform>
-                <ScaleTransform x:Name="CardBodyScale" ScaleX="1" ScaleY="1" />
-            </Grid.RenderTransform>
+        <Grid x:Name="CardBody" Margin="12,8,12,8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -296,15 +313,15 @@
             </Grid.RowDefinitions>
 
             <!-- Compact statistics header; actions retain their existing handlers. -->
-            <Grid x:Name="Header" Background="Transparent" Height="32">
+            <Grid x:Name="Header" Background="Transparent" Height="{DynamicResource HeaderHeight}" Effect="{StaticResource TextShadow}">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="DPS-Statistiken" Foreground="{StaticResource StatsTeal}" FontSize="14" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding Clock, Converter={StaticResource OverlayDisplay}, ConverterParameter=clock}" FontFamily="{StaticResource NumberFont}" Foreground="#DAE6EA" FontSize="12" Margin="10,1,0,0" />
+                    <TextBlock x:Name="StatisticsTitle" Text="DPS-Statistiken" Foreground="{StaticResource StatsTeal}" FontSize="{DynamicResource HeaderFont}" FontWeight="SemiBold" />
+                    <TextBlock x:Name="StatisticsClock" Text="{Binding Clock, Converter={StaticResource OverlayDisplay}, ConverterParameter=clock}" FontFamily="{StaticResource NumberFont}" Foreground="#DAE6EA" FontSize="{DynamicResource HeaderFont}" FontWeight="SemiBold" Margin="{DynamicResource TimerGap}" />
                 </StackPanel>
                 <StackPanel x:Name="CompactTopActions" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="CompactResetButton" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" ToolTip="DPS zurücksetzen" AutomationProperties.Name="DPS zurücksetzen" />
-                    <Button x:Name="CompactSettingsButton" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="Einstellungen" AutomationProperties.Name="Einstellungen" />
+                    <Button x:Name="CompactResetButton" Margin="{DynamicResource HeaderIconGap}" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" ToolTip="DPS zurücksetzen" AutomationProperties.Name="DPS zurücksetzen" />
+                    <Button x:Name="CompactSettingsButton" Margin="{DynamicResource HeaderIconGap}" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="Einstellungen" AutomationProperties.Name="Einstellungen" />
                     <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click" ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" />
                 </StackPanel>
                 <StackPanel Visibility="Collapsed"><TextBlock x:Name="PartnerBadge" /><Ellipse x:Name="StatusDot" /></StackPanel>
@@ -379,12 +396,12 @@
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">
                     <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
                 </ScrollViewer>
-                <StackPanel Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="330"
+                <StackPanel x:Name="EmptyHintPanel" Grid.RowSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,4,0,0" Effect="{StaticResource TextShadow}"
                             Visibility="{Binding HasData, Converter={StaticResource VisibleIf}, ConverterParameter=!}">
-                    <TextBlock Text="{Binding T.EmptyParty}" FontSize="13" Foreground="#B4B8BE"
-                               TextWrapping="Wrap" TextAlignment="Center" />
-                    <TextBlock Text="{Binding WaitingPlayer}" FontSize="12" Foreground="#F28A45"
-                               TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0" />
+                    <TextBlock Text="{Binding T.EmptyParty}" FontSize="{DynamicResource HintFont}" Foreground="#DCE5EE"
+                               TextWrapping="Wrap" TextAlignment="Left" />
+                    <TextBlock Text="{Binding WaitingPlayer}" FontSize="{DynamicResource HintFont}" Foreground="#E3D1BE"
+                               TextWrapping="Wrap" TextAlignment="Left" Margin="0,6,0,0" />
                 </StackPanel>
             </Grid>
 
@@ -403,7 +420,7 @@
                         <Button x:Name="TimersToolButton" Style="{StaticResource ToolIcon}" Content="&#xE121;" Click="Timers_Click" ToolTip="{Binding T.TipTimers}" />
                         <Button x:Name="EventsToolButton" Style="{StaticResource ToolIcon}" Content="&#xE787;" Click="Events_Click" ToolTip="{Binding T.EventTimersTitle}" />
                         <ToggleButton x:Name="LockButton" Style="{StaticResource ToolToggle}" Click="Lock_Click" ToolTip="{Binding T.TipLock}"><TextBlock x:Name="LockGlyph" Text="&#xE785;" /></ToggleButton>
-                        <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0" Maximum="1" Margin="5,0,3,0" ValueChanged="Opacity_Changed" VerticalAlignment="Center" ToolTip="{Binding T.TipOpacity}" />
+                        <Slider x:Name="OpacitySlider" Style="{StaticResource GoldSlider}" Width="52" Minimum="0.20" Maximum="1" Margin="5,0,3,0" ValueChanged="Opacity_Changed" VerticalAlignment="Center" ToolTip="{Binding T.TipOpacity}" />
                         <Button x:Name="HideToolButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="Hide_Click" ToolTip="{Binding T.TipHide}" />
                     </StackPanel>
                 </Border>
@@ -427,9 +444,9 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel x:Name="FooterStatus" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding Status}">
-                        <TextBlock Text="✦" FontSize="10" Foreground="{StaticResource StatsTeal}" Margin="0,0,6,0" />
-                        <TextBlock Text="{Binding TotalDamage}" FontFamily="{StaticResource NumberFont}" FontSize="10" Foreground="#AFBBC5" />
+                    <StackPanel x:Name="FooterStatus" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding Status}" Effect="{StaticResource TextShadow}">
+                        <TextBlock Text="✦" FontSize="{DynamicResource FooterIconFont}" Foreground="{StaticResource StatsTeal}" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding TotalDamage}" FontFamily="{StaticResource NumberFont}" FontSize="{DynamicResource FooterFont}" Foreground="#CED8E3" />
                         <TextBlock x:Name="FooterText" Visibility="Collapsed" FontSize="11" Foreground="#A9B1C0" TextTrimming="CharacterEllipsis"
                                    Effect="{StaticResource TextShadow}" />
                     </StackPanel>

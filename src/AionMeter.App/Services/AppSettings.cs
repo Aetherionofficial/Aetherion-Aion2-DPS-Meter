@@ -20,7 +20,13 @@ public enum OverlayRanking
 
 public sealed class AppSettings
 {
-    public static string AppDataDir { get; } = ResolveAppDataDir();
+    private static string _appDataDir = ResolveAppDataDir();
+    /// <summary>Tests may redirect storage to a temporary directory and restore it afterwards.</summary>
+    public static string AppDataDir
+    {
+        get => _appDataDir;
+        set => _appDataDir = Path.GetFullPath(value);
+    }
 
     private static string ResolveAppDataDir()
     {

@@ -4,6 +4,8 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Globalization;
+using System.Windows.Data;
 using AionMeter.App.Controls;
 using AionMeter.App.Services;
 using AionMeter.App.ViewModels;
@@ -23,6 +25,20 @@ public partial class OverlayWindow : Window
     private SavedFight? _saved; // a fight loaded from history (takes precedence over _segment)
     private nint _hwnd;
     private readonly DragAnywhere _drag;
+    private bool _appearanceReady;
+    private bool _opacitySavePending;
+    private readonly System.Windows.Threading.DispatcherTimer _opacitySaveTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+
+    public static readonly DependencyProperty DisplayNumbersProperty = DependencyProperty.Register(
+        nameof(DisplayNumbers), typeof(OverlayNumberContext), typeof(OverlayWindow));
+    public OverlayNumberContext? DisplayNumbers
+    {
+        get => (OverlayNumberContext?)GetValue(DisplayNumbersProperty);
+        private set => SetValue(DisplayNumbersProperty, value);
+    }
+
+    internal static double NormalizeBackgroundOpacity(double value) =>
+        !double.IsFinite(value) || value == 0 ? 0.60 : Math.Clamp(value, 0.20, 1);
 
     private sealed record SavedFight(HistoryEntry Entry, FightRecord Record, RecordFightView View, string Title);
 
@@ -33,9 +49,15 @@ public partial class OverlayWindow : Window
     {
         _meter = meter;
         _settings = meter.Settings;
-        var opacity = _settings.BackgroundOpacity; // the slider's coercion during InitializeComponent would overwrite it
+        _opacitySaveTimer.Tick += (_, _) => FlushPendingAppearanceSave();
+        var opacity = NormalizeBackgroundOpacity(_settings.BackgroundOpacity);
+        var loadedWidth = double.IsFinite(_settings.OverlayWidth) ? Math.Max(300, _settings.OverlayWidth) : 300;
+        var normalizeSettings = loadedWidth != _settings.OverlayWidth || opacity != _settings.BackgroundOpacity;
         InitializeComponent();
+        _settings.OverlayWidth = loadedWidth;
         _settings.BackgroundOpacity = opacity;
+        _appearanceReady = true;
+        if (normalizeSettings) _settings.Save();
         DataContext = _vm;
 
         Left = _settings.OverlayLeft;
@@ -99,6 +121,7 @@ public partial class OverlayWindow : Window
             _vm.Apply(saved.Record.Summary with { Title = saved.Title, Zone = _meter.DisplayZone(saved.Record.Summary.Zone) },
                 _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
             _vm.SetSegment("saved", saved.Entry.StartedAt.ToString("dd.MM HH:mm"));
+            DisplayNumbers = new(saved.Record.Summary, _settings.OverlayRanking == OverlayRanking.Healing);
         }
         else
         {
@@ -111,6 +134,7 @@ public partial class OverlayWindow : Window
                 snap = _meter.Tracker.Snapshot(null, now);
             }
             _vm.Apply(snap, _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
+            DisplayNumbers = new(snap, _settings.OverlayRanking == OverlayRanking.Healing);
             _vm.SetSegment(_segment is null ? "live" : "session", snap?.StartedAt.ToString("HH:mm"));
             if (!_vm.HasData && _meter.Tracker.SelfName is { Length: > 0 } selfName)
                 _vm.WaitingPlayer = $"Spieler: {selfName}";
@@ -211,8 +235,8 @@ public partial class OverlayWindow : Window
 
     private void ApplyBackgroundOpacity(double opacity)
     {
-        var value = _settings.HighContrast ? 1 : Math.Clamp(opacity, 0, 1);
-        FrameBackground.Opacity = _settings.HighContrast ? 1 : value * 0.75;
+        var value = _settings.HighContrast ? 1 : NormalizeBackgroundOpacity(opacity);
+        FrameBackground.Opacity = value;
 
         // Fade the toolbar's empty surface with the main panel too. Keeping its fixed opaque backing
         // prevented mouse clicks from reaching the game underneath, even at zero background opacity.
@@ -232,20 +256,39 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Row size in percent of the original. The height follows it exactly; text, emblems and the number columns shrink
-    /// more gently (square root), so the smallest rows stay readable and the names get the room the numbers give up.
+    /// Typography and spacing depend only on the chosen size profile, never on the window width.
     /// </summary>
     public void ApplyRowSize(int percent)
     {
-        var k = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize) / 100.0;
-        var f = Math.Max(0.8, Math.Sqrt(k) * _settings.OverlayTextScale);
-        var height = Math.Max(Math.Round(44 * k), Math.Ceiling(26 * f + 8));
+        percent = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize);
+        var position = percent <= 80 ? (percent - 58) / 22.0 : (percent - 80) / 10.0;
+        var profileFont = percent <= 80 ? 13 + position : 14 + position;
+        var profileHeight = percent <= 80 ? 38 + 6 * position : 44 + 8 * position;
+        var profileGap = percent <= 80 ? 2 + 2 * position : 4 + 2 * position;
+        var basis = Math.Clamp(profileFont * _settings.OverlayTextScale, 13, 18);
+        Resources["OverlayBaseFont"] = basis;
+        Resources["HeaderFont"] = basis;
+        Resources["HintFont"] = basis * (13.5 / 14);
+        Resources["IconFontSize"] = Math.Max(18, basis * (18.0 / 14));
+        Resources["IconHitSize"] = Math.Max(24, basis * (24.0 / 14));
+        Resources["FooterFont"] = basis * (12.0 / 14);
+        Resources["FooterIconFont"] = basis * (16.0 / 14);
+        Resources["HeaderHeight"] = basis * (32.0 / 14);
+        Resources["ShareWidth"] = basis * 3.25;
+        Resources["DpsColumnWidth"] = new GridLength(basis * 7.5);
+        Resources["ShareColumnWidth"] = new GridLength(basis * 4.25);
+        Resources["HeaderIconGap"] = new Thickness(0, 0, basis * (10.0 / 14), 0);
+        Resources["TimerGap"] = new Thickness(basis * (10.0 / 14), 0, 0, 0);
+        Resources["TextShadowBlur"] = 2d;
+        Resources["TextShadowDepth"] = 1d;
+        var f = basis / 14;
+        var height = Math.Max(profileHeight, 2 * basis + 10);
         Resources["RowHeight"] = height;
-        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(2, Math.Round(3 * k)));
-        Resources["RowNameFont"] = Math.Round(15 * f, 1);
-        Resources["RowGearFont"] = Math.Round(11.5 * f, 1);
+        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(2, profileGap));
+        Resources["RowNameFont"] = basis;
+        Resources["RowGearFont"] = 12 * f;
         Resources["RowNumberFont"] = Math.Round(14 * f, 1);
-        Resources["RowSubFont"] = Math.Round(11 * f, 1);
+        Resources["RowSubFont"] = 12 * f;
         Resources["RowGlyphSize"] = Math.Min(Math.Round(22 * f), height - 8);
         Resources["RowRankFont"] = Math.Round(13.5 * f, 1);
         Resources["RowAccentWidth"] = Math.Max(2, Math.Round(3 * f));
@@ -359,10 +402,9 @@ public partial class OverlayWindow : Window
     private void ApplyAutomaticHeight()
     {
         if (!_settings.AutoOverlayHeight || !IsVisible || ActualHeight <= 0 || PlayerRowsViewport.ActualHeight <= 0) return;
-        var scale = (CardBody.LayoutTransform as ScaleTransform)?.ScaleY ?? 1;
-        var chrome = ActualHeight - PlayerRowsViewport.ActualHeight * scale;
+        var chrome = ActualHeight - PlayerRowsViewport.ActualHeight;
         var row = (double)Resources["RowHeight"] + ((Thickness)Resources["RowMargin"]).Bottom;
-        var content = Math.Max(1, _vm.Rows.Count) * row * scale;
+        var content = Math.Max(1, _vm.Rows.Count) * row;
         var target = Math.Clamp(Math.Ceiling(chrome + content), MinHeight, Math.Max(MinHeight, _settings.OverlayHeight));
         if (Math.Abs(Height - target) > 1) Height = target;
     }
@@ -384,12 +426,7 @@ public partial class OverlayWindow : Window
     {
         // Keep footer actions clear of the corner resize handle at narrow sizes.
         if (FooterDetailsButton is null) return;
-        // LayoutTransform reserves the scaled space, keeping content inside the actual window bounds.
-        // The panel and edge hit areas retain the window geometry while text, icons and bars scale together.
-        var scale = Math.Clamp((Width - 16) / 520.0, 0.5, 1.5);
-        CardBody.LayoutTransform = new ScaleTransform(scale, scale);
-        CardBodyScale.ScaleX = CardBodyScale.ScaleY = 1;
-        FrameScale.ScaleX = FrameScale.ScaleY = 1;
+        // Width changes only redistribute the flexible name/bar area; fixed typography is untouched.
         var compact = _settings.CompactDpsOnly;
         // Keep the three essential controls in the header at every size, matching the reference meter. The footer
         // remains reserved for details and comparison so the controls never appear twice.
@@ -767,14 +804,56 @@ public partial class OverlayWindow : Window
 
     private void Opacity_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (FrameBackground is null) return;
+        if (!_appearanceReady || FrameBackground is null) return;
         ApplyBackgroundOpacity(e.NewValue);
-        _settings.BackgroundOpacity = Math.Round(e.NewValue, 2);
+        var value = Math.Round(NormalizeBackgroundOpacity(e.NewValue), 2);
+        if (_settings.BackgroundOpacity == value) return;
+        _settings.BackgroundOpacity = value;
+        _opacitySavePending = true;
+        _opacitySaveTimer.Stop();
+        _opacitySaveTimer.Start();
+    }
+
+    /// <summary>Commit the last slider value immediately; normally debounced for 400 ms.</summary>
+    public void FlushPendingAppearanceSave()
+    {
+        VerifyAccess();
+        _opacitySaveTimer.Stop();
+        if (!_opacitySavePending) return;
+        _settings.Save();
+        _opacitySavePending = false;
     }
 
     protected override void OnClosed(EventArgs e)
     {
+        _opacitySaveTimer.Stop();
         SavePlacement();
+        _opacitySavePending = false; // SavePlacement includes the final opacity, without a second write.
         base.OnClosed(e);
     }
+}
+
+/// <summary>Raw snapshot for overlay formatting only; shared combat values are never rewritten.</summary>
+public sealed record OverlayNumberContext(EncounterSnapshot? Snapshot, bool Healing);
+
+public sealed class OverlayExactNumberConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values.Length != 2 || values[0] is not uint actorId || values[1] is not OverlayNumberContext context
+            || context.Snapshot is not { } snapshot
+            || snapshot.Combatants.FirstOrDefault(row => row.ActorId == actorId) is not { } actor) return "—";
+        var total = context.Healing ? actor.Healing : actor.Damage;
+        // Same healing rate as OverlayViewModel: healing / max(1 second, combat duration).
+        // OverlayDisplayConverter only adjusts clock padding and /S; it has no numeric settings.
+        // Format.Compact's K/M abbreviations and decimal precision are intentionally replaced by
+        // full N0 integers as requested. Zero stays 0; unavailable actors/snapshots stay "—".
+        var seconds = Math.Max(1, snapshot.CombatMs / 1000.0);
+        var rate = context.Healing ? total / seconds : actor.Dps;
+        var numbers = CultureInfo.GetCultureInfo("en-US");
+        return parameter as string == "total" ? total.ToString("N0", numbers) : rate.ToString("N0", numbers) + "/S";
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
 }

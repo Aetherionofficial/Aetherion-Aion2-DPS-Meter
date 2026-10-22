@@ -72,7 +72,8 @@ public partial class SettingsWindow : Window
         DiscordPresence.IsChecked = s.DiscordPresenceEnabled;
         foreach (var n in new[] { 5, 8, 10, 12, 15, 20 }) MaxRows.Items.Add(n);
         MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(n => Math.Abs(n - s.MaxRows)).First();
-        OpacityValue.Value = s.BackgroundOpacity;
+        OpacityValue.Minimum = 0.20;
+        OpacityValue.Value = OverlayWindow.NormalizeBackgroundOpacity(s.BackgroundOpacity);
         RowSizeValue.Value = s.RowSize;
         Mode.SelectedIndex = s.TargetMode == TargetMode.BossOnly ? 0 : 1;
         Idle.Text = s.IdleTimeoutSec.ToString();
@@ -281,17 +282,17 @@ public partial class SettingsWindow : Window
     private void SizePreset_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string preset }) return;
-        (int rows, int size, double width, double height) = preset switch
+        (int rows, int size) = preset switch
         {
-            "compact" => (5, 58, 380, 250),
-            "large" => (12, 90, 460, 780),
-            _ => (8, 80, 400, 680),
+            "compact" => (5, 58),
+            "large" => (12, 90),
+            _ => (8, 80),
         };
         MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(value => Math.Abs(value - rows)).First();
         RowSizeValue.Value = size;
-        _previewWidth = width;
-        _previewHeight = height;
-        AppHost.Current.PreviewOverlaySize(width, height);
+        // Keep the live preview, but a typography preset does not resize the window.
+        var overlay = Application.Current.Windows.OfType<OverlayWindow>().FirstOrDefault();
+        AppHost.Current.PreviewOverlaySize(overlay?.Width ?? _previewWidth, overlay?.Height ?? _previewHeight);
     }
 
     private void OverlayView_Click(object sender, RoutedEventArgs e)
@@ -384,7 +385,7 @@ public partial class SettingsWindow : Window
         s.MaxRows = MaxRows.SelectedItem is int rows ? rows : 10;
         s.OverlayWidth = _previewWidth;
         s.OverlayHeight = _previewHeight;
-        s.BackgroundOpacity = Math.Round(OpacityValue.Value, 2);
+        s.BackgroundOpacity = Math.Round(OverlayWindow.NormalizeBackgroundOpacity(OpacityValue.Value), 2);
         s.RowSize = (int)Math.Round(RowSizeValue.Value);
         s.TargetMode = Mode.SelectedIndex == 1 ? TargetMode.All : TargetMode.BossOnly;
         if (int.TryParse(Idle.Text, out var idle)) s.IdleTimeoutSec = Math.Clamp(idle, 3, 120);

@@ -2,9 +2,13 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Threading;
+using System.Windows.Controls;
+using System.Windows.Media;
+using AionMeter.App.ViewModels;
 using AionMeter.App.Services;
 using AionMeter.App.Windows;
 using AionMeter.Core.Events;
+using AionMeter.Core.Combat;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
@@ -50,6 +54,7 @@ public sealed class WindowSmokeTests
                     var footer = Assert.IsType<System.Windows.Controls.StackPanel>(overlay.FindName("FooterStatus"));
                     Assert.True(footer.IsVisible);
                     Assert.True(footer.TranslatePoint(new Point(0, footer.ActualHeight), overlay).Y <= overlay.ActualHeight);
+                    CheckOverlayTypography(overlay, settings);
                     foreach (var language in new[] { "de", "en", "ru" })
                     {
                         UiText.Use(language);
@@ -60,6 +65,8 @@ public sealed class WindowSmokeTests
                     }
                     using var output = new TemporaryOutput();
                     CheckJournalNavigation(app, meter, overlay);
+                    CheckSizePresets(meter, overlay);
+                    CheckOverlayAppearancePersistence();
                     CheckUnavailableRecovery(meter);
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "customer-tools", Backdrop: "dark", Scale: 1));
                     Assert.True(new FileInfo(output.Path).Length > 1_000);
@@ -78,6 +85,210 @@ public sealed class WindowSmokeTests
         thread.SetApartmentState(ApartmentState.STA); thread.Start();
         Assert.True(thread.Join(TimeSpan.FromSeconds(60)), "WPF test did not finish.");
         Assert.Null(failure);
+    }
+
+    private static IEnumerable<T> Visuals<T>(DependencyObject root) where T : DependencyObject
+    {
+        if (root is T match) yield return match;
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+            foreach (var child in Visuals<T>(VisualTreeHelper.GetChild(root, i))) yield return child;
+    }
+
+    private static double TextWidth(TextBlock text, string? content = null) => new FormattedText(content ?? text.Text,
+        System.Globalization.CultureInfo.GetCultureInfo("en-US"), text.FlowDirection,
+        new Typeface(text.FontFamily, text.FontStyle, text.FontWeight, text.FontStretch), text.FontSize,
+        text.Foreground, null, TextFormattingMode.Display, VisualTreeHelper.GetDpi(text).PixelsPerDip).WidthIncludingTrailingWhitespace;
+
+    private static void CheckOverlayTypography(OverlayWindow overlay, AppSettings settings)
+    {
+        var original = (overlay.Width, overlay.Height, settings.RowSize);
+        var vm = (OverlayViewModel)overlay.DataContext;
+        var row = vm.Rows[0];
+        var oldValues = (row.Name, row.Damage, row.Share, overlay.DisplayNumbers);
+        const string longName = "EinExtremLangerSpielernameDerNiemalsInDieDpsSpalteRagenDarf";
+        var snapshot = overlay.DisplayNumbers!.Snapshot!;
+        var actor = snapshot.Combatants.First(c => c.ActorId == row.ActorId);
+        row.Name = longName; row.Damage = "119.4K"; row.Share = "100.0%";
+        var exactSnapshot = snapshot with { Combatants = new[] { actor with { Dps = 9_999_999, Damage = 9_999_999 } } };
+        overlay.SetValue(OverlayWindow.DisplayNumbersProperty, new OverlayNumberContext(exactSnapshot, false));
+        try
+        {
+            foreach (var (rowSize, expectedHeight, expectedGap) in new[] { (58, 38d, 2d), (80, 44d, 4d), (90, 52d, 6d) })
+            {
+                settings.RowSize = rowSize;
+                overlay.ApplyRowSize(rowSize);
+                double? observedFont = null;
+                double? observedNumberWidth = null;
+                foreach (var width in new[] { 300, 380, 460, 600 })
+                {
+                    overlay.PreviewSize(width, 500); overlay.UpdateLayout();
+                    Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+                    overlay.UpdateLayout();
+                    var name = Visuals<TextBlock>(overlay).Single(t => t.Name == "NameText");
+                    var dps = Visuals<TextBlock>(overlay).Single(t => t.Name == "DpsText");
+                    var damage = Visuals<TextBlock>(overlay).Single(t => t.Name == "DamageText");
+                    var share = Visuals<TextBlock>(overlay).Single(t => t.Name == "ShareText");
+                    Assert.True(name.FontSize >= 13);
+                    if (observedFont is { } font) Assert.Equal(font, name.FontSize);
+                    observedFont = name.FontSize;
+                    var rowGrid = Visuals<Grid>(overlay).Single(g => ReferenceEquals(g.DataContext, row) && g.Cursor == System.Windows.Input.Cursors.Hand);
+                    Assert.Equal(expectedHeight, rowGrid.ActualHeight);
+                    Assert.Equal(expectedGap, rowGrid.Margin.Bottom);
+                    if (observedNumberWidth is { } columnWidth) Assert.Equal(columnWidth, dps.ActualWidth);
+                    observedNumberWidth = dps.ActualWidth;
+                    Assert.True(((Grid)overlay.FindName("CardBody")).LayoutTransform.Value.IsIdentity);
+                    Assert.Equal(300, overlay.MinWidth);
+                    Assert.Equal(TextTrimming.CharacterEllipsis, name.TextTrimming);
+                    Assert.Equal(TextWrapping.NoWrap, name.TextWrapping);
+                    Assert.Equal("9,999,999/S", dps.Text);
+                    Assert.Equal("9,999,999", damage.Text);
+                    Assert.Equal(dps.FontSize, share.FontSize);
+                    Assert.Equal(Color.FromRgb(0x75, 0xE5, 0xA1), ((SolidColorBrush)share.Foreground).Color);
+                    if (width == 300)
+                    {
+                        Assert.True(TextWidth(name) > name.ActualWidth, "Long name must be constrained and ellipsized.");
+                        Assert.True(name.ActualWidth >= TextWidth(name, "…"), "The ellipsis itself must fit.");
+                        Assert.True(name.TranslatePoint(new Point(name.ActualWidth, 0), overlay).X <= dps.TranslatePoint(new Point(), overlay).X);
+                    }
+                    foreach (var text in new[] { dps, damage, share })
+                    {
+                        Assert.True(text.ActualWidth + 1 >= TextWidth(text), $"Clipped {text.Name}: {text.ActualWidth} < {TextWidth(text)} at {width}, profile {rowSize}");
+                        Assert.True(text.TranslatePoint(new Point(text.ActualWidth, 0), overlay).X <= overlay.ActualWidth - 8);
+                    }
+                    var title = (TextBlock)overlay.FindName("StatisticsTitle");
+                    var timer = (TextBlock)overlay.FindName("StatisticsClock");
+                    Assert.Equal(title.FontSize, timer.FontSize);
+                    var actions = (StackPanel)overlay.FindName("CompactTopActions");
+                    Assert.True(timer.TranslatePoint(new Point(timer.ActualWidth, 0), overlay).X <= actions.TranslatePoint(new Point(), overlay).X,
+                        $"Header overlap at {width}, profile {rowSize}: timer ends {timer.TranslatePoint(new Point(timer.ActualWidth, 0), overlay).X}, actions start {actions.TranslatePoint(new Point(), overlay).X}");
+                    foreach (var button in actions.Children.OfType<Button>())
+                    {
+                        Assert.True(button.ActualWidth >= 23.99); Assert.True(button.ActualHeight >= 23.99);
+                    }
+                }
+            }
+            var converter = new OverlayExactNumberConverter();
+            var example = new OverlayNumberContext(snapshot with { Combatants = new[] { actor with { Dps = 22_049, Damage = 1_345_034 } } }, false);
+            Assert.Equal("22,049/S", converter.Convert(new object[] { actor.ActorId, example }, typeof(string), "rate", System.Globalization.CultureInfo.InvariantCulture));
+            Assert.Equal("1,345,034", converter.Convert(new object[] { actor.ActorId, example }, typeof(string), "total", System.Globalization.CultureInfo.InvariantCulture));
+        }
+        finally
+        {
+            row.Name = oldValues.Name; row.Damage = oldValues.Damage; row.Share = oldValues.Share;
+            overlay.SetValue(OverlayWindow.DisplayNumbersProperty, oldValues.DisplayNumbers);
+            settings.RowSize = original.RowSize; overlay.ApplyRowSize(original.RowSize);
+            overlay.PreviewSize(original.Width, original.Height);
+        }
+    }
+
+    private static void CheckSizePresets(MeterService meter, OverlayWindow overlay)
+    {
+        var window = new SettingsWindow(meter) { Opacity = 0, ShowActivated = false };
+        var originalSize = (overlay.Width, overlay.Height);
+        var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        try
+        {
+            window.Show(); window.UpdateLayout();
+            var handler = typeof(SettingsWindow).GetMethod("SizePreset_Click", flags)!;
+            foreach (var (preset, rows) in new[] { ("compact", 5), ("standard", 8), ("large", 12) })
+            {
+                handler.Invoke(window, new object[] { new Button { Tag = preset }, new RoutedEventArgs() });
+                Assert.Equal(rows, ((ComboBox)window.FindName("MaxRows")).SelectedItem);
+                Assert.Equal(originalSize.Width, overlay.Width); Assert.Equal(originalSize.Height, overlay.Height);
+            }
+        }
+        finally { window.Close(); }
+    }
+
+    private static void CheckOverlayAppearancePersistence()
+    {
+        foreach (var existing in Application.Current.Windows.OfType<OverlayWindow>()) existing.FlushPendingAppearanceSave();
+        var previousDirectory = AppSettings.AppDataDir;
+        var temporaryRoot = Path.GetFullPath(Path.GetTempPath());
+        var temporaryDirectory = Path.Combine(temporaryRoot, "Aetherion-overlay-persistence-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temporaryDirectory);
+        AppSettings.AppDataDir = temporaryDirectory;
+        try
+        {
+            var file = Path.Combine(temporaryDirectory, "settings.json");
+            var seed = new AppSettings { LayoutVersion = AppSettings.Load().LayoutVersion, OverlayWidth = 240, BackgroundOpacity = 0 };
+            seed.Save();
+            var loaded = AppSettings.Load();
+            using var meter = new MeterService(loaded, null);
+            var window = new OverlayWindow(meter) { Opacity = 0, ShowActivated = false };
+            try
+            {
+                Assert.Equal(300, window.Width); Assert.Equal(300, loaded.OverlayWidth);
+                window.FlushPendingAppearanceSave();
+                Assert.Equal(300, AppSettings.Load().OverlayWidth);
+                Assert.Equal(0.60, ((SolidColorBrush)window.FindName("FrameBackground")).Opacity);
+                var slider = (Slider)window.FindName("OpacitySlider");
+                Assert.Equal(0.20, slider.Minimum);
+                var beforeDrag = File.ReadAllText(file);
+                slider.Value = 0.30; slider.Value = 0.32; slider.Value = 0.35;
+                Assert.Equal(0.35, ((SolidColorBrush)window.FindName("FrameBackground")).Opacity);
+                Assert.Equal(beforeDrag, File.ReadAllText(file)); // Moving the slider does not write synchronously.
+                window.FlushPendingAppearanceSave();
+                Assert.Equal(0.35, AppSettings.Load().BackgroundOpacity);
+
+                loaded.HighContrast = true;
+                window.ApplyAppearance();
+                Assert.Equal(1, ((SolidColorBrush)window.FindName("FrameBackground")).Opacity);
+                Assert.Equal(0.35, loaded.BackgroundOpacity); // Contrast does not overwrite the user's slider value.
+                loaded.HighContrast = false;
+                window.ApplyAppearance();
+                Assert.Equal(0.35, ((SolidColorBrush)window.FindName("FrameBackground")).Opacity);
+
+                using var restartedMeter = new MeterService(AppSettings.Load(), null);
+                var restarted = new OverlayWindow(restartedMeter) { Opacity = 0, ShowActivated = false };
+                try { Assert.Equal(0.35, ((SolidColorBrush)restarted.FindName("FrameBackground")).Opacity); }
+                finally { restarted.Close(); }
+                slider.Value = 0.01;
+                Assert.Equal(0.20, slider.Value);
+                window.FlushPendingAppearanceSave();
+                Assert.Equal(0.20, AppSettings.Load().BackgroundOpacity);
+                Assert.Equal(0, window.Opacity); // Background changes never alter the window/text opacity.
+                slider.Value = 0.45; // Closing must also commit a pending value without waiting for the timer.
+            }
+            finally { window.Close(); }
+            Assert.Equal(0.45, AppSettings.Load().BackgroundOpacity);
+        }
+        finally
+        {
+            AppSettings.AppDataDir = previousDirectory;
+            var allowedRoot = Path.TrimEndingDirectorySeparator(temporaryRoot) + Path.DirectorySeparatorChar;
+            Assert.StartsWith(allowedRoot, Path.GetFullPath(temporaryDirectory), StringComparison.OrdinalIgnoreCase);
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Healing_numbers_keep_the_original_duration_floor_and_handle_zero_and_missing_data()
+    {
+        var converter = new OverlayExactNumberConverter();
+        var actor = new CombatantSnapshot(100, "Healer", GameClass.Cleric, true,
+            1_345_034, 9_999_999, 1, 1, 0, 0, 0, Healing: 44_098);
+        var snapshot = new EncounterSnapshot(Guid.NewGuid(), "Test", null, DateTimeOffset.UnixEpoch,
+            0, 0, true, EncounterEndReason.None, 1_345_034, 9_999_999, null, new[] { actor });
+        string Display(EncounterSnapshot? value, string field) => Assert.IsType<string>(converter.Convert(
+            new object[] { actor.ActorId, new OverlayNumberContext(value, true) }, typeof(string), field,
+            System.Globalization.CultureInfo.InvariantCulture));
+        foreach (var (milliseconds, expected) in new[]
+        {
+            (0L, "44,098/S"), (500L, "44,098/S"), (1000L, "44,098/S"),
+            (2000L, "22,049/S"), (2500L, "17,639/S")
+        })
+        {
+            var timed = snapshot with { CombatMs = milliseconds };
+            Assert.Equal(expected, Display(timed, "rate"));
+            Assert.Equal("44,098", Display(timed, "total"));
+        }
+        var zero = snapshot with { Combatants = new[] { actor with { Healing = 0 } } };
+        Assert.Equal("0/S", Display(zero, "rate")); Assert.Equal("0", Display(zero, "total"));
+        var rounded = snapshot with { CombatMs = 2000, Combatants = new[] { actor with { Healing = 3 } } };
+        Assert.Equal("2/S", Display(rounded, "rate")); // Full-integer N0 rounding, intentionally no K/M abbreviations.
+        Assert.Equal("—", Display(null, "rate"));
+        Assert.Equal("—", Display(snapshot with { Combatants = Array.Empty<CombatantSnapshot>() }, "total"));
     }
 
     // Pumping the dispatcher must not start real login, maintenance HTTP polling or the single-instance path.
