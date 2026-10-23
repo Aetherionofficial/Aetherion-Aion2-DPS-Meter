@@ -168,7 +168,19 @@ public sealed class WindowSmokeTests
             details.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             var window = Assert.Single(Application.Current.Windows.OfType<BreakdownWindow>());
             Assert.True(window.IsVisible);
+            Assert.True(window.Topmost); // Must not be created underneath a borderless game's topmost surface.
+            Assert.True(window.ShowActivated);
+            Assert.False(overlay.ShowActivated); // Only the explicit detail window can take keyboard focus.
             Assert.Equal(Visibility.Visible, ((Border)window.FindName("OverlayCritTile")).Visibility);
+            window.WindowState = WindowState.Minimized;
+            details.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Same(window, Assert.Single(Application.Current.Windows.OfType<BreakdownWindow>()));
+            Assert.Equal(WindowState.Normal, window.WindowState);
+            Assert.True(window.IsVisible);
+            window.Hide();
+            details.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Same(window, Assert.Single(Application.Current.Windows.OfType<BreakdownWindow>()));
+            Assert.True(window.IsVisible);
             details.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Empty(Application.Current.Windows.OfType<BreakdownWindow>());
             settings.ShowPing = false; overlay.ApplyAppearance();

@@ -491,14 +491,25 @@ public partial class OverlayWindow : Window
         if (view is null) return;
         if (_overlayDetails is { IsLoaded: true } existing && Equals(key, _detailSource))
         {
-            existing.Select(actorId); existing.Activate(); return;
+            existing.Select(actorId); PresentOverlayDetails(existing); return;
         }
         _overlayDetails?.Close();
-        var window = new BreakdownWindow(view, actorId, _meter.Data, _meter.Icons, _meter.Portraits);
+        // A normal window can open behind a borderless game when invoked from our non-activating overlay.
+        // Keep this explicit user-opened analysis above the game without changing the overlay's activation style.
+        var window = new BreakdownWindow(view, actorId, _meter.Data, _meter.Icons, _meter.Portraits)
+            { Topmost = true, ShowActivated = true };
         window.UseOverlayPresentation();
         _overlayDetails = window; _detailSource = key;
         window.Closed += (_, _) => { if (ReferenceEquals(_overlayDetails, window)) { _overlayDetails = null; _detailSource = null; } };
-        window.Show();
+        PresentOverlayDetails(window);
+    }
+
+    private static void PresentOverlayDetails(BreakdownWindow window)
+    {
+        if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
+        if (!window.IsVisible) window.Show();
+        window.Topmost = true;
+        window.Activate();
     }
 
     private EncounterSnapshot? ShownSummary() =>
@@ -534,7 +545,12 @@ public partial class OverlayWindow : Window
 
     private void Details_Click(object sender, RoutedEventArgs e)
     {
-        if (_overlayDetails is { IsLoaded: true }) { _overlayDetails.Close(); return; }
+        if (_overlayDetails is { IsLoaded: true } existing)
+        {
+            if (existing.WindowState == WindowState.Minimized || !existing.IsVisible) PresentOverlayDetails(existing);
+            else existing.Close();
+            return;
+        }
         var target = _vm.Rows.FirstOrDefault(r => r.IsSelf && !r.IsPlaceholder) ?? _vm.Rows.FirstOrDefault(r => !r.IsPlaceholder);
         if (target is null) return;
         OpenBreakdown(target.ActorId);
