@@ -16,7 +16,7 @@ public sealed record LayoutProfile(double Width = 678, double Height = 330, int 
         if (!double.IsFinite(Width) || !double.IsFinite(Height) || !double.IsFinite(Opacity) || !double.IsFinite(TextScale) || Left is { } left && !double.IsFinite(left) || Top is { } top && !double.IsFinite(top))
             throw new InvalidDataException("Das Layout enthält ungültige Zahlen.");
         return this with { Width = Math.Clamp(Width, 340, 1600), Height = Math.Clamp(Height, 220, 1200),
-            RowSize = Math.Clamp(RowSize, 50, 100), Opacity = Math.Clamp(Opacity, 0, 1), TextScale = Math.Clamp(TextScale, 0.8, 1.5), Left = Left is { } x ? Math.Clamp(x, -20_000, 20_000) : null, Top = Top is { } y ? Math.Clamp(y, -20_000, 20_000) : null };
+            RowSize = Math.Clamp(RowSize, 50, 100), Opacity = Math.Clamp(Opacity, 0, 1), TextScale = Math.Clamp(TextScale, 0.7, 1.5), Left = Left is { } x ? Math.Clamp(x, -20_000, 20_000) : null, Top = Top is { } y ? Math.Clamp(y, -20_000, 20_000) : null };
     }
 
     public static LayoutProfile From(AppSettings s) => new(s.OverlayWidth, s.OverlayHeight, s.RowSize,

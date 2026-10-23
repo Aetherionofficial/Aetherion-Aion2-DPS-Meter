@@ -227,10 +227,12 @@
                                 <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,8" Text="Zusatzwerte bleiben dezent und optional." />
                                 <UniformGrid Columns="2">
                                     <CheckBox x:Name="ShowBoss" Style="{StaticResource DarkCheck}" Content="{Binding ShowBossHpInfo, Source={x:Static s:UiText.Current}}" />
+                                    <CheckBox x:Name="ShowPing" Style="{StaticResource DarkCheck}" Content="Ping anzeigen" ToolTip="ICMP zum erkannten AION2-Server. Ohne eindeutigen Gameserver: Näherungswert zu 1.1.1.1. Bei blockiertem ICMP wird -- angezeigt." />
                                     <CheckBox x:Name="ShowPeakDps" Style="{StaticResource DarkCheck}" Content="{Binding ShowPeakDpsInfo, Source={x:Static s:UiText.Current}}" />
                                     <CheckBox x:Name="ShowHealingPanel" Style="{StaticResource DarkCheck}" Content="{Binding ShowHealingInfo, Source={x:Static s:UiText.Current}}" />
                                     <CheckBox x:Name="ShowGear" Style="{StaticResource DarkCheck}" Content="{Binding ShowGearInfo, Source={x:Static s:UiText.Current}}" />
                                 </UniformGrid>
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,6,0,0" Text="Ping: Ohne eindeutig erkannten Gameserver wird ein Näherungswert zu 1.1.1.1 angezeigt." />
                                 <Border Height="1" Background="{StaticResource Line}" Margin="0,16,0,14" />
                                 <TextBlock Text="{Binding WindowSizeTitle, Source={x:Static s:UiText.Current}}" FontWeight="SemiBold" FontSize="14" />
                                 <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,10" Text="{Binding WindowSizeHint, Source={x:Static s:UiText.Current}}" />
@@ -240,6 +242,13 @@
                                     <Button Style="{StaticResource GhostButton}" Content="{Binding PresetLarge, Source={x:Static s:UiText.Current}}" Tag="large" Click="SizePreset_Click" />
                                 </UniformGrid>
                                 <Border Height="1" Background="{StaticResource Line}" Margin="0,16,0,14" />
+                                <TextBlock Text="Skalierung" FontWeight="SemiBold" FontSize="14" />
+                                <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,8" Text="Schrift, Symbole, Zeilen und Abstände gemeinsam skalieren. Die Fensterbreite bleibt davon unabhängig." />
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="250" Minimum="70" Maximum="150" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
+                                    <TextBlock x:Name="RowSizeText" VerticalAlignment="Center" Margin="10,0,0,0" />
+                                </StackPanel>
+                                <Border Height="1" Background="{StaticResource Line}" Margin="0,8,0,14" />
                                 <TextBlock Text="{Binding TransparencyTitle, Source={x:Static s:UiText.Current}}" FontWeight="SemiBold" FontSize="14" />
                                 <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,10" Text="{Binding TransparencyHint, Source={x:Static s:UiText.Current}}" />
                                 <StackPanel Orientation="Horizontal">
@@ -333,12 +342,6 @@
                                 <TextBlock Text="{Binding RowsShown, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
                                 <ComboBox x:Name="MaxRows" MinWidth="80" />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding RowSize, Source={x:Static s:UiText.Current}}" Style="{StaticResource Label}" />
-                                <Slider x:Name="RowSizeValue" Style="{StaticResource GoldSlider}" Width="180" Minimum="50" Maximum="100" SmallChange="5" LargeChange="10" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="RowSize_Changed" />
-                                <TextBlock x:Name="RowSizeText" VerticalAlignment="Center" Margin="10,0,0,0" />
-                            </StackPanel>
-                            <TextBlock Style="{StaticResource Hint}" Margin="190,2,0,0" Text="{Binding RowSizeHint, Source={x:Static s:UiText.Current}}" />
                         </StackPanel>
                     </Border>
                     <Border x:Name="OverlayBehaviorSection" Style="{StaticResource Section}">

@@ -25,6 +25,12 @@ public partial class OverlayWindow : Window
     private SavedFight? _saved; // a fight loaded from history (takes precedence over _segment)
     private nint _hwnd;
     private readonly DragAnywhere _drag;
+    private BreakdownWindow? _overlayDetails;
+    private LatencyMonitor? _latencyMonitor;
+    private bool _closed;
+    public static readonly DependencyProperty LatencyProperty = DependencyProperty.Register(nameof(Latency), typeof(LatencyDisplay), typeof(OverlayWindow), new PropertyMetadata(LatencyDisplay.Waiting));
+    public LatencyDisplay Latency { get => (LatencyDisplay)GetValue(LatencyProperty); private set => SetValue(LatencyProperty, value); }
+    private object? _detailSource;
     private bool _appearanceReady;
     private bool _opacitySavePending;
     private readonly System.Windows.Threading.DispatcherTimer _opacitySaveTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
@@ -59,11 +65,12 @@ public partial class OverlayWindow : Window
         _appearanceReady = true;
         if (normalizeSettings) _settings.Save();
         DataContext = _vm;
+        Loaded += (_, _) => ConfigureLatency();
 
         Left = _settings.OverlayLeft;
         Top = _settings.OverlayTop;
-        Width = Math.Max(MinWidth, _settings.OverlayWidth);
-        Height = Math.Max(MinHeight, _settings.OverlayHeight);
+        Width = Math.Clamp(_settings.OverlayWidth, MinWidth, MaxWidth);
+        Height = Math.Clamp(_settings.OverlayHeight, MinHeight, MaxHeight);
         EnsureOnScreen();
 
         OpacitySlider.Value = _settings.BackgroundOpacity;
@@ -72,20 +79,24 @@ public partial class OverlayWindow : Window
         ToolbarTray.Visibility = Visibility.Collapsed;
         ApplyResponsiveLayout();
         ApplyLock();
-        ApplyRowSize(_settings.RowSize);
+        ApplyScale(_settings.OverlayTextScale);
+        ConfigureLatency();
         ApplyOverlayDisplayOptions();
         UpdateModeLabel();
         ApplyHotkeyTips();
-        LayoutUpdated += (_, _) => FitNames();
         _meter.Updates.Changed += ShowUpdateBanner;
         ShowUpdateBanner();
 
-        // Drag the card by any part of it (unless locked); a click without movement still opens a breakdown.
-        _drag = DragAnywhere.Attach(this, canDrag: () => !_settings.Locked, dropped: SavePlacement);
+        // Only the header moves the overlay; interactive controls are excluded by DragAnywhere.
+        _drag = DragAnywhere.Attach(this, canDrag: () => !_settings.Locked, dropped: SavePlacement, dragSurface: Header);
 
         SourceInitialized += (_, _) =>
         {
             _hwnd = new WindowInteropHelper(this).Handle;
+            // A transparent topmost HWND shares the desktop compositor with borderless games.
+            // Keep this small surface off WPF's hardware rendering path; other windows keep their own mode.
+            if (HwndSource.FromHwnd(_hwnd)?.CompositionTarget is { } target)
+                target.RenderMode = RenderMode.SoftwareOnly;
             // Clicking the overlay must never pull keyboard focus away from the game window.
             NativeMethods.SetExStyle(_hwnd, NativeMethods.WS_EX_NOACTIVATE | NativeMethods.WS_EX_TOOLWINDOW);
             ApplyClickThrough();
@@ -119,7 +130,7 @@ public partial class OverlayWindow : Window
         if (_saved is { } saved)
         {
             _vm.Apply(saved.Record.Summary with { Title = saved.Title, Zone = _meter.DisplayZone(saved.Record.Summary.Zone) },
-                _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
+                6, true, _settings.OverlayRanking, compactParty: true);
             _vm.SetSegment("saved", saved.Entry.StartedAt.ToString("dd.MM HH:mm"));
             DisplayNumbers = new(saved.Record.Summary, _settings.OverlayRanking == OverlayRanking.Healing);
         }
@@ -133,7 +144,7 @@ public partial class OverlayWindow : Window
                 _segment = null;
                 snap = _meter.Tracker.Snapshot(null, now);
             }
-            _vm.Apply(snap, _settings.MaxRows, _settings.BarsRelativeToTop, _settings.OverlayRanking);
+            _vm.Apply(snap, 6, true, _settings.OverlayRanking, compactParty: true);
             DisplayNumbers = new(snap, _settings.OverlayRanking == OverlayRanking.Healing);
             _vm.SetSegment(_segment is null ? "live" : "session", snap?.StartedAt.ToString("HH:mm"));
             if (!_vm.HasData && _meter.Tracker.SelfName is { Length: > 0 } selfName)
@@ -220,10 +231,31 @@ public partial class OverlayWindow : Window
         EnsureOnScreen(); FitToMonitor();
         OpacitySlider.Value = _settings.BackgroundOpacity;
         ApplyBackgroundOpacity(_settings.BackgroundOpacity);
-        ApplyRowSize(_settings.RowSize);
+        ApplyScale(_settings.OverlayTextScale);
+        ConfigureLatency();
         ApplyOverlayDisplayOptions();
         UpdateModeLabel();
     }
+
+    private void ConfigureLatency()
+    {
+        PingStatus.Visibility = _settings.ShowPing ? Visibility.Visible : Visibility.Collapsed;
+        if (!_settings.ShowPing || _settings.Transient || _meter.DemoRunning || _closed)
+        {
+            _latencyGeneration = null;
+            _latencyMonitor?.Dispose(); _latencyMonitor = null;
+            return;
+        }
+        if (!IsLoaded || _latencyMonitor is not null) return;
+        var generation = new object();
+        _latencyGeneration = generation;
+        _latencyMonitor = new LatencyMonitor(value =>
+        {
+            if (!Dispatcher.HasShutdownStarted)
+                Dispatcher.BeginInvoke(() => { if (!_closed && _settings.ShowPing && ReferenceEquals(generation, _latencyGeneration)) Latency = value; });
+        });
+    }
+    private object? _latencyGeneration;
 
     private void ApplyOverlayDisplayOptions()
     {
@@ -255,60 +287,47 @@ public partial class OverlayWindow : Window
         SignatureLine.Visibility = value <= 0.001 ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    /// <summary>
-    /// Typography and spacing depend only on the chosen size profile, never on the window width.
-    /// </summary>
-    public void ApplyRowSize(int percent)
+    /// <summary>One scale for typography, rows, icons and spacing; independent of the window width.</summary>
+    public void ApplyScale(double requestedScale)
     {
-        percent = Math.Clamp(percent, AppSettings.MinRowSize, AppSettings.MaxRowSize);
-        var position = percent <= 80 ? (percent - 58) / 22.0 : (percent - 80) / 10.0;
-        var profileFont = percent <= 80 ? 13 + position : 14 + position;
-        var profileHeight = percent <= 80 ? 38 + 6 * position : 44 + 8 * position;
-        var profileGap = percent <= 80 ? 2 + 2 * position : 4 + 2 * position;
-        var basis = Math.Clamp(profileFont * _settings.OverlayTextScale, 13, 18);
-        Resources["OverlayBaseFont"] = basis;
-        Resources["HeaderFont"] = basis;
-        Resources["HintFont"] = basis * (13.5 / 14);
-        Resources["IconFontSize"] = Math.Max(18, basis * (18.0 / 14));
-        Resources["IconHitSize"] = Math.Max(24, basis * (24.0 / 14));
-        Resources["FooterFont"] = basis * (12.0 / 14);
-        Resources["FooterIconFont"] = basis * (16.0 / 14);
-        Resources["HeaderHeight"] = basis * (32.0 / 14);
-        Resources["ShareWidth"] = basis * 3.25;
-        Resources["DpsColumnWidth"] = new GridLength(basis * 7.5);
-        Resources["ShareColumnWidth"] = new GridLength(basis * 4.25);
-        Resources["HeaderIconGap"] = new Thickness(0, 0, basis * (10.0 / 14), 0);
-        Resources["TimerGap"] = new Thickness(basis * (10.0 / 14), 0, 0, 0);
-        Resources["TextShadowBlur"] = 2d;
-        Resources["TextShadowDepth"] = 1d;
-        var f = basis / 14;
-        var height = Math.Max(profileHeight, 2 * basis + 10);
-        Resources["RowHeight"] = height;
-        Resources["RowMargin"] = new Thickness(0, 0, 0, Math.Max(2, profileGap));
-        Resources["RowNameFont"] = basis;
-        Resources["RowGearFont"] = 12 * f;
-        Resources["RowNumberFont"] = Math.Round(14 * f, 1);
-        Resources["RowSubFont"] = 12 * f;
-        Resources["RowGlyphSize"] = Math.Min(Math.Round(22 * f), height - 8);
-        Resources["RowRankFont"] = Math.Round(13.5 * f, 1);
-        Resources["RowAccentWidth"] = Math.Max(2, Math.Round(3 * f));
-        Resources["ColRankWidth"] = new GridLength(Math.Round(22 * f));
-        Resources["ColGlyphWidth"] = new GridLength(Math.Round(32 * f));
-        Resources["ColGap"] = new Thickness(Math.Round(12 * f), 0, 0, 0);
-    }
-
-
-    /// <summary>
-    /// The name column uses the room left after rank, class icon, DPS and share so combat values never disappear.
-    /// </summary>
-    private void FitNames()
-    {
-        if (ColumnLabels.ActualWidth <= 0) return;
-        var columns = ColumnLabels.ColumnDefinitions;
-        const double fixedColumns = 28 + 28 + 78 + 42;
-        var max = Math.Max(30, Math.Floor(ColumnLabels.ActualWidth - fixedColumns - 28));
-        if (Resources["NameMaxWidth"] is double current && Math.Abs(current - max) < 1) return;
-        Resources["NameMaxWidth"] = max;
+        var scale = double.IsFinite(requestedScale) ? Math.Clamp(requestedScale, .7, 1.5) : 1;
+        Resources["OverlayBaseFont"] = 13 * scale;
+        Resources["HeaderFont"] = 14 * scale;
+        Resources["HintFont"] = 12 * scale;
+        Resources["IconFontSize"] = 17 * scale;
+        Resources["IconHitSize"] = 24 * scale;
+        Resources["FooterFont"] = 11 * scale;
+        Resources["PingDotSize"] = 5 * scale;
+        Resources["FooterIconFont"] = 12 * scale;
+        Resources["HeaderHeight"] = 32 * scale;
+        Resources["ShareWidth"] = 36 * scale;
+        Resources["DpsColumnWidth"] = new GridLength(94 * scale);
+        Resources["ShareColumnWidth"] = new GridLength(50 * scale);
+        Resources["HeaderIconGap"] = new Thickness(0, 0, 8 * scale, 0);
+        Resources["TimerGap"] = new Thickness(10 * scale, 0, 0, 0);
+        Resources["TextShadowBlur"] = 2 * scale;
+        Resources["TextShadowDepth"] = scale;
+        Resources["RowHeight"] = 24 * scale;
+        Resources["RowMargin"] = new Thickness(0, 0, 0, 2 * scale);
+        Resources["RowNameFont"] = 13 * scale;
+        Resources["RowGearFont"] = 10 * scale;
+        Resources["RowNumberFont"] = 13 * scale;
+        Resources["RowSubFont"] = 11 * scale;
+        Resources["RowGlyphSize"] = 18 * scale;
+        Resources["RowRankFont"] = 11 * scale;
+        Resources["RowAccentWidth"] = 2 * scale;
+        Resources["ColRankWidth"] = new GridLength(18 * scale);
+        Resources["ColGlyphWidth"] = new GridLength(24 * scale);
+        Resources["ColGap"] = new Thickness(8 * scale, 0, 0, 0);
+        Resources["RowPadding"] = new Thickness(8 * scale, 0, 8 * scale, 0);
+        Resources["NameGap"] = new Thickness(3 * scale, 0, 6 * scale, 0);
+        Resources["PanelPadding"] = new Thickness(12 * scale, 8 * scale, 12 * scale, 8 * scale);
+        Resources["RowsGap"] = new Thickness(0, 6 * scale, 0, 0);
+        Resources["FooterGap"] = new Thickness(0, 6 * scale, 0, 0);
+        MinWidth = Math.Max(300, Math.Ceiling(352 * scale));
+        MinHeight = Math.Max(185, Math.Ceiling(252 * scale));
+        MaxWidth = Math.Max(MinWidth, 1600);
+        MaxHeight = Math.Max(MinHeight, 1200);
     }
 
     /// <summary>Ctrl + mouse wheel over the rows: row size in 5 % steps, kept right away.</summary>
@@ -316,10 +335,10 @@ public partial class OverlayWindow : Window
     {
         if (!NativeMethods.IsCtrlDown()) return;
         e.Handled = true;
-        var size = Math.Clamp(_settings.RowSize + Math.Sign(e.Delta) * 5, AppSettings.MinRowSize, AppSettings.MaxRowSize);
-        if (size == _settings.RowSize) return;
-        _settings.RowSize = size;
-        ApplyRowSize(size);
+        var size = Math.Clamp(Math.Round(_settings.OverlayTextScale * 20 + Math.Sign(e.Delta)) / 20, .7, 1.5);
+        if (size == _settings.OverlayTextScale) return;
+        _settings.OverlayTextScale = size;
+        ApplyScale(size);
         _settings.Save();
     }
 
@@ -343,9 +362,7 @@ public partial class OverlayWindow : Window
         LockButton.IsChecked = _settings.Locked;
         LockGlyph.Text = _settings.Locked ? "" : "";
         var visibility = _settings.Locked ? Visibility.Collapsed : Visibility.Visible;
-        ResizeGrip.Visibility = visibility;
-        ResizeWidthGrip.Visibility = visibility;
-        ResizeHeightGrip.Visibility = visibility;
+        ResizeHandles.Visibility = visibility;
     }
 
     private void UpdateModeLabel() =>
@@ -393,10 +410,21 @@ public partial class OverlayWindow : Window
 
     private void Resize_DragDelta(object sender, DragDeltaEventArgs e)
     {
-        var axis = (sender as FrameworkElement)?.Tag as string;
-        _settings.AutoOverlayHeight = false; // Explicit manual resize takes priority over automatic sizing.
-        if (axis != "height") Width = Math.Max(MinWidth, Width + e.HorizontalChange);
-        if (axis != "width") Height = Math.Max(MinHeight, Height + e.VerticalChange);
+        var axis = (sender as FrameworkElement)?.Tag as string ?? "bottom-right";
+        _settings.AutoOverlayHeight = false;
+        var oldWidth = Width; var oldHeight = Height;
+        if (axis != "top" && axis != "bottom")
+        {
+            var left = axis.Contains("left", StringComparison.Ordinal);
+            Width = Math.Clamp(Width + (left ? -e.HorizontalChange : e.HorizontalChange), MinWidth, MaxWidth);
+            if (left) Left += oldWidth - Width;
+        }
+        if (axis != "left" && axis != "right")
+        {
+            var top = axis.Contains("top", StringComparison.Ordinal);
+            Height = Math.Clamp(Height + (top ? -e.VerticalChange : e.VerticalChange), MinHeight, MaxHeight);
+            if (top) Top += oldHeight - Height;
+        }
     }
 
     private void ApplyAutomaticHeight()
@@ -448,15 +476,29 @@ public partial class OverlayWindow : Window
     /// <summary>Preview a Settings size preset without saving it until the player presses Save.</summary>
     public void PreviewSize(double width, double height)
     {
-        Width = Math.Max(MinWidth, width);
-        Height = Math.Max(MinHeight, height);
+        Width = Math.Clamp(width, MinWidth, MaxWidth);
+        Height = Math.Clamp(height, MinHeight, MaxHeight);
         ApplyResponsiveLayout();
     }
 
     private void OpenBreakdown(uint actorId)
     {
-        if (_saved is { } saved) AppHost.Current.ShowBreakdown(saved.View, actorId);
-        else if (_vm.SegmentId is { } seg) AppHost.Current.ShowBreakdown(seg, actorId);
+        if (actorId == 0) return;
+        IFightView? view = null;
+        object? key = null;
+        if (_saved is { } saved) { view = saved.View; key = saved.Record; }
+        else if (_vm.SegmentId is { } segment) { view = new LiveFightView(_meter.Tracker, segment); key = segment; }
+        if (view is null) return;
+        if (_overlayDetails is { IsLoaded: true } existing && Equals(key, _detailSource))
+        {
+            existing.Select(actorId); existing.Activate(); return;
+        }
+        _overlayDetails?.Close();
+        var window = new BreakdownWindow(view, actorId, _meter.Data, _meter.Icons, _meter.Portraits);
+        window.UseOverlayPresentation();
+        _overlayDetails = window; _detailSource = key;
+        window.Closed += (_, _) => { if (ReferenceEquals(_overlayDetails, window)) { _overlayDetails = null; _detailSource = null; } };
+        window.Show();
     }
 
     private EncounterSnapshot? ShownSummary() =>
@@ -472,7 +514,7 @@ public partial class OverlayWindow : Window
 
     private void Row_RightClick(object sender, MouseButtonEventArgs e)
     {
-        if ((sender as FrameworkElement)?.DataContext is not RowViewModel row) return;
+        if ((sender as FrameworkElement)?.DataContext is not RowViewModel { IsPlaceholder: false } row) return;
         var menu = new ContextMenu { PlacementTarget = (UIElement)sender };
         var open = new MenuItem { Header = UiText.Current.OpenBreakdown };
         open.Click += (_, _) => OpenBreakdown(row.ActorId);
@@ -492,8 +534,9 @@ public partial class OverlayWindow : Window
 
     private void Details_Click(object sender, RoutedEventArgs e)
     {
-        if (_vm.Rows.Count == 0) return;
-        var target = _vm.Rows.FirstOrDefault(r => r.IsSelf) ?? _vm.Rows[0];
+        if (_overlayDetails is { IsLoaded: true }) { _overlayDetails.Close(); return; }
+        var target = _vm.Rows.FirstOrDefault(r => r.IsSelf && !r.IsPlaceholder) ?? _vm.Rows.FirstOrDefault(r => !r.IsPlaceholder);
+        if (target is null) return;
         OpenBreakdown(target.ActorId);
     }
 
@@ -826,6 +869,9 @@ public partial class OverlayWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _closed = true;
+        _latencyMonitor?.Dispose();
+        _overlayDetails?.Close();
         _opacitySaveTimer.Stop();
         SavePlacement();
         _opacitySavePending = false; // SavePlacement includes the final opacity, without a second write.

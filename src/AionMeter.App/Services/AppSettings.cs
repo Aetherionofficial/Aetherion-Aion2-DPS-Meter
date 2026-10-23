@@ -62,6 +62,7 @@ public sealed class AppSettings
 
     public bool AutoOverlayHeight { get; set; } = true;
     public double OverlayTextScale { get; set; } = 1;
+    public bool ShowPing { get; set; } = true;
     public bool HighContrast { get; set; }
     public bool AccessibleColors { get; set; }
     public bool StreamerMode { get; set; }
@@ -244,7 +245,7 @@ public sealed class AppSettings
                     // hid it after 60 seconds, which made the overlay appear to vanish when no DPS was dealt.
                     if (s.AutoHideSeconds == 60) s.AutoHideSeconds = 0;
                 }
-                s.OverlayTextScale = double.IsFinite(s.OverlayTextScale) ? Math.Clamp(s.OverlayTextScale, 0.8, 1.5) : 1;
+                s.OverlayTextScale = double.IsFinite(s.OverlayTextScale) ? Math.Clamp(s.OverlayTextScale, 0.7, 1.5) : 1;
                 s.LayoutProfiles ??= new();
                 s.Language = UiText.Normalize(s.Language);
                 s.LayoutVersion = CurrentLayout;

@@ -39,11 +39,12 @@ public static class SampleRenderer
 
     public static void Render(string path, string language, Options o)
     {
-        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 4 : 10, o.BackgroundOpacity,
+        using var meter = CreateMeter(language, o.RowSize, o.Window == "overlay" ? 6 : 10, o.BackgroundOpacity,
             o.Window == "settings" ? new Core.Capture.CaptureStatus(Core.Capture.CaptureState.WaitingForGame, "AION2 is not running") : null);
+        meter.Settings.OverlayTextScale = Math.Clamp(o.RowSize / 100d, .7, 1.5);
         var start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 20_500; // a fight that is still going
-        var fight = new SampleFight(start, 20, o.Window == "overlay" ? 4 : 9);
-        fight.FeedUntil(meter.Tracker, start + 20_000);
+        var fight = new SampleFight(start, 20, o.Window == "overlay" ? 6 : 9);
+        if (o.Window != "overlay-empty") fight.FeedUntil(meter.Tracker, start + 20_000);
         // A dungeon's time limit, 12:48 of its hour gone: the countdown in the overlay's top line.
         meter.Tracker.Process(new InstanceTimerEvent(start, 600092, 2, start - 768_000, start + 2_832_000));
         if (o.Window == "overlay-crowd") fight.FeedCrowd(meter.Tracker, start + 20_000, 124);
@@ -102,6 +103,7 @@ public static class SampleRenderer
                 var segment = meter.Tracker.Segments()[0].Id;
                 var breakdown = new BreakdownWindow(new ViewModels.LiveFightView(meter.Tracker, segment), 2, meter.Data, meter.Icons, meter.Portraits)
                     { Width = o.Width ?? 1280, Height = o.Height ?? 840 };
+                breakdown.UseOverlayPresentation();
                 if (o.Tab is { } tab) breakdown.ShowTab(tab);
                 host = breakdown;
                 refresh = breakdown.ReloadNow;
@@ -144,6 +146,9 @@ public static class SampleRenderer
             default:
                 if (o.Window == "overlay-update") meter.Updates.Preview(SampleRelease(meter.Updates.Current)); // with the footer's update banner
                 var overlay = new OverlayWindow(meter) { Width = o.Width ?? 470, Height = o.Height ?? 630 };
+                // Sample rendering has no live capture or network probes. This value is preview data only.
+                overlay.SetValue(OverlayWindow.LatencyProperty,
+                    new LatencyDisplay("42 ms", "#65D98A", "Vorschau · Beispielwert: 42 ms; keine echte Messung."));
                 overlay.ApplyResponsiveLayout();
                 overlay.ShowToolbarPreview();
                 host = overlay;

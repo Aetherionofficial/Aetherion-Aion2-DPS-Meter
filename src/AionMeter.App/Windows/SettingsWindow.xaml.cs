@@ -15,7 +15,7 @@ public partial class SettingsWindow : Window
     private readonly List<(string? Name, string Label)> _devices = new();
     private readonly double _originalOverlayWidth;
     private readonly double _originalOverlayHeight;
-    private readonly int _originalRowSize;
+    private readonly double _originalOverlayScale;
     private Button? _activeSettingsNav;
     private double _previewWidth;
     private double _previewHeight;
@@ -26,7 +26,7 @@ public partial class SettingsWindow : Window
         _meter = meter;
         _originalOverlayWidth = meter.Settings.OverlayWidth;
         _originalOverlayHeight = meter.Settings.OverlayHeight;
-        _originalRowSize = meter.Settings.RowSize;
+        _originalOverlayScale = meter.Settings.OverlayTextScale;
         InitializeComponent();
         var workArea = SystemParameters.WorkArea;
         Left = Math.Max(workArea.Left + 8, workArea.Right - Width - workArea.Width * 0.085);
@@ -37,7 +37,7 @@ public partial class SettingsWindow : Window
         // The row size slider previews on the overlay; closing without saving puts the saved size back.
         Closed += (_, _) =>
         {
-            AppHost.Current.PreviewRowSize(_settingsSaved ? _meter.Settings.RowSize : _originalRowSize);
+            AppHost.Current.PreviewOverlayScale(_settingsSaved ? _meter.Settings.OverlayTextScale : _originalOverlayScale);
             if (!_settingsSaved) AppHost.Current.PreviewOverlaySize(_originalOverlayWidth, _originalOverlayHeight);
         };
     }
@@ -52,6 +52,7 @@ public partial class SettingsWindow : Window
         ShowGear.IsChecked = s.ShowGear;
         ShowHealingPanel.IsChecked = s.ShowHealingPanel;
         ShowPeakDps.IsChecked = s.ShowPeakDps;
+        ShowPing.IsChecked = s.ShowPing;
         CombinedView.IsChecked = !s.CompactDpsOnly;
         CompactView.IsChecked = s.CompactDpsOnly;
         AutoShow.IsChecked = s.AutoShow;
@@ -70,11 +71,11 @@ public partial class SettingsWindow : Window
         BossAlertScale.ValueChanged += (_, e) => BossAlertScaleText.Text = $"{e.NewValue:0.0}×";
         EventTimerOpacity.Value = s.EventTimersOpacity;
         DiscordPresence.IsChecked = s.DiscordPresenceEnabled;
-        foreach (var n in new[] { 5, 8, 10, 12, 15, 20 }) MaxRows.Items.Add(n);
+        foreach (var n in new[] { 6 }) MaxRows.Items.Add(n);
         MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(n => Math.Abs(n - s.MaxRows)).First();
         OpacityValue.Minimum = 0.20;
         OpacityValue.Value = OverlayWindow.NormalizeBackgroundOpacity(s.BackgroundOpacity);
-        RowSizeValue.Value = s.RowSize;
+        RowSizeValue.Value = Math.Clamp(s.OverlayTextScale, .7, 1.5) * 100;
         Mode.SelectedIndex = s.TargetMode == TargetMode.BossOnly ? 0 : 1;
         Idle.Text = s.IdleTimeoutSec.ToString();
         BossIdle.Text = s.BossIdleTimeoutSec.ToString();
@@ -282,14 +283,8 @@ public partial class SettingsWindow : Window
     private void SizePreset_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string preset }) return;
-        (int rows, int size) = preset switch
-        {
-            "compact" => (5, 58),
-            "large" => (12, 90),
-            _ => (8, 80),
-        };
-        MaxRows.SelectedItem = MaxRows.Items.Cast<int>().OrderBy(value => Math.Abs(value - rows)).First();
-        RowSizeValue.Value = size;
+        MaxRows.SelectedItem = 6;
+        RowSizeValue.Value = preset switch { "compact" => 85, "large" => 125, _ => 100 };
         // Keep the live preview, but a typography preset does not resize the window.
         var overlay = Application.Current.Windows.OfType<OverlayWindow>().FirstOrDefault();
         AppHost.Current.PreviewOverlaySize(overlay?.Width ?? _previewWidth, overlay?.Height ?? _previewHeight);
@@ -365,6 +360,7 @@ public partial class SettingsWindow : Window
         s.ShowGear = ShowGear.IsChecked == true;
         s.ShowHealingPanel = ShowHealingPanel.IsChecked == true;
         s.ShowPeakDps = ShowPeakDps.IsChecked == true;
+        s.ShowPing = ShowPing.IsChecked == true;
         s.CompactDpsOnly = CompactView.IsChecked == true;
         s.AutoShow = AutoShow.IsChecked == true;
         if (int.TryParse(AutoHideSeconds.Text, out var autoHide)) s.AutoHideSeconds = Math.Clamp(autoHide, 0, 3600);
@@ -386,7 +382,7 @@ public partial class SettingsWindow : Window
         s.OverlayWidth = _previewWidth;
         s.OverlayHeight = _previewHeight;
         s.BackgroundOpacity = Math.Round(OverlayWindow.NormalizeBackgroundOpacity(OpacityValue.Value), 2);
-        s.RowSize = (int)Math.Round(RowSizeValue.Value);
+        s.OverlayTextScale = Math.Round(Math.Clamp(RowSizeValue.Value / 100, .7, 1.5), 2);
         s.TargetMode = Mode.SelectedIndex == 1 ? TargetMode.All : TargetMode.BossOnly;
         if (int.TryParse(Idle.Text, out var idle)) s.IdleTimeoutSec = Math.Clamp(idle, 3, 120);
         if (int.TryParse(BossIdle.Text, out var bossIdle)) s.BossIdleTimeoutSec = Math.Clamp(bossIdle, 5, 300);
@@ -442,7 +438,7 @@ public partial class SettingsWindow : Window
         if (RowSizeText is null) return; // the slider sets its first value before the rest of the window exists
         var percent = (int)Math.Round(e.NewValue);
         RowSizeText.Text = $"{percent}%";
-        AppHost.Current.PreviewRowSize(percent);
+        AppHost.Current.PreviewOverlayScale(percent / 100.0);
     }
 
     /// <summary>Asks GitHub right away; a newer version also opens the update window.</summary>

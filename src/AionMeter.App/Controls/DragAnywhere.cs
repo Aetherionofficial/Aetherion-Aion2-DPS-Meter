@@ -16,14 +16,16 @@ public sealed class DragAnywhere
     private readonly Window _window;
     private readonly Func<bool> _canDrag;
     private readonly Action? _dropped;
+    private readonly FrameworkElement? _dragSurface;
     private Point _start;
     private bool _pending;
 
-    private DragAnywhere(Window window, Func<bool>? canDrag, Action? dropped)
+    private DragAnywhere(Window window, Func<bool>? canDrag, Action? dropped, FrameworkElement? dragSurface)
     {
         _window = window;
         _canDrag = canDrag ?? (() => true);
         _dropped = dropped;
+        _dragSurface = dragSurface;
         window.PreviewMouseLeftButtonDown += OnDown;
         window.PreviewMouseMove += OnMove;
         window.PreviewMouseLeftButtonUp += (_, _) => _pending = false;
@@ -32,13 +34,14 @@ public sealed class DragAnywhere
     /// <summary>True when the last press became a drag — click handlers should ignore that release.</summary>
     public bool JustDragged { get; private set; }
 
-    public static DragAnywhere Attach(Window window, Func<bool>? canDrag = null, Action? dropped = null) =>
-        new(window, canDrag, dropped);
+    public static DragAnywhere Attach(Window window, Func<bool>? canDrag = null, Action? dropped = null, FrameworkElement? dragSurface = null) =>
+        new(window, canDrag, dropped, dragSurface);
 
     private void OnDown(object sender, MouseButtonEventArgs e)
     {
         JustDragged = false;
-        _pending = _canDrag() && !IsInteractive(e.OriginalSource as DependencyObject);
+        _pending = _canDrag() && IsOnDragSurface(e.OriginalSource as DependencyObject)
+            && !IsInteractive(e.OriginalSource as DependencyObject);
         _start = e.GetPosition(_window);
     }
 
@@ -72,6 +75,15 @@ public sealed class DragAnywhere
                 return true;
             if (node is Window) return false;
         }
+        return false;
+    }
+
+    private bool IsOnDragSurface(DependencyObject? node)
+    {
+        if (_dragSurface is null) return true;
+        for (; node is not null; node = node is Visual or System.Windows.Media.Media3D.Visual3D
+                 ? VisualTreeHelper.GetParent(node) : LogicalTreeHelper.GetParent(node))
+            if (ReferenceEquals(node, _dragSurface)) return true;
         return false;
     }
 }

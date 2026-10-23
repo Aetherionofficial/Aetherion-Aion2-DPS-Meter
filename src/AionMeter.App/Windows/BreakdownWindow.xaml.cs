@@ -102,6 +102,13 @@ public partial class BreakdownWindow : Window
 
     public bool Shows(IFightView view) => ReferenceEquals(view, _view);
 
+    public void UseOverlayPresentation()
+    {
+        _skillOrder = SkillOrder.Default;
+        OverlayCritTile.Visibility = Visibility.Visible;
+        ShowTab("dps");
+    }
+
     /// <summary>dps | accuracy | rotation | defense</summary>
     public void ShowTab(string name)
     {
@@ -175,6 +182,7 @@ public partial class BreakdownWindow : Window
         StatDps.Text = Format.Compact(d.Dps);
         StatShare.Text = Format.Share(d.Share);
         StatTime.Text = Format.Clock(d.CombatMs);
+        StatCrit.Text = Format.Percent(d.Quality.CritRate);
         HealingTotalValue.Text = d.HealingTotal > 0 ? Format.Grouped(d.HealingTotal) : "—";
         var healingSkills = (d.HealingSkills ?? [])
             .OrderByDescending(h => h.Amount)

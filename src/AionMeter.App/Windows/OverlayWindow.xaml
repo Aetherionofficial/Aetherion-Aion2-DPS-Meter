@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AionMeter.App.Windows"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         x:Name="Root"
-        Title="AION2 DPS Meter" Width="600" Height="300" MinWidth="300" MinHeight="160"
+        Title="AION2 DPS Meter" Width="600" Height="300" MinWidth="300" MinHeight="185" MaxWidth="1600" MaxHeight="1200"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" SizeChanged="Overlay_SizeChanged"
@@ -53,6 +53,18 @@
         <sys:Double x:Key="TextShadowDepth">1</sys:Double>
         <Thickness x:Key="HeaderIconGap">0,0,10,0</Thickness>
         <Thickness x:Key="TimerGap">10,0,0,0</Thickness>
+
+        <Thickness x:Key="RowPadding">8,0,8,0</Thickness>
+        <Thickness x:Key="NameGap">3,0,6,0</Thickness>
+        <Thickness x:Key="PanelPadding">12,8,12,8</Thickness>
+        <Thickness x:Key="RowsGap">0,6,0,0</Thickness>
+        <Thickness x:Key="FooterGap">0,6,0,0</Thickness>
+        <Style x:Key="ResizeEdge" TargetType="Thumb">
+            <Setter Property="Background" Value="#01000000" />
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Thumb"><Border Background="{TemplateBinding Background}" /></ControlTemplate></Setter.Value></Setter>
+            <EventSetter Event="DragDelta" Handler="Resize_DragDelta" />
+            <EventSetter Event="DragCompleted" Handler="Resize_DragCompleted" />
+        </Style>
 
         <!-- A soft dark halo under every text so it stays readable over any game scene -->
         <DropShadowEffect x:Key="TextShadow" BlurRadius="{DynamicResource TextShadowBlur}" ShadowDepth="{DynamicResource TextShadowDepth}" Direction="270" Opacity="0.8" Color="Black" />
@@ -231,52 +243,43 @@
         <DataTemplate x:Key="RowTemplate" DataType="{x:Type vm:RowViewModel}">
             <Grid Height="{DynamicResource RowHeight}" Margin="{DynamicResource RowMargin}" Cursor="Hand" ToolTip="{Binding Tooltip}"
                   Background="Transparent" MouseLeftButtonUp="Row_Click" MouseRightButtonUp="Row_RightClick">
-                <Border x:Name="Track" Background="#181A2028" CornerRadius="3" />
-                <Grid Margin="8,0,10,0" Effect="{StaticResource TextShadow}">
+                <Border x:Name="Track" Background="#191D2933" CornerRadius="3" />
+                <c:AnimatedBar Background="{Binding BarBrush}" Opacity="0.38" CornerRadius="3" HorizontalAlignment="Left">
+                    <c:AnimatedBar.TargetWidth><MultiBinding Converter="{StaticResource OverlayDisplay}">
+                        <Binding Path="Fill" /><Binding Path="DataContext.Rows[0].Fill" RelativeSource="{RelativeSource AncestorType=Window}" />
+                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
+                    </MultiBinding></c:AnimatedBar.TargetWidth>
+                </c:AnimatedBar>
+                <Border x:Name="SelfFrame" BorderBrush="Transparent" BorderThickness="1" CornerRadius="3" IsHitTestVisible="False" />
+                <Grid Margin="{DynamicResource RowPadding}" Effect="{StaticResource TextShadow}">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{DynamicResource ColRankWidth}" />
+                        <ColumnDefinition Width="{DynamicResource ColGlyphWidth}" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="{DynamicResource DpsColumnWidth}" />
                         <ColumnDefinition Width="{DynamicResource ShareColumnWidth}" />
                     </Grid.ColumnDefinitions>
-                    <!-- Only the identity area carries the class-coloured relative bar. -->
-                    <Border Background="{Binding SoftFillBrush}" CornerRadius="3" HorizontalAlignment="Left" Margin="-8,0,0,0">
-                        <Border.Width>
-                            <MultiBinding Converter="{StaticResource OverlayDisplay}">
-                                <Binding Path="Fill" />
-                                <Binding Path="DataContext.Rows[0].Fill" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                <Binding Path="ColumnDefinitions[0].ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
-                            </MultiBinding>
-                        </Border.Width>
-                    </Border>
-                    <Grid Grid.Column="0" Margin="0,0,8,0">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="{DynamicResource ColGlyphWidth}" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <c:ClassGlyph Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}"
-                                      Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="2,0,0,0">
-                            <TextBlock x:Name="NameText" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="Bold"
-                                       Foreground="{Binding NameBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
-                            <TextBlock Style="{StaticResource GearText}" Margin="0">
-                                <Run Text="✦ " Foreground="#AFBBC5" /><Run Text="{Binding Damage, Mode=OneWay}" Foreground="#BFCBD2" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Grid>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0">
+                    <TextBlock Text="{Binding RankText}" Foreground="{Binding RankColor}" FontFamily="{StaticResource NumberFont}" FontSize="{DynamicResource RowRankFont}" VerticalAlignment="Center" />
+                    <c:ClassGlyph x:Name="PlayerGlyph" Grid.Column="1" Class="{Binding Class}" OnBar="True" Width="{DynamicResource RowGlyphSize}" Height="{DynamicResource RowGlyphSize}" HorizontalAlignment="Left" />
+                    <TextBlock x:Name="NameText" Grid.Column="2" Text="{Binding Name}" FontSize="{DynamicResource RowNameFont}" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Margin="{DynamicResource NameGap}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
                         <TextBlock x:Name="DpsText" Style="{StaticResource RowNumber}" Margin="0">
                             <TextBlock.Text><MultiBinding Converter="{StaticResource ExactNumber}"><Binding Path="ActorId" /><Binding Path="DisplayNumbers" RelativeSource="{RelativeSource AncestorType=Window}" /></MultiBinding></TextBlock.Text>
                         </TextBlock>
-                        <TextBlock x:Name="DamageText" Style="{StaticResource RowSub}" Margin="0">
-                            <TextBlock.Text><MultiBinding Converter="{StaticResource ExactNumber}" ConverterParameter="total"><Binding Path="ActorId" /><Binding Path="DisplayNumbers" RelativeSource="{RelativeSource AncestorType=Window}" /></MultiBinding></TextBlock.Text>
-                        </TextBlock>
                     </StackPanel>
-                    <TextBlock x:Name="ShareText" Grid.Column="2" Text="{Binding Share}" Style="{StaticResource RowNumber}" Foreground="#75E5A1" MinWidth="{DynamicResource ShareWidth}" />
+                    <TextBlock x:Name="ShareText" Grid.Column="4" Text="{Binding Share}" Style="{StaticResource RowSub}" Foreground="#83E8AD" Margin="{DynamicResource ColGap}" />
                 </Grid>
             </Grid>
             <DataTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="Track" Property="Background" Value="#F21F1C1D" />
-                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Track" Property="Background" Value="#50304757" /></Trigger>
                 <DataTrigger Binding="{Binding IsSelf}" Value="True">
-                    <Setter TargetName="NameText" Property="Foreground" Value="White" />
+                    <Setter TargetName="SelfFrame" Property="BorderBrush" Value="#9673E3D6" />
+                    <Setter TargetName="NameText" Property="Foreground" Value="#91F3DF" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                    <Setter TargetName="PlayerGlyph" Property="Visibility" Value="Hidden" />
+                    <Setter TargetName="NameText" Property="Foreground" Value="#758797" />
+                    <Setter TargetName="NameText" Property="FontWeight" Value="Normal" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
@@ -303,7 +306,7 @@
             </Border.Background>
         </Border>
 
-        <Grid x:Name="CardBody" Margin="12,8,12,8">
+        <Grid x:Name="CardBody" Margin="{DynamicResource PanelPadding}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -320,6 +323,7 @@
                     <TextBlock x:Name="StatisticsClock" Text="{Binding Clock, Converter={StaticResource OverlayDisplay}, ConverterParameter=clock}" FontFamily="{StaticResource NumberFont}" Foreground="#DAE6EA" FontSize="{DynamicResource HeaderFont}" FontWeight="SemiBold" Margin="{DynamicResource TimerGap}" />
                 </StackPanel>
                 <StackPanel x:Name="CompactTopActions" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="HeaderDetailsButton" Margin="{DynamicResource HeaderIconGap}" Style="{StaticResource ToolIcon}" Content="&#xE9D9;" Click="Details_Click" IsEnabled="{Binding HasData}" ToolTip="Spielerdetails anzeigen oder schließen" ToolTipService.ShowOnDisabled="True" AutomationProperties.Name="Spielerdetails" />
                     <Button x:Name="CompactResetButton" Margin="{DynamicResource HeaderIconGap}" Style="{StaticResource ToolIcon}" Content="&#xE72C;" Click="Restart_Click" ToolTip="DPS zurücksetzen" AutomationProperties.Name="DPS zurücksetzen" />
                     <Button x:Name="CompactSettingsButton" Margin="{DynamicResource HeaderIconGap}" Style="{StaticResource ToolIcon}" Content="&#xE713;" Click="Settings_Click" ToolTip="Einstellungen" AutomationProperties.Name="Einstellungen" />
                     <Button x:Name="CloseMeterButton" Style="{StaticResource ToolIcon}" Content="&#xE711;" Click="CloseMeter_Click" ToolTip="DPS Meter schließen" AutomationProperties.Name="DPS Meter schließen" />
@@ -368,7 +372,7 @@
             </Grid>
 
             <!-- Party: the rows share their value column widths -->
-            <Grid Grid.Row="3" Margin="0,7,0,0" Grid.IsSharedSizeScope="True">
+            <Grid Grid.Row="3" Margin="{DynamicResource RowsGap}" Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -394,10 +398,10 @@
                 </Grid>
                 <ScrollViewer x:Name="PlayerRowsViewport" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"
                               Padding="8,0,7,0" Margin="-8,0,-7,0" PreviewMouseWheel="Rows_PreviewMouseWheel">
-                    <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
+                    <ItemsControl x:Name="PlayerRows" ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" Focusable="False" />
                 </ScrollViewer>
                 <StackPanel x:Name="EmptyHintPanel" Grid.RowSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,4,0,0" Effect="{StaticResource TextShadow}"
-                            Visibility="{Binding HasData, Converter={StaticResource VisibleIf}, ConverterParameter=!}">
+                            Visibility="Collapsed">
                     <TextBlock Text="{Binding T.EmptyParty}" FontSize="{DynamicResource HintFont}" Foreground="#DCE5EE"
                                TextWrapping="Wrap" TextAlignment="Left" />
                     <TextBlock Text="{Binding WaitingPlayer}" FontSize="{DynamicResource HintFont}" Foreground="#E3D1BE"
@@ -406,7 +410,7 @@
             </Grid>
 
             <!-- Footer -->
-            <StackPanel Grid.Row="4" Margin="0,8,0,0">
+            <StackPanel Grid.Row="4" Margin="{DynamicResource FooterGap}">
                 <Border x:Name="ToolbarTray" Visibility="Collapsed" Background="#010C0C0F" BorderBrush="Transparent" BorderThickness="0" CornerRadius="4" Padding="4" Margin="0,0,0,6">
                     <StackPanel x:Name="Toolbar" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
                         <Button Style="{StaticResource ToolbarChip}" Content="{Binding ModeLabel}" Click="Mode_Click" Margin="0,0,4,0" ToolTip="{Binding T.TipTargetMode}" />
@@ -450,6 +454,10 @@
                         <TextBlock x:Name="FooterText" Visibility="Collapsed" FontSize="11" Foreground="#A9B1C0" TextTrimming="CharacterEllipsis"
                                    Effect="{StaticResource TextShadow}" />
                     </StackPanel>
+                    <StackPanel x:Name="PingStatus" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="{Binding Latency.Tooltip, RelativeSource={RelativeSource AncestorType=Window}}" Margin="8,0,0,0">
+                        <Ellipse Width="{DynamicResource PingDotSize}" Height="{DynamicResource PingDotSize}" Fill="{Binding Latency.Color, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,0,5,0" />
+                        <TextBlock Text="{Binding Latency.Text, RelativeSource={RelativeSource AncestorType=Window}}" FontSize="{DynamicResource FooterFont}" Foreground="#A9B1C0" />
+                    </StackPanel>
                     <StackPanel Grid.Column="1" Visibility="Collapsed" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,35,0">
                         <Ellipse Width="5" Height="5" Fill="#F06A22" Margin="0,0,5,0" />
                         <TextBlock Text="LIVE" FontSize="9" FontWeight="Bold" Foreground="#F2A06B" />
@@ -468,23 +476,16 @@
             </StackPanel>
         </Grid>
 
-        <!-- Resize grip -->
-        <Thumb x:Name="ResizeGrip" Width="0" Height="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
-               Cursor="SizeNWSE" ToolTip="Fenstergröße ändern · am Eck ziehen" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
-            <Thumb.Template>
-                <ControlTemplate TargetType="Thumb">
-                    <Border x:Name="GripBack" Background="#D9111922" BorderBrush="#75F06A22" BorderThickness="1" CornerRadius="8">
-                    <Path Data="M23 5 L5 23 M23 13 L13 23" Stroke="#FFE5E7EA" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                    </Border>
-                </ControlTemplate>
-            </Thumb.Template>
-        </Thumb>
-        <!-- Separate edge handles let users change the width or height without also changing the other dimension. -->
-        <Thumb x:Name="ResizeWidthGrip" Width="7" HorizontalAlignment="Right" VerticalAlignment="Stretch"
-               Margin="0,4,0,4" Background="#01000000" Cursor="SizeWE" Tag="width" ToolTip="Breite ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted">
-            <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="{TemplateBinding Background}" /></ControlTemplate></Thumb.Template>
-        </Thumb>
-        <Thumb x:Name="ResizeHeightGrip" Width="0" Height="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-               Margin="0,0,0,1" Cursor="SizeNS" Tag="height" ToolTip="Höhe ändern" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+        <!-- Eight edge/corner handles. Only these handles resize the panel. -->
+        <Grid x:Name="ResizeHandles">
+            <Thumb Style="{StaticResource ResizeEdge}" Width="6" HorizontalAlignment="Left" Margin="0,8,0,8" Tag="left" Cursor="SizeWE" ToolTip="Linken Rand ziehen" />
+            <Thumb x:Name="ResizeWidthGrip" Style="{StaticResource ResizeEdge}" Width="6" HorizontalAlignment="Right" Margin="0,8,0,8" Tag="right" Cursor="SizeWE" ToolTip="Rechten Rand ziehen" />
+            <Thumb Style="{StaticResource ResizeEdge}" Height="6" VerticalAlignment="Top" Margin="8,0,8,0" Tag="top" Cursor="SizeNS" ToolTip="Oberen Rand ziehen" />
+            <Thumb x:Name="ResizeHeightGrip" Style="{StaticResource ResizeEdge}" Height="6" VerticalAlignment="Bottom" Margin="8,0,8,0" Tag="bottom" Cursor="SizeNS" ToolTip="Unteren Rand ziehen" />
+            <Thumb Style="{StaticResource ResizeEdge}" Width="12" Height="12" HorizontalAlignment="Left" VerticalAlignment="Top" Tag="top-left" Cursor="SizeNWSE" ToolTip="Größe ändern" />
+            <Thumb Style="{StaticResource ResizeEdge}" Width="12" Height="12" HorizontalAlignment="Right" VerticalAlignment="Top" Tag="top-right" Cursor="SizeNESW" ToolTip="Größe ändern" />
+            <Thumb Style="{StaticResource ResizeEdge}" Width="12" Height="12" HorizontalAlignment="Left" VerticalAlignment="Bottom" Tag="bottom-left" Cursor="SizeNESW" ToolTip="Größe ändern" />
+            <Thumb x:Name="ResizeGrip" Style="{StaticResource ResizeEdge}" Width="12" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Tag="bottom-right" Cursor="SizeNWSE" ToolTip="Größe ändern" />
+        </Grid>
     </Grid>
 </Window>

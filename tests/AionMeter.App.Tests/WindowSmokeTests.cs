@@ -48,6 +48,7 @@ public sealed class WindowSmokeTests
                     overlay.Show(); overlay.Refresh(); overlay.UpdateLayout();
                     Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
                     overlay.Refresh(); overlay.UpdateLayout();
+                    CheckOverlayRendering(overlay);
                     // The compact overlay intentionally fits the footer into a shorter card.
                     Assert.InRange(overlay.Height, 160, 499);
                     Assert.Equal(500, settings.OverlayHeight);
@@ -99,84 +100,91 @@ public sealed class WindowSmokeTests
         new Typeface(text.FontFamily, text.FontStyle, text.FontWeight, text.FontStretch), text.FontSize,
         text.Foreground, null, TextFormattingMode.Display, VisualTreeHelper.GetDpi(text).PixelsPerDip).WidthIncludingTrailingWhitespace;
 
-    private static void CheckOverlayTypography(OverlayWindow overlay, AppSettings settings)
+    private static void CheckOverlayRendering(OverlayWindow overlay)
     {
-        var original = (overlay.Width, overlay.Height, settings.RowSize);
-        var vm = (OverlayViewModel)overlay.DataContext;
-        var row = vm.Rows[0];
-        var oldValues = (row.Name, row.Damage, row.Share, overlay.DisplayNumbers);
-        const string longName = "EinExtremLangerSpielernameDerNiemalsInDieDpsSpalteRagenDarf";
-        var snapshot = overlay.DisplayNumbers!.Snapshot!;
-        var actor = snapshot.Combatants.First(c => c.ActorId == row.ActorId);
-        row.Name = longName; row.Damage = "119.4K"; row.Share = "100.0%";
-        var exactSnapshot = snapshot with { Combatants = new[] { actor with { Dps = 9_999_999, Damage = 9_999_999 } } };
-        overlay.SetValue(OverlayWindow.DisplayNumbersProperty, new OverlayNumberContext(exactSnapshot, false));
+        var source = Assert.IsType<System.Windows.Interop.HwndSource>(PresentationSource.FromVisual(overlay));
+        Assert.Equal(System.Windows.Interop.RenderMode.SoftwareOnly, source.CompositionTarget.RenderMode);
+        Assert.False(overlay.ShowActivated);
+        Assert.True(overlay.Topmost);
+        var sizeChanges = 0;
+        SizeChangedEventHandler changed = (_, _) => sizeChanges++;
+        overlay.SizeChanged += changed;
         try
         {
-            foreach (var (rowSize, expectedHeight, expectedGap) in new[] { (58, 38d, 2d), (80, 44d, 4d), (90, 52d, 6d) })
+            var bounds = (overlay.Left, overlay.Top, overlay.ActualWidth, overlay.ActualHeight);
+            for (var i = 0; i < 30; i++)
             {
-                settings.RowSize = rowSize;
-                overlay.ApplyRowSize(rowSize);
+                overlay.Refresh(); overlay.UpdateLayout();
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+            }
+            Assert.Equal(bounds, (overlay.Left, overlay.Top, overlay.ActualWidth, overlay.ActualHeight));
+            Assert.Equal(0, sizeChanges);
+            Assert.Equal(System.Windows.Interop.RenderMode.SoftwareOnly, source.CompositionTarget.RenderMode);
+        }
+        finally { overlay.SizeChanged -= changed; }
+    }
+
+    private static void CheckOverlayTypography(OverlayWindow overlay, AppSettings settings)
+    {
+        var original = (overlay.Width, overlay.Height, settings.OverlayTextScale);
+        var vm = (OverlayViewModel)overlay.DataContext;
+        Assert.Equal(6, vm.Rows.Count);
+        Assert.Equal(5, vm.Rows.Count(r => r.IsPlaceholder));
+        var row = vm.Rows.First(r => !r.IsPlaceholder);
+        var oldName = row.Name;
+        row.Name = "EinExtremLangerSpielernameDerNiemalsInDieDpsSpalteRagenDarf";
+        try
+        {
+            foreach (var scale in new[] { .7, 1d, 1.5 })
+            {
+                overlay.ApplyScale(scale);
                 double? observedFont = null;
-                double? observedNumberWidth = null;
-                foreach (var width in new[] { 300, 380, 460, 600 })
+                foreach (var width in new[] { overlay.MinWidth, 600d, 900d })
                 {
-                    overlay.PreviewSize(width, 500); overlay.UpdateLayout();
+                    overlay.PreviewSize(width, 600); overlay.UpdateLayout();
                     Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
-                    overlay.UpdateLayout();
-                    var name = Visuals<TextBlock>(overlay).Single(t => t.Name == "NameText");
-                    var dps = Visuals<TextBlock>(overlay).Single(t => t.Name == "DpsText");
-                    var damage = Visuals<TextBlock>(overlay).Single(t => t.Name == "DamageText");
-                    var share = Visuals<TextBlock>(overlay).Single(t => t.Name == "ShareText");
-                    Assert.True(name.FontSize >= 13);
+                    var name = Visuals<TextBlock>(overlay).Single(t => t.Name == "NameText" && ReferenceEquals(t.DataContext, row));
+                    var dps = Visuals<TextBlock>(overlay).Single(t => t.Name == "DpsText" && ReferenceEquals(t.DataContext, row));
+                    var share = Visuals<TextBlock>(overlay).Single(t => t.Name == "ShareText" && ReferenceEquals(t.DataContext, row));
+                    Assert.Equal(13 * scale, name.FontSize, 3);
                     if (observedFont is { } font) Assert.Equal(font, name.FontSize);
                     observedFont = name.FontSize;
                     var rowGrid = Visuals<Grid>(overlay).Single(g => ReferenceEquals(g.DataContext, row) && g.Cursor == System.Windows.Input.Cursors.Hand);
-                    Assert.Equal(expectedHeight, rowGrid.ActualHeight);
-                    Assert.Equal(expectedGap, rowGrid.Margin.Bottom);
-                    if (observedNumberWidth is { } columnWidth) Assert.Equal(columnWidth, dps.ActualWidth);
-                    observedNumberWidth = dps.ActualWidth;
-                    Assert.True(((Grid)overlay.FindName("CardBody")).LayoutTransform.Value.IsIdentity);
-                    Assert.Equal(300, overlay.MinWidth);
+                    Assert.InRange(rowGrid.ActualHeight, 24 * scale - 1, 24 * scale + 1);
+                    Assert.Equal(2 * scale, rowGrid.Margin.Bottom, 3);
                     Assert.Equal(TextTrimming.CharacterEllipsis, name.TextTrimming);
                     Assert.Equal(TextWrapping.NoWrap, name.TextWrapping);
-                    Assert.Equal("9,999,999/S", dps.Text);
-                    Assert.Equal("9,999,999", damage.Text);
-                    Assert.Equal(dps.FontSize, share.FontSize);
-                    Assert.Equal(Color.FromRgb(0x75, 0xE5, 0xA1), ((SolidColorBrush)share.Foreground).Color);
-                    if (width == 300)
-                    {
-                        Assert.True(TextWidth(name) > name.ActualWidth, "Long name must be constrained and ellipsized.");
-                        Assert.True(name.ActualWidth >= TextWidth(name, "…"), "The ellipsis itself must fit.");
-                        Assert.True(name.TranslatePoint(new Point(name.ActualWidth, 0), overlay).X <= dps.TranslatePoint(new Point(), overlay).X);
-                    }
-                    foreach (var text in new[] { dps, damage, share })
-                    {
-                        Assert.True(text.ActualWidth + 1 >= TextWidth(text), $"Clipped {text.Name}: {text.ActualWidth} < {TextWidth(text)} at {width}, profile {rowSize}");
-                        Assert.True(text.TranslatePoint(new Point(text.ActualWidth, 0), overlay).X <= overlay.ActualWidth - 8);
-                    }
-                    var title = (TextBlock)overlay.FindName("StatisticsTitle");
+                    Assert.True(name.TranslatePoint(new Point(name.ActualWidth, 0), overlay).X <= dps.TranslatePoint(new Point(), overlay).X);
+                    foreach (var text in new[] { dps, share }) Assert.True(text.ActualWidth + 1 >= TextWidth(text));
                     var timer = (TextBlock)overlay.FindName("StatisticsClock");
-                    Assert.Equal(title.FontSize, timer.FontSize);
                     var actions = (StackPanel)overlay.FindName("CompactTopActions");
-                    Assert.True(timer.TranslatePoint(new Point(timer.ActualWidth, 0), overlay).X <= actions.TranslatePoint(new Point(), overlay).X,
-                        $"Header overlap at {width}, profile {rowSize}: timer ends {timer.TranslatePoint(new Point(timer.ActualWidth, 0), overlay).X}, actions start {actions.TranslatePoint(new Point(), overlay).X}");
-                    foreach (var button in actions.Children.OfType<Button>())
-                    {
-                        Assert.True(button.ActualWidth >= 23.99); Assert.True(button.ActualHeight >= 23.99);
-                    }
+                    Assert.Equal(4, actions.Children.OfType<Button>().Count());
+                    Assert.All(actions.Children.OfType<Button>(), b => Assert.NotNull(b.ToolTip));
+                    Assert.True(timer.TranslatePoint(new Point(timer.ActualWidth, 0), overlay).X <= actions.TranslatePoint(new Point(), overlay).X, "Header overlap");
+                    Assert.True(overlay.Width >= overlay.MinWidth);
                 }
             }
-            var converter = new OverlayExactNumberConverter();
-            var example = new OverlayNumberContext(snapshot with { Combatants = new[] { actor with { Dps = 22_049, Damage = 1_345_034 } } }, false);
-            Assert.Equal("22,049/S", converter.Convert(new object[] { actor.ActorId, example }, typeof(string), "rate", System.Globalization.CultureInfo.InvariantCulture));
-            Assert.Equal("1,345,034", converter.Convert(new object[] { actor.ActorId, example }, typeof(string), "total", System.Globalization.CultureInfo.InvariantCulture));
+            var details = (Button)overlay.FindName("HeaderDetailsButton");
+            details.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            var window = Assert.Single(Application.Current.Windows.OfType<BreakdownWindow>());
+            Assert.True(window.IsVisible);
+            Assert.Equal(Visibility.Visible, ((Border)window.FindName("OverlayCritTile")).Visibility);
+            details.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Empty(Application.Current.Windows.OfType<BreakdownWindow>());
+            settings.ShowPing = false; overlay.ApplyAppearance();
+            Assert.Equal(Visibility.Collapsed, ((FrameworkElement)overlay.FindName("PingStatus")).Visibility);
+            settings.ShowPing = true; overlay.ApplyAppearance();
+            Assert.Equal(Visibility.Visible, ((FrameworkElement)overlay.FindName("PingStatus")).Visibility);
+            overlay.SetValue(OverlayWindow.LatencyProperty, new LatencyDisplay("42 ms", "#65D98A", "Testmessung"));
+            overlay.UpdateLayout();
+            var pingPanel = (StackPanel)overlay.FindName("PingStatus");
+            Assert.Equal("42 ms", Assert.Single(pingPanel.Children.OfType<TextBlock>()).Text);
+            Assert.Equal(Color.FromRgb(0x65, 0xD9, 0x8A),
+                ((SolidColorBrush)Assert.Single(pingPanel.Children.OfType<System.Windows.Shapes.Ellipse>()).Fill).Color);
         }
         finally
         {
-            row.Name = oldValues.Name; row.Damage = oldValues.Damage; row.Share = oldValues.Share;
-            overlay.SetValue(OverlayWindow.DisplayNumbersProperty, oldValues.DisplayNumbers);
-            settings.RowSize = original.RowSize; overlay.ApplyRowSize(original.RowSize);
+            row.Name = oldName; overlay.ApplyScale(original.OverlayTextScale);
             overlay.PreviewSize(original.Width, original.Height);
         }
     }
@@ -184,17 +192,17 @@ public sealed class WindowSmokeTests
     private static void CheckSizePresets(MeterService meter, OverlayWindow overlay)
     {
         var window = new SettingsWindow(meter) { Opacity = 0, ShowActivated = false };
-        var originalSize = (overlay.Width, overlay.Height);
         var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
         try
         {
             window.Show(); window.UpdateLayout();
             var handler = typeof(SettingsWindow).GetMethod("SizePreset_Click", flags)!;
-            foreach (var (preset, rows) in new[] { ("compact", 5), ("standard", 8), ("large", 12) })
+            foreach (var (preset, rows) in new[] { ("compact", 6), ("standard", 6), ("large", 6) })
             {
                 handler.Invoke(window, new object[] { new Button { Tag = preset }, new RoutedEventArgs() });
                 Assert.Equal(rows, ((ComboBox)window.FindName("MaxRows")).SelectedItem);
-                Assert.Equal(originalSize.Width, overlay.Width); Assert.Equal(originalSize.Height, overlay.Height);
+                Assert.Equal(preset == "compact" ? 85d : preset == "large" ? 125d : 100d, ((Slider)window.FindName("RowSizeValue")).Value);
+                Assert.True(overlay.Width >= overlay.MinWidth);
             }
         }
         finally { window.Close(); }

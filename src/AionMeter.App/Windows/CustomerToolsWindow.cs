@@ -81,8 +81,8 @@ public sealed class CustomerToolsWindow : Window
         _contrast = Check(display, "Hoher Kontrast: dunkle Flächen und weiße Schrift", meter.Settings.HighContrast);
         _colors = Check(display, "Farbsehfreundliche Balken (Klassen bleiben über Symbol und Text erkennbar)", meter.Settings.AccessibleColors);
         _records = Check(display, "Persönliche Boss-Rekorde nach vollständigen Kills anzeigen", meter.Settings.ShowPersonalRecords);
-        Note(display, "Schriftgröße im Overlay (80–150 %)");
-        _font = new Slider { Minimum = .8, Maximum = 1.5, TickFrequency = .1, IsSnapToTickEnabled = true,
+        Note(display, "Skalierung des Overlays (70–150 %)");
+        _font = new Slider { Minimum = .7, Maximum = 1.5, TickFrequency = .05, IsSnapToTickEnabled = true,
             Value = meter.Settings.OverlayTextScale, Width = 300, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 4, 0, 10) };
         _font.Style = (Style)Application.Current.FindResource("GoldSlider");
         display.Children.Add(_font);

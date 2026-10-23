@@ -10,6 +10,8 @@ namespace AionMeter.App.ViewModels;
 
 public sealed class RowViewModel : ObservableObject
 {
+    private bool _isPlaceholder;
+    public bool IsPlaceholder { get => _isPlaceholder; set => Set(ref _isPlaceholder, value); }
     public Brush TrackBrush { get; private set; } = Freeze(new SolidColorBrush(Color.FromArgb(201, 23, 21, 24)));
     private (GameClass, bool, bool, bool)? _lastTheme;
     public void ApplyAccessibility(bool contrast, bool accessible)
@@ -369,7 +371,7 @@ public sealed class OverlayViewModel : ObservableObject
     public bool HighContrast { get; set; }
     public bool AccessibleColors { get; set; }
 
-    public void Apply(EncounterSnapshot? snap, int maxRows, bool relativeToTop, OverlayRanking ranking = OverlayRanking.Damage)
+    public void Apply(EncounterSnapshot? snap, int maxRows, bool relativeToTop, OverlayRanking ranking = OverlayRanking.Damage, bool compactParty = false)
     {
         snap = PrivacyNames.Apply(snap);
         if (snap is null)
@@ -392,7 +394,8 @@ public sealed class OverlayViewModel : ObservableObject
             MostDamageUnsent = false;
             SelfPlace = "";
             HasGear = false;
-            Rows.Clear();
+            if (compactParty) FillEmptyPlaces();
+            else Rows.Clear();
             return;
         }
 
@@ -465,19 +468,20 @@ public sealed class OverlayViewModel : ObservableObject
 
         var list = visibleCombatants
             .Where(c => rankingHealing ? c.Healing > 0 || (c.IsSelf && snap.IsActive) : c.Damage > 0 || c.IsUnknownSummons || (c.IsSelf && snap.IsActive))
-            .OrderByDescending(c => rankingHealing ? c.Healing : c.Damage)
+            .OrderByDescending(c => rankingHealing ? c.Healing : compactParty ? c.Dps : c.Damage)
             .ThenBy(c => c.IsUnknownSummons ? 1 : 0)
             .ToList();
-        var count = Math.Min(maxRows, list.Count);
+        var count = Math.Min(compactParty ? 6 : maxRows, list.Count);
         // Always keep the local player visible even when they are outside the top N.
         var selfIndex = -1;
         for (var i = 0; i < list.Count; i++)
             if (list[i].IsSelf) { selfIndex = i; break; }
         var showSelfExtra = selfIndex >= count;
-        var rowsNeeded = count + (showSelfExtra ? 1 : 0);
+        var rowsNeeded = count + (showSelfExtra && !compactParty ? 1 : 0);
 
-        while (Rows.Count > rowsNeeded) Rows.RemoveAt(Rows.Count - 1);
-        while (Rows.Count < rowsNeeded) Rows.Add(new RowViewModel());
+        var allocatedRows = compactParty ? 6 : rowsNeeded;
+        while (Rows.Count > allocatedRows) Rows.RemoveAt(Rows.Count - 1);
+        while (Rows.Count < allocatedRows) Rows.Add(new RowViewModel());
 
         var best = list.Count > 0 ? Math.Max(1, rankingHealing ? list[0].Healing : list[0].Damage) : 1;
         for (var r = 0; r < rowsNeeded; r++)
@@ -485,6 +489,7 @@ public sealed class OverlayViewModel : ObservableObject
             var i = showSelfExtra && r == rowsNeeded - 1 ? selfIndex : r;
             var cb = list[i];
             var row = Rows[r];
+            row.IsPlaceholder = false;
             row.ActorId = cb.ActorId;
             row.Rank = cb.IsUnknownSummons ? 0 : i + 1;
             row.Name = T.CombatantLabel(cb.ActorId, cb.Name, cb.Class);
@@ -507,10 +512,25 @@ public sealed class OverlayViewModel : ObservableObject
                           $"{T.HealShort} {Format.Grouped(cb.Healing)}\n" +
                           $"{T.RowHits} {cb.Hits} · {T.RowCrit} {Format.Percent(cb.CritRate)} · {T.RowMax} {Format.Grouped(cb.MaxHit)}";
         }
+        if (compactParty) { FillEmptyPlaces(rowsNeeded); if (count == 0) HasData = false; }
         HasGear = Rows.Any(r => r.HasGearScore || r.HasCombatPower);
         SelfPlace = selfIndex >= 0 ? $"{selfIndex + 1} / {snap.PlayerCount}" : "";
         SelfPlaceBrush = RankBrushes.For(selfIndex + 1).Bg;
         SelfPlaceForeground = RankBrushes.For(selfIndex + 1).Fg;
+    }
+
+    private void FillEmptyPlaces(int first = 0)
+    {
+        while (Rows.Count < 6) Rows.Add(new RowViewModel());
+        for (var index = first; index < Rows.Count; index++)
+        {
+            var row = Rows[index];
+            row.IsPlaceholder = true; row.ActorId = 0; row.IsSelf = false;
+            row.Rank = index + 1; row.Name = "Spielerplatz frei";
+            row.Dps = row.Damage = row.Share = "—"; row.Fill = 0;
+            row.GearScore = row.CombatPower = "";
+            row.Tooltip = "Für diesen Spielerplatz liegen noch keine Kampfdaten vor.";
+        }
     }
 
     private static bool HasVisibleIdentity(CombatantSnapshot c) =>
