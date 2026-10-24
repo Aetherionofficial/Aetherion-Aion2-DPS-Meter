@@ -16,6 +16,8 @@ public partial class SettingsWindow : Window
     private readonly double _originalOverlayWidth;
     private readonly double _originalOverlayHeight;
     private readonly double _originalOverlayScale;
+    private Controls.EventsPage? _eventsPage;
+    public string CurrentMarkerLabel => MarkerLabel.Text;
     private Button? _activeSettingsNav;
     private double _previewWidth;
     private double _previewHeight;
@@ -84,10 +86,13 @@ public partial class SettingsWindow : Window
         HistoryMin.Text = s.HistoryMinSeconds.ToString();
         HistoryInfo.Text = string.Format(T.HistoryInfo, _meter.History.List().Count, _meter.History.Directory);
         Record.IsChecked = s.RecordPackets;
+        DebugUnknownPackets.IsChecked = s.DebugUnknownPackets;
         HkToggle.Text = s.HotkeyToggleOverlay;
         HkReset.Text = s.HotkeyReset;
         HkClick.Text = s.HotkeyClickThrough;
         HkTimers.Text = s.HotkeyTimers;
+        HkMarker.Text = s.HotkeyRecordingMarker;
+        MarkerLabel.Text = s.RecordingMarkerLabel;
 
         _devices.Add((null, T.AdapterAuto));
         try
@@ -234,11 +239,14 @@ public partial class SettingsWindow : Window
             _activeSettingsNav = button;
         }
 
+        if (page == "events") EventsHost.Content = _eventsPage ??= new Controls.EventsPage(_meter, () => MarkerLabel.Text, recording => Record.IsChecked = recording);
+
         FrameworkElement[] visible = page switch
         {
             "timer" => new[] { TimerSection },
             "fights" => new[] { HistorySection, CaptureSection },
             "journal" => new[] { JournalSection },
+            "events" => new[] { EventsSection },
             "appearance" => new[] { AppearanceSection, LanguageSection, DataFilesSection },
             "general" => new[] { OverlayBehaviorSection, MeterSection, HotkeysSection, LicenseSection, DataSection },
             "account" => new[] { PremiumSection, UpdatesSection },
@@ -248,7 +256,7 @@ public partial class SettingsWindow : Window
             _ => new[] { OverlaySection },
         };
         FrameworkElement[] allSections = new FrameworkElement[] { PremiumSection, LanguageSection, OverlaySection, MapSection, GuideSection, AppearanceSection, TimerSection, MeterSection,
-            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection, PvpSection, JournalSection };
+            HistorySection, CaptureSection, OverlayBehaviorSection, HotkeysSection, LicenseSection, UpdatesSection, DataSection, DataFilesSection, PvpSection, JournalSection, EventsSection };
         foreach (var section in allSections)
             section.Visibility = visible.Contains(section) ? Visibility.Visible : Visibility.Collapsed;
         DisclaimerText.Visibility = page == "general" ? Visibility.Visible : Visibility.Collapsed;
@@ -258,6 +266,7 @@ public partial class SettingsWindow : Window
             "timer" => T.NavTimer,
             "fights" => T.NavFights,
             "journal" => "Kampfbuch & Training",
+            "events" => "Ereignisse",
             "appearance" => T.NavAppearance,
             "general" => T.NavGeneral,
             "account" => T.NavAccount,
@@ -268,6 +277,7 @@ public partial class SettingsWindow : Window
         };
         PageSubtitle.Text = page switch
         {
+            "events" => "Aufnehmen, markieren und eigene Ereignisse verfolgen – ausschließlich lokal.",
             "timer" => T.TimerPageHint,
             "journal" => "Boss-Tagebuch, Heilung, Trainingsziele und Discord – an einem Ort.",
             "pvp" => T.PvpPageHint,
@@ -278,7 +288,7 @@ public partial class SettingsWindow : Window
         SettingsScroll.ScrollToTop();
     }
 
-    internal void ShowSettingsPageForPreview(string page) => SelectSettingsPage(page, page == "journal" ? NavJournalButton : null);
+    internal void ShowSettingsPageForPreview(string page) => SelectSettingsPage(page, page == "journal" ? NavJournalButton : page == "events" ? NavEventsButton : null);
 
     private void SizePreset_Click(object sender, RoutedEventArgs e)
     {
@@ -353,6 +363,11 @@ public partial class SettingsWindow : Window
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         var s = _meter.Settings;
+        if (!HotkeyManager.TryParse(HkMarker.Text, out _, out _) || string.IsNullOrWhiteSpace(MarkerLabel.Text) || MarkerLabel.Text.Any(char.IsControl))
+        {
+            MessageBox.Show(this, "Bitte einen gültigen Marker-Hotkey und ein Label mit 1–120 Zeichen eingeben.", "Ereignisse");
+            return;
+        }
         var captureChanged = false;
 
         s.BarsRelativeToTop = BarsRelative.IsChecked == true;
@@ -394,6 +409,7 @@ public partial class SettingsWindow : Window
         if (device != s.CaptureDevice || (Record.IsChecked == true) != s.RecordPackets) captureChanged = true;
         s.CaptureDevice = device;
         s.RecordPackets = Record.IsChecked == true;
+        s.DebugUnknownPackets = DebugUnknownPackets.IsChecked == true;
 
         var language = (LanguageBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "en";
         s.DownloadIcons = Icons.IsChecked == true;
@@ -403,6 +419,8 @@ public partial class SettingsWindow : Window
         s.HotkeyReset = HkReset.Text.Trim();
         s.HotkeyClickThrough = HkClick.Text.Trim();
         s.HotkeyTimers = HkTimers.Text.Trim();
+        s.HotkeyRecordingMarker = HkMarker.Text.Trim();
+        s.RecordingMarkerLabel = MarkerLabel.Text.Trim();
 
         _meter.ApplySettings();
         if (captureChanged) _meter.RestartCapture();

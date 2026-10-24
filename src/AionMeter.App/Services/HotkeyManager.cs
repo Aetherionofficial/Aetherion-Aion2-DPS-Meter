@@ -44,6 +44,7 @@ public sealed class HotkeyManager : IDisposable
         vk = 0;
         if (string.IsNullOrWhiteSpace(gesture)) return false;
         var parts = gesture.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0) return false;
         foreach (var part in parts[..^1])
         {
             switch (part.ToLowerInvariant())

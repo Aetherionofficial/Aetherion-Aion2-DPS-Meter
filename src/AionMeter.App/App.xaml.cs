@@ -44,6 +44,7 @@ public partial class App : Application
     private readonly DiscordPresenceService _discordPresence = new();
     private OverlayWindow _overlay = null!;
     private TrayIcon? _tray;
+    private EventNotificationPump? _eventNotifications;
     private HotkeyManager? _hotkeys;
     private DispatcherTimer? _timer;
     private DispatcherTimer? _licenseTimer;
@@ -282,6 +283,7 @@ public partial class App : Application
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(_meter.Settings.PowerSaving ? 500 : 200) };
         _timer.Tick += (_, _) => OnTick();
         _timer.Start();
+        _eventNotifications = new EventNotificationPump(_meter);
 
         _licenseTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMinutes(1) };
         _licenseTimer.Tick += async (_, _) => await RecheckLicenseAsync();
@@ -344,7 +346,8 @@ public partial class App : Application
         _maintenanceTimer?.Stop();
         _showWait?.Unregister(null);
         _showWait = null;
-        _hotkeys?.Dispose(); _hotkeys = null;
+        _hotkeys?.Dispose();
+        _eventNotifications?.Dispose(); _hotkeys = null;
         _tray?.Dispose(); _tray = null;
         _discordPresence.Dispose();
         _meter.PauseForMaintenance();
@@ -493,6 +496,20 @@ public partial class App : Application
         ShowByItself();
     }
 
+    private async Task SetRecordingMarkerAsync()
+    {
+        if (_maintenanceBlocked || _meter is null) return;
+        try
+        {
+            var label = _settingsWindow is { IsVisible: true } ? _settingsWindow.CurrentMarkerLabel : _meter.Settings.RecordingMarkerLabel;
+            var marker = await _meter.AddRecordingMarkerAsync(label);
+            EventToastWindow.ShowMessage(marker is null ? "Keine aktive Aufnahme" : "Marker gesetzt",
+                marker is null ? "Starte unter Ereignisse eine Aufnahme und warte auf Spielverkehr." : $"{marker.Label} · {DateTimeOffset.FromUnixTimeMilliseconds(marker.TimeMs).ToLocalTime():HH:mm:ss.fff}");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException)
+        { EventToastWindow.ShowMessage("Marker konnte nicht gespeichert werden", error.Message); }
+    }
+
     private void RegisterHotkeys()
     {
         if (_hotkeys is null) return;
@@ -503,6 +520,8 @@ public partial class App : Application
         _overlay.ApplyHotkeyTips();
         _hotkeys.Register(s.HotkeyClickThrough, ToggleClickThrough);
         _hotkeys.Register(s.HotkeyTimers, ToggleBossTimers);
+        if (!_hotkeys.Register(s.HotkeyRecordingMarker, () => _ = SetRecordingMarkerAsync()))
+            EventToastWindow.ShowMessage("Marker-Hotkey nicht verfügbar", "Bitte unter Ereignisse eine andere Tastenkombination wählen.");
     }
 
     /// <summary>

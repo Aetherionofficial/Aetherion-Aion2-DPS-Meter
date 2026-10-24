@@ -20,6 +20,8 @@ return args.FirstOrDefault() switch
     "replay" when args.Length > 1 => Replay(args[1]),
     "dump" when args.Length > 1 => Dump(args[1], args.Length > 2 ? args[2] : null),
     "opcodes" when args.Length > 1 => OpcodeSummary(args[1]),
+    "unknown" or "unknown-opcodes" when args.Length > 1 => UnknownOpcodes(args[1]),
+    "discover" when args.Length > 1 => Discover(args[1]),
     "find" when args.Length > 2 => Find(args[1], args[2]),
     "crits" when args.Length > 1 => Crits(args[1]),
     "entities" when args.Length > 1 => Entities(args[1]),
@@ -41,6 +43,10 @@ int Usage()
         aionmeter-cli replay <file.pcap>            run a capture through the meter, print fights
         aionmeter-cli dump <file.pcap> [opcode]     print decoded packets (opcode as hex, e.g. 0438)
         aionmeter-cli opcodes <file.pcap>            count opcodes and show sample bytes for unknown packets
+        aionmeter-cli unknown <datei.pcap> [--log datei.jsonl]
+                                                    unbekannte/nicht dekodierte Nachrichten zählen; optional Hex-Rohdaten speichern
+        aionmeter-cli discover <datei.pcap> [--markers datei.markers.jsonl] [--window 3] [--events events.json]
+                                                    Marker korrelieren und mögliche Felder vergleichen (keine bestätigte Decodierung)
         aionmeter-cli replay <file.pcap> --boss --brief   player counts per fight only
         aionmeter-cli crits <file.pcap>             damage-type / modifier statistics per class (crit check)
         aionmeter-cli entities <file.pcap>          damage dealers that are not announced players, by spawn kind
@@ -49,6 +55,100 @@ int Usage()
                                                     what the meter's update check sees on GitHub; download + verify the installer
         """);
     return 1;
+}
+
+int Discover(string path)
+{
+    string? Option(string name)
+    {
+        var at = Array.IndexOf(args, name);
+        if (at < 0) return null;
+        if (at + 1 >= args.Length || args[at + 1].StartsWith("--", StringComparison.Ordinal)) throw new InvalidDataException($"Wert für {name} fehlt.");
+        return args[at + 1];
+    }
+    try
+    {
+        var markers = RecordingMarkers.Load(Option("--markers") ?? RecordingMarkers.SidecarPath(path));
+        var seconds = double.Parse(Option("--window") ?? "3", CultureInfo.InvariantCulture);
+        if (!double.IsFinite(seconds) || seconds is <= 0 or > 30) throw new InvalidDataException("Zeitfenster muss zwischen 0 und 30 Sekunden liegen.");
+        var analysis = new EventDiscovery(markers, (long)Math.Round(seconds * 1000));
+        using var replay = new PcapReplaySource(data, path, realtime: false);
+        if (Option("--events") is { } configuration) replay.Pipeline.Parser.ConfiguredDecoder = ConfiguredEventDecoder.Load(configuration);
+        Console.WriteLine($"{markers.Count} Marker; Zeitfenster ±{seconds} s. Treffer sind Korrelationen, keine bestätigten Spielereignisse.");
+        foreach (var group in markers.GroupBy(m => m.Label))
+        {
+            var ordered = group.OrderBy(m => m.TimeMs).ToArray();
+            if (ordered.Length < 2) Console.WriteLine($"Hinweis {group.Key}: Für belastbare Kandidaten mindestens zwei getrennte Marker aufnehmen.");
+            if (ordered.Zip(ordered.Skip(1)).Any(p => p.Second.TimeMs - p.First.TimeMs <= seconds * 2000))
+                Console.WriteLine($"Hinweis {group.Key}: Zeitfenster überlappen; Treffer sind nicht unabhängig.");
+        }
+        replay.Pipeline.Parser.Undecoded = packet =>
+        {
+            foreach (var marker in analysis.Observe(packet))
+                Console.WriteLine($"TREFFER {marker.Label} [{marker.TimeMs}] Δ{packet.TimeMs - marker.TimeMs} ms Opcode={packet.Opcode} Länge={packet.Length} Gebiet={packet.MapId?.ToString() ?? "?"} Hex={packet.Hex}");
+        };
+        var packets = replay.RunToEnd();
+        Console.WriteLine($"\nPCAP-Pakete: {packets}; Kandidaten nach Label und Opcode:");
+        foreach (var candidate in analysis.GetCandidates())
+        {
+            Console.WriteLine($"{(candidate.StrongCandidate ? "*** KANDIDAT" : "TREFFER")} {candidate.Label}: {candidate.Opcode}; Marker {candidate.MarkerHits}/{candidate.MarkerCount}; im Fenster {candidate.Inside}; sonst {candidate.Outside}");
+            Console.WriteLine("Feldvorschau aus höchstens 8 Treffern und den ersten 512 Bytes; Typen/IDs sind unbestätigt:");
+            foreach (var field in candidate.FieldPreview) Console.WriteLine("  " + field);
+        }
+        return 0;
+    }
+    catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or FormatException or System.Text.Json.JsonException or SharpPcap.PcapException)
+    { Console.Error.WriteLine($"discover fehlgeschlagen: {error.Message}"); return 1; }
+}
+
+int UnknownOpcodes(string path)
+{
+    var logAt = Array.IndexOf(args, "--log");
+    if (logAt >= 0 && (logAt + 1 >= args.Length || args[logAt + 1].StartsWith("--", StringComparison.Ordinal)))
+    {
+        Console.Error.WriteLine("Nach --log muss ein Dateipfad stehen.");
+        return 1;
+    }
+    var logPath = logAt >= 0 ? Path.GetFullPath(args[logAt + 1]) : null;
+    if (string.Equals(logPath, Path.GetFullPath(path), OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+    {
+        Console.Error.WriteLine("Die Logdatei darf nicht die PCAP-Eingabedatei sein.");
+        return 1;
+    }
+    UndecodedPacketLog? log = null;
+    try
+    {
+        // Offline replay may wait for disk: unlike live capture, this loses no records on a full log queue.
+        if (logPath is not null) log = new UndecodedPacketLog(logPath, waitForCapacity: true);
+        using var replay = new PcapReplaySource(data, path, realtime: false);
+        var counts = new Dictionary<(string Opcode, string Reason), long>();
+        replay.Pipeline.Parser.Undecoded = packet =>
+        {
+            var key = (packet.Opcode, packet.Reason);
+            counts[key] = counts.GetValueOrDefault(key) + 1;
+            log?.Write(packet);
+        };
+        var total = replay.RunToEnd();
+        log?.Dispose();
+        Console.WriteLine($"PCAP-Pakete gelesen: {total:N0}");
+        Console.WriteLine("Opcode       Anzahl  Diagnose");
+        foreach (var (key, count) in counts.OrderByDescending(p => p.Value).ThenBy(p => p.Key.Opcode, StringComparer.Ordinal))
+            Console.WriteLine($"{key.Opcode}  {count,12:N0}  {key.Reason}");
+        if (counts.Count == 0) Console.WriteLine("Keine unbekannten oder nicht dekodierten Nachrichten erkannt.");
+        if (logPath is not null) Console.WriteLine($"Lokales Rohdatenprotokoll: {logPath}");
+        if (log?.Error is { } error)
+        {
+            Console.Error.WriteLine($"Protokoll konnte nicht vollständig geschrieben werden: {error.Message}");
+            return 2;
+        }
+        return 0;
+    }
+    catch (Exception error) when (error is IOException or UnauthorizedAccessException or SharpPcap.PcapException)
+    {
+        Console.Error.WriteLine($"PCAP-Diagnose fehlgeschlagen: {error.Message}");
+        return 1;
+    }
+    finally { log?.Dispose(); }
 }
 
 int OpcodeSummary(string path)

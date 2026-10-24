@@ -74,6 +74,7 @@ public sealed class WindowSmokeTests
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "maintenance", Scale: 1));
                     Assert.True(new FileInfo(output.Path).Length > 1_000);
                     JournalUiChecks.Run(meter);
+                    EventsUiChecks.Run(meter);
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "fight-journal", Tab: "healing", Scale: 1));
                     Assert.True(new FileInfo(output.Path).Length > 1_000);
                     SampleRenderer.Render(output.Path, "de", new SampleRenderer.Options(Window: "discord-card", Scale: 1));
@@ -306,9 +307,41 @@ public sealed class WindowSmokeTests
         var zero = snapshot with { Combatants = new[] { actor with { Healing = 0 } } };
         Assert.Equal("0/S", Display(zero, "rate")); Assert.Equal("0", Display(zero, "total"));
         var rounded = snapshot with { CombatMs = 2000, Combatants = new[] { actor with { Healing = 3 } } };
-        Assert.Equal("1,5/S", Display(rounded, "rate"));
+        // Below 1000, CompactGerman intentionally keeps whole-number rounding (also used before v0.3.78).
+        Assert.Equal("2/S", Display(rounded, "rate"));
         Assert.Equal("—", Display(null, "rate"));
         Assert.Equal("—", Display(snapshot with { Combatants = Array.Empty<CombatantSnapshot>() }, "total"));
+    }
+
+    [Theory]
+    [InlineData(3L, 2000L, "2/S")]
+    [InlineData(28L, 20000L, "1/S")]
+    [InlineData(32L, 20000L, "2/S")]
+    [InlineData(1999L, 2000L, "1000/S")]
+    [InlineData(2000L, 2000L, "1k/S")]
+    [InlineData(2999L, 2000L, "1,5k/S")]
+    [InlineData(200200L, 2000L, "100,1k/S")]
+    public void Overlay_damage_and_healing_keep_the_same_rounding_and_suffix_threshold_across_cultures(
+        long total, long milliseconds, string expected)
+    {
+        var converter = new OverlayExactNumberConverter();
+        var actor = new CombatantSnapshot(100, "Test", GameClass.Cleric, true,
+            total, 0, 1, 1, 0, 0, 0, Healing: total);
+        var snapshot = new EncounterSnapshot(Guid.NewGuid(), "Test", null, DateTimeOffset.UnixEpoch,
+            0, milliseconds, true, EncounterEndReason.None, total, 0, null, new[] { actor });
+        var originalCulture = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            foreach (var name in new[] { "de-DE", "en-US" })
+            {
+                var culture = System.Globalization.CultureInfo.GetCultureInfo(name);
+                System.Globalization.CultureInfo.CurrentCulture = culture;
+                foreach (var healing in new[] { false, true })
+                    Assert.Equal(expected, converter.Convert(
+                        new object[] { actor.ActorId, new OverlayNumberContext(snapshot, healing) }, typeof(string), "rate", culture));
+            }
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = originalCulture; }
     }
 
     // Pumping the dispatcher must not start real login, maintenance HTTP polling or the single-instance path.

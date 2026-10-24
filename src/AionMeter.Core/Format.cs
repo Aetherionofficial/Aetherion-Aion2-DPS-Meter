@@ -33,9 +33,7 @@ public static class Format
             _ => (value, "")
         };
 
-        var digits = suffix.Length == 0
-            ? Math.Abs(scaled % 1) > 0 ? "0.#" : "0"
-            : Math.Abs(scaled) >= 100 ? "0.#" : "0.##";
+        var digits = suffix.Length == 0 ? "0" : Math.Abs(scaled) >= 100 ? "0.#" : "0.##";
         return scaled.ToString(digits, Inv).Replace('.', ',') + suffix;
     }
 

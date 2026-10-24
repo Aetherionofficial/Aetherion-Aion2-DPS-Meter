@@ -6,6 +6,10 @@ using AionMeter.Core.Combat;
 using AionMeter.Core.Demo;
 using AionMeter.Core.Game;
 using AionMeter.Core.Storage;
+using AionMeter.Core.Events;
+using AionMeter.Core.Protocol;
+using AionMeter.Core.Tracking;
+using System.Text.Json;
 
 namespace AionMeter.App.Services;
 
@@ -16,6 +20,13 @@ public sealed class MeterService : IDisposable
     private IEventSource? _replay;
     private DemoFightSource? _demo;
     private readonly ConcurrentQueue<FightRecord> _sessionFights = new();
+    private readonly IDisposable _killCounterRegistration;
+    private UndecodedPacketLog? _packetLog;
+    private readonly List<IDisposable> _eventResources = [];
+    private readonly List<Func<Exception?>> _eventStoreErrors = [];
+    private string? _eventLoadError;
+    private ConfiguredEventDecoder? _eventDecoder;
+    private readonly RecordingMarkers _markers = new();
 
     public MeterService(AppSettings settings, Func<GameData, IEventSource>? captureFactory)
     {
@@ -29,6 +40,21 @@ public sealed class MeterService : IDisposable
         Options = new MeterOptions();
         settings.ApplyTo(Options);
         Tracker = new CombatTracker(Data, Options);
+        Trackers = new TrackerDispatcher(error => Log.Error("Zusätzlicher Tracker fehlgeschlagen", error));
+        KillCounter = new KillCounter(settings.Transient ? null : Path.Combine(AppSettings.AppDataDir, "trackers", "kill-counter.json"),
+            observedDeath: Trackers.Publish);
+        _killCounterRegistration = Trackers.Register(KillCounter);
+        EventLog = new EventLogTracker();
+        EventCounters = new CounterTracker();
+        _eventResources.Add(Trackers.Register(EventLog));
+        _eventResources.Add(Trackers.Register(EventCounters));
+        if (!settings.Transient)
+        {
+            RestoreTracker("event-log.json", EventLog.Restore, EventLog.GetSnapshot, s => s.Version);
+            RestoreTracker("event-counters.json", EventCounters.Restore, EventCounters.GetSnapshot, s => s.Version);
+        }
+        ReloadEventConfiguration();
+        if (KillCounter.PersistenceError is { } persistenceError) Log.Info(persistenceError);
         History = new HistoryStore(Path.Combine(AppSettings.AppDataDir, "fights"));
         Journal = new FightJournalStore(settings.Transient ? null : Path.Combine(AppSettings.AppDataDir, "journal", "metadata.json"));
         Timers = new BossTimers(Path.Combine(AppSettings.AppDataDir, "boss-timers.json"), Data, DataDirectory, persistent: !settings.Transient);
@@ -84,6 +110,53 @@ public sealed class MeterService : IDisposable
     public BossPortraits Portraits { get; }
     public MeterOptions Options { get; }
     public CombatTracker Tracker { get; }
+    public TrackerDispatcher Trackers { get; }
+    public KillCounter KillCounter { get; }
+    public string? PacketDebugLogPath { get; private set; }
+    public EventLogTracker EventLog { get; }
+    public CounterTracker EventCounters { get; }
+    public string EventConfigPath => Path.Combine(DataDirectory, "events.json");
+    public string? EventConfigError { get; private set; }
+    public string? EventStorageError => _eventLoadError ?? _eventStoreErrors.Select(read => read()).FirstOrDefault(e => e is not null)?.Message;
+    public string? ActiveRecordingPath { get { lock (_captureGate) return (_capture as LiveCapture)?.ActiveRecordingPath; } }
+
+    private void RestoreTracker<T>(string name, Action<T> restore, Func<T> snapshot, Func<T, long> version) where T : class
+    {
+        var path = Path.Combine(AppSettings.AppDataDir, "trackers", name);
+        try
+        {
+            if (File.Exists(path))
+            {
+                if (new FileInfo(path).Length > 33_554_432) throw new InvalidDataException("Die Ereignisdatei ist zu groß.");
+                restore(JsonSerializer.Deserialize<T>(File.ReadAllText(path)) ?? throw new InvalidDataException("Leere Ereignisdatei."));
+            }
+            var store = new TrackerStateFile<T>(path, snapshot, version);
+            _eventResources.Add(store);
+            _eventStoreErrors.Add(() => store.Error);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or JsonException)
+        { _eventLoadError = $"{name}: {error.Message} (Originaldatei bleibt erhalten)"; }
+    }
+
+    public bool ReloadEventConfiguration()
+    {
+        try { _eventDecoder = ConfiguredEventDecoder.Load(EventConfigPath); EventConfigError = null; }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or JsonException)
+        { EventConfigError = $"Ereigniskonfiguration ungültig: {error.Message}"; return false; }
+        ConfigurePacketDiagnostics();
+        return true;
+    }
+
+    public async Task<RecordingMarker?> AddRecordingMarkerAsync(string label)
+    {
+        var recording = ActiveRecordingPath;
+        if (recording is null) return null;
+        int? map;
+        lock (_captureGate) map = (_capture as LiveCapture)?.Pipeline.Parser.CurrentMapId;
+        var marker = new RecordingMarker(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), label.Trim(), map, Tracker.ZoneName);
+        await Task.Run(() => _markers.Append(recording, marker)).ConfigureAwait(false);
+        return marker;
+    }
     public HistoryStore History { get; }
     public FightJournalStore Journal { get; }
     public string? TrainingMessage { get; private set; }
@@ -115,7 +188,11 @@ public sealed class MeterService : IDisposable
         _replay?.Dispose();
         Tracker.Reset();
         _replaying = true;
-        if (_capture is not null) _capture.EventDecoded -= Tracker.Process;
+        if (_capture is not null)
+        {
+            _capture.EventDecoded -= Tracker.Process;
+            _capture.EventDecoded -= OnLiveTrackerEvent;
+        }
 
         var replay = new PcapReplaySource(Data, path, realtime: false);
         replay.EventDecoded += Tracker.Process;
@@ -125,9 +202,14 @@ public sealed class MeterService : IDisposable
             Tracker.Tick(Tracker.LastEventMs + 3_600_000); // close the recording's last fight
             _savedNamesVersion = Tracker.CacheVersion; // names from a recording must not overwrite the live cache
             _replaying = false;
-            if (_capture is not null) _capture.EventDecoded += Tracker.Process;
+            if (_capture is not null)
+            {
+                _capture.EventDecoded += Tracker.Process;
+                _capture.EventDecoded += OnLiveTrackerEvent;
+            }
         };
         _replay = replay;
+        ConfigurePacketDiagnostics();
         replay.Start();
     }
 
@@ -146,6 +228,8 @@ public sealed class MeterService : IDisposable
             {
                 _capture = CaptureFactory(Data);
                 _capture.EventDecoded += Tracker.Process;
+                _capture.EventDecoded += OnLiveTrackerEvent;
+                ConfigurePacketDiagnostics();
                 _capture.Start();
             }
             catch (Exception ex)
@@ -239,7 +323,41 @@ public sealed class MeterService : IDisposable
         Settings.ApplyTo(Options);
         Icons.Enabled = Settings.DownloadIcons;
         Portraits.Enabled = Settings.DownloadIcons;
+        ConfigurePacketDiagnostics();
         Settings.Save();
+    }
+
+    private void OnLiveTrackerEvent(GameEvent gameEvent)
+    {
+        // The original CombatTracker subscription runs first and remains unchanged.
+        // Recordings and demo fights must not increase the persistent live death counter.
+        if (!_replaying && !DemoRunning) Trackers.Publish(gameEvent);
+    }
+
+    private void ConfigurePacketDiagnostics()
+    {
+        lock (_captureGate)
+        {
+            Action<UndecodedPacket>? sink = null;
+            if (Settings.DebugUnknownPackets && !Settings.Transient)
+            {
+                if (_packetLog is null)
+                {
+                    PacketDebugLogPath = Path.Combine(AppSettings.AppDataDir, "logs",
+                        $"unknown-packets-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.jsonl");
+                    _packetLog = new UndecodedPacketLog(PacketDebugLogPath);
+                    Log.Info($"Paketdiagnose aktiviert: {PacketDebugLogPath}");
+                }
+                sink = _packetLog.Write;
+            }
+            if (_capture is LiveCapture live)
+            {
+                live.Pipeline.Parser.Undecoded = sink;
+                live.Pipeline.Parser.ConfiguredDecoder = _eventDecoder;
+                live.Pipeline.Parser.ConfiguredEventDecoded = OnLiveTrackerEvent;
+            }
+            if (_replay is PcapReplaySource replay) replay.Pipeline.Parser.Undecoded = sink;
+        }
     }
 
     /// <summary>Boss fights are always kept; trash only when long enough (or everything, per settings).</summary>
@@ -371,6 +489,12 @@ public sealed class MeterService : IDisposable
         lock (_captureGate) _capture?.Dispose(); // no more packets: the running fight is as complete as it gets
         _replay?.Dispose();
         _demo?.Dispose();
+        _killCounterRegistration.Dispose();
+        KillCounter.Dispose();
+        foreach (var resource in _eventResources) resource.Dispose();
+        _packetLog?.Dispose();
+        if (_packetLog is { } packetLog)
+            Log.Info($"Paketdiagnose beendet: {packetLog.Dropped} ausgelassene Nachrichten; Fehler: {packetLog.Error?.Message ?? "keine"}");
         if (live)
         {
             // Closing the meter mid-fight keeps the fight so far, like the restart button does.

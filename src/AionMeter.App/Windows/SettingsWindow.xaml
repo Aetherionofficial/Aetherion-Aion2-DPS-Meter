@@ -144,6 +144,7 @@
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavTimer, Source={x:Static s:UiText.Current}}" Tag="timer" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavFights, Source={x:Static s:UiText.Current}}" Tag="fights" Click="SettingsNav_Click" />
                     <Button x:Name="NavJournalButton" Style="{StaticResource SettingsNavButton}" Tag="journal" Click="SettingsNav_Click"><TextBlock Text="Kampfbuch &amp;&#10;Training" /></Button>
+                    <Button x:Name="NavEventsButton" Style="{StaticResource SettingsNavButton}" Content="Ereignisse" Tag="events" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavAppearance, Source={x:Static s:UiText.Current}}" Tag="appearance" Click="SettingsNav_Click" />
                     <Button Style="{StaticResource SettingsNavButton}" Content="{Binding NavGeneral, Source={x:Static s:UiText.Current}}" Tag="general" Click="SettingsNav_Click" />
                     <TextBlock Text="AION2 EXTRAS" Foreground="{StaticResource TextMute}" FontSize="9" FontWeight="Bold" Margin="12,18,0,7" />
@@ -207,6 +208,18 @@
                             <Button Content="Datenqualität prüfen" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Tag="quality" Click="Journal_Click" />
                             <TextBlock Style="{StaticResource Hint}" Text="Hinweise zu spätem Einstieg, fehlenden Gruppendaten und weiteren Einschränkungen." Margin="0,6,0,18" />
                             <TextBlock Style="{StaticResource Hint}" Text="Noch keine Kämpfe? Unter Kampf &amp; Verlauf die Kampfspeicherung aktivieren und einen Kampf erfassen. Beim Öffnen werden deine aktuellen Einstellungen gespeichert." />
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="EventsSection" Style="{StaticResource Section}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="AUFNAHME &amp; EREIGNISSE" Style="{StaticResource SectionLabel}" Margin="0,0,0,12" />
+                            <TextBlock Text="Marker-Hotkey (global)" Style="{StaticResource Hint}" />
+                            <TextBox x:Name="HkMarker" Margin="0,4,0,8" Width="260" HorizontalAlignment="Left" />
+                            <TextBlock Text="Marker-Label – frei wählbar, z. B. cube_geöffnet" Style="{StaticResource Hint}" />
+                            <TextBox x:Name="MarkerLabel" Margin="0,4,0,12" MaxLength="120" Width="340" HorizontalAlignment="Left" />
+                            <TextBlock Text="Hotkey und Label mit Speichern übernehmen. Marker werden neben der PCAP-Datei gespeichert." Style="{StaticResource Hint}" Margin="0,0,0,12" />
+                            <ContentControl x:Name="EventsHost" />
                         </StackPanel>
                     </Border>
 
@@ -462,6 +475,9 @@
                             <CheckBox x:Name="Record" Style="{StaticResource DarkCheck}"
                                       Content="{Binding RecordPackets, Source={x:Static s:UiText.Current}}" />
                             <TextBlock Style="{StaticResource Hint}" Text="{Binding RecordHint, Source={x:Static s:UiText.Current}}" />
+                            <CheckBox x:Name="DebugUnknownPackets" Style="{StaticResource DarkCheck}" Margin="0,8,0,0"
+                                      Content="Unbekannte und nicht dekodierte Nachrichten protokollieren" />
+                            <TextBlock Style="{StaticResource Hint}" Text="Lokale JSONL-Datei unter %AppData%\AionMeter\logs: Opcode, Zeit, Gebiet und vollständige Hex-Rohdaten. Keine automatische Übertragung. Bei hoher Last werden ausgelassene Nachrichten im App-Log gezählt." />
                             <TextBlock x:Name="CaptureState" Style="{StaticResource Hint}" Margin="0,6,0,0" Foreground="{StaticResource TextDim}" />
                             <Border Margin="0,10,0,0" Padding="10,8" Background="#101216" BorderBrush="#393337" BorderThickness="1" CornerRadius="8">
                                 <StackPanel>

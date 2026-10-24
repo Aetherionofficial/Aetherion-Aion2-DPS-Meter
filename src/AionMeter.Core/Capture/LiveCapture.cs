@@ -47,6 +47,7 @@ public sealed class LiveCapture : IEventSource
     public CaptureStatus Status => _status;
     public PacketPipeline Pipeline => _pipeline;
     public string? RecordingPath { get; private set; }
+    public string? ActiveRecordingPath { get { lock (_gate) return _writer is null ? null : RecordingPath; } }
 
     /// <summary>Npcap's capture library is on this PC (its own folder, or System32 in WinPcap-compatible mode).</summary>
     public static bool IsNpcapInstalled() =>
@@ -234,7 +235,7 @@ public sealed class LiveCapture : IEventSource
     {
         if (_options.RecordDirectory is not { Length: > 0 } dir) return;
         Directory.CreateDirectory(dir);
-        RecordingPath = Path.Combine(dir, $"aion2_{DateTime.Now:yyyyMMdd_HHmmss}.pcap");
+        RecordingPath = Path.Combine(dir, $"aion2_{DateTime.Now:yyyyMMdd_HHmmss_fff}_{Guid.NewGuid():N}.pcap");
         _writer = new CaptureFileWriterDevice(RecordingPath);
         _writer.Open(new DeviceConfiguration { LinkLayerType = device.LinkType });
     }

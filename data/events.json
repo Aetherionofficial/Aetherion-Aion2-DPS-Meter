@@ -1,0 +1,8 @@
+{
+  "events": [
+    { "name": "SystemMessage", "enabled": false, "opcode": null, "fields": [], "notify": false, "sound": false },
+    { "name": "HiddenCubeOpened", "enabled": false, "opcode": null, "fields": [], "notify": false, "sound": false },
+    { "name": "SoulGained", "enabled": false, "opcode": null, "fields": [], "notify": false, "sound": false },
+    { "name": "FieldBossSpawned", "enabled": false, "opcode": null, "fields": [], "notify": false, "sound": false }
+  ]
+}

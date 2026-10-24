@@ -15,6 +15,8 @@ public sealed class PacketParser
     private readonly GameData _data;
     private readonly Action<GameEvent> _sink;
     private int _lastMapId = -1;
+    private long _emittedEvents;
+    private long _partialEvents;
 
     public PacketParser(GameData data, Action<GameEvent> sink)
     {
@@ -33,6 +35,13 @@ public sealed class PacketParser
     /// <summary>Optional raw packet tap for the diagnostics dump.</summary>
     public Action<long, ushort, ReadOnlySpan<byte>>? Tap { get; set; }
 
+    /// <summary>Optional diagnostics only. No raw-body allocation when disabled; must not touch GUI objects.</summary>
+    public Action<UndecodedPacket>? Undecoded { get; set; }
+    public ConfiguredEventDecoder? ConfiguredDecoder { get; set; }
+    /// <summary>Additional events ONLY. Never route these through the existing combat sink: that would change idle handling.</summary>
+    public Action<ConfiguredGameEvent>? ConfiguredEventDecoded { get; set; }
+    public int? CurrentMapId => _lastMapId < 0 ? null : _lastMapId;
+
     /// <summary>Diagnostics: every accepted damage record's raw header fields (layout, damage type, modifier byte, direction byte).</summary>
     public Action<DamageEvent, int, uint, byte, byte>? DamageTap { get; set; }
 
@@ -41,6 +50,12 @@ public sealed class PacketParser
         OpcodeCounts[opcode] = OpcodeCounts.GetValueOrDefault(opcode) + 1;
         Tap?.Invoke(TimeMs, opcode, body);
 
+        var emittedBefore = _emittedEvents;
+        var rejectedBefore = DamageRejected;
+        var partialBefore = _partialEvents;
+        var known = true;
+        try
+        {
         switch (opcode)
         {
             case Opcodes.Heartbeat:
@@ -98,6 +113,7 @@ public sealed class PacketParser
                 ParseBattleToggle(body);
                 break;
             default:
+                known = false;
                 // Identity records also ride inside other packets: mid-packet, and inside LZ4 bundles embedded in a
                 // larger packet (the self record repeats that way every few minutes after a zone load).
                 if (body.Length >= 16)
@@ -107,6 +123,36 @@ public sealed class PacketParser
                     ScanEmbeddedBundles(body);
                 }
                 break;
+        }
+        }
+        finally
+        {
+            var customDecoded = false;
+            if (ConfiguredDecoder is { } decoder)
+                foreach (var extra in decoder.Decode(opcode, body, TimeMs, CurrentMapId,
+                    _lastMapId < 0 ? null : _data.MapName(_lastMapId)))
+                {
+                    customDecoded = true;
+                    try { ConfiguredEventDecoded?.Invoke(extra); }
+                    catch (Exception error) when (error is not OutOfMemoryException)
+                    { System.Diagnostics.Trace.WriteLine($"Zusatzereignis fehlgeschlagen: {error.Message}"); }
+                }
+            if (Undecoded is { } diagnostic && opcode != Opcodes.Heartbeat &&
+                !customDecoded &&
+                (!known || _emittedEvents == emittedBefore || DamageRejected > rejectedBefore || _partialEvents > partialBefore))
+            {
+                var reason = !known ? "Unbekannter Opcode" : _emittedEvents == emittedBefore
+                    ? "Kein Ereignis dekodiert" : "Teilweise dekodiert";
+                try
+                {
+                    diagnostic(new(TimeMs, $"{opcode:X4}", body.Length, Convert.ToHexString(body),
+                        _lastMapId < 0 ? null : _lastMapId, _lastMapId < 0 ? null : _data.MapName(_lastMapId), reason));
+                }
+                catch (Exception error) when (error is not OutOfMemoryException)
+                {
+                    System.Diagnostics.Trace.WriteLine($"Paketdiagnose fehlgeschlagen: {error.Message}");
+                }
+            }
         }
     }
 
@@ -276,12 +322,13 @@ public sealed class PacketParser
             if (!TryDamageRecord(b, ref o, out var ev, out var clean))
             {
                 if (first) DamageRejected++;
+                _partialEvents++;
                 break;
             }
             DamageRecords++;
             Emit(ev);
             first = false;
-            if (!clean) break; // tail length unsure: do not risk misreading a chained record
+            if (!clean) { _partialEvents++; break; } // tail length unsure: do not risk misreading a chained record
         }
     }
 
@@ -875,5 +922,10 @@ public sealed class PacketParser
         }
     }
 
-    private void Emit(GameEvent e) => _sink(e);
+    private void Emit(GameEvent e)
+    {
+        _emittedEvents++;
+        if (e is FieldBossListEvent { Complete: false }) _partialEvents++;
+        _sink(e);
+    }
 }
