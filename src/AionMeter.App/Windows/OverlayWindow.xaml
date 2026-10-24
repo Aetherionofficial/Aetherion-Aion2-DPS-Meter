@@ -266,6 +266,9 @@
                         <TextBlock x:Name="DpsText" Style="{StaticResource RowNumber}" Margin="0">
                             <TextBlock.Text><MultiBinding Converter="{StaticResource ExactNumber}"><Binding Path="ActorId" /><Binding Path="DisplayNumbers" RelativeSource="{RelativeSource AncestorType=Window}" /></MultiBinding></TextBlock.Text>
                         </TextBlock>
+                        <TextBlock x:Name="DamageText" Style="{StaticResource RowSub}" Margin="0">
+                            <TextBlock.Text><MultiBinding Converter="{StaticResource ExactNumber}" ConverterParameter="total"><Binding Path="ActorId" /><Binding Path="DisplayNumbers" RelativeSource="{RelativeSource AncestorType=Window}" /></MultiBinding></TextBlock.Text>
+                        </TextBlock>
                     </StackPanel>
                     <TextBlock x:Name="ShareText" Grid.Column="4" Text="{Binding Share}" Style="{StaticResource RowSub}" Foreground="#83E8AD" Margin="{DynamicResource ColGap}" />
                 </Grid>

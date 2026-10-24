@@ -21,6 +21,22 @@ public static class Format
         static string Scaled(double v, string suffix) => v.ToString(Math.Abs(v) >= 100 ? "0.#" : "0.##", Inv) + suffix;
     }
 
+    /// <summary>Compact overlay numbers using German decimal punctuation and player-friendly suffixes.</summary>
+    public static string CompactGerman(double value)
+    {
+        var abs = Math.Abs(value);
+        var (scaled, suffix) = abs switch
+        {
+            >= 1e9 => (value / 1e9, " Mrd."),
+            >= 1e6 => (value / 1e6, " Mio."),
+            >= 1e3 => (value / 1e3, "k"),
+            _ => (value, "")
+        };
+
+        var digits = suffix.Length == 0 ? "0" : Math.Abs(scaled) >= 100 ? "0.#" : "0.##";
+        return scaled.ToString(digits, Inv).Replace('.', ',') + suffix;
+    }
+
     public static string Grouped(long value) => value.ToString("#,0", Inv);
 
     /// <summary>Combat power at a glance: 82,115 → 82.1K, 1,234,567 → 1.23M (one decimal is how players quote it).</summary>

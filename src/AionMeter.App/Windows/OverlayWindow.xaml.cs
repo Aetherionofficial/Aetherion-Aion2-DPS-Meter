@@ -906,14 +906,10 @@ public sealed class OverlayExactNumberConverter : IMultiValueConverter
             || context.Snapshot is not { } snapshot
             || snapshot.Combatants.FirstOrDefault(row => row.ActorId == actorId) is not { } actor) return "—";
         var total = context.Healing ? actor.Healing : actor.Damage;
-        // Same healing rate as OverlayViewModel: healing / max(1 second, combat duration).
-        // OverlayDisplayConverter only adjusts clock padding and /S; it has no numeric settings.
-        // Format.Compact's K/M abbreviations and decimal precision are intentionally replaced by
-        // full N0 integers as requested. Zero stays 0; unavailable actors/snapshots stay "—".
+        // The overlay intentionally derives DPS from the same cumulative value shown below it.
         var seconds = Math.Max(1, snapshot.CombatMs / 1000.0);
-        var rate = context.Healing ? total / seconds : actor.Dps;
-        var numbers = CultureInfo.GetCultureInfo("en-US");
-        return parameter as string == "total" ? total.ToString("N0", numbers) : rate.ToString("N0", numbers) + "/S";
+        var rate = total / seconds;
+        return parameter as string == "total" ? Format.CompactGerman(total) : Format.CompactGerman(rate) + "/S";
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) =>

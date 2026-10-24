@@ -295,18 +295,18 @@ public sealed class WindowSmokeTests
             System.Globalization.CultureInfo.InvariantCulture));
         foreach (var (milliseconds, expected) in new[]
         {
-            (0L, "44,098/S"), (500L, "44,098/S"), (1000L, "44,098/S"),
-            (2000L, "22,049/S"), (2500L, "17,639/S")
+            (0L, "44,1k/S"), (500L, "44,1k/S"), (1000L, "44,1k/S"),
+            (2000L, "22,05k/S"), (2500L, "17,64k/S")
         })
         {
             var timed = snapshot with { CombatMs = milliseconds };
             Assert.Equal(expected, Display(timed, "rate"));
-            Assert.Equal("44,098", Display(timed, "total"));
+            Assert.Equal("44,1k", Display(timed, "total"));
         }
         var zero = snapshot with { Combatants = new[] { actor with { Healing = 0 } } };
         Assert.Equal("0/S", Display(zero, "rate")); Assert.Equal("0", Display(zero, "total"));
         var rounded = snapshot with { CombatMs = 2000, Combatants = new[] { actor with { Healing = 3 } } };
-        Assert.Equal("2/S", Display(rounded, "rate")); // Full-integer N0 rounding, intentionally no K/M abbreviations.
+        Assert.Equal("1,5/S", Display(rounded, "rate"));
         Assert.Equal("—", Display(null, "rate"));
         Assert.Equal("—", Display(snapshot with { Combatants = Array.Empty<CombatantSnapshot>() }, "total"));
     }
