@@ -328,6 +328,7 @@ public partial class OverlayWindow : Window
         MinHeight = Math.Max(185, Math.Ceiling(252 * scale));
         MaxWidth = Math.Max(MinWidth, 1600);
         MaxHeight = Math.Max(MinHeight, 1200);
+        ApplyResponsiveLayout();
     }
 
     /// <summary>Ctrl + mouse wheel over the rows: row size in 5 % steps, kept right away.</summary>
@@ -456,6 +457,17 @@ public partial class OverlayWindow : Window
         if (FooterDetailsButton is null) return;
         // Width changes only redistribute the flexible name/bar area; fixed typography is untouched.
         var compact = _settings.CompactDpsOnly;
+        // The compact overlay is commonly used at 350–420 px wide. The old fixed
+        // value columns consumed most of that space and forced player names to
+        // ellipsize even though the numbers still had room to breathe.
+        var narrow = Width < 430;
+        Resources["DpsColumnWidth"] = new GridLength(narrow ? 82 : 94);
+        Resources["ShareColumnWidth"] = new GridLength(narrow ? 44 : 50);
+        Resources["ColRankWidth"] = new GridLength(narrow ? 16 : 18);
+        Resources["ColGlyphWidth"] = new GridLength(narrow ? 22 : 24);
+        Resources["ColGap"] = new Thickness(narrow ? 5 : 8, 0, 0, 0);
+        Resources["RowPadding"] = new Thickness(narrow ? 6 : 8, 0, narrow ? 6 : 8, 0);
+        Resources["NameGap"] = new Thickness(narrow ? 2 : 3, 0, narrow ? 4 : 6, 0);
         // Keep the three essential controls in the header at every size, matching the reference meter. The footer
         // remains reserved for details and comparison so the controls never appear twice.
         CompactTopActions.Visibility = Visibility.Visible;

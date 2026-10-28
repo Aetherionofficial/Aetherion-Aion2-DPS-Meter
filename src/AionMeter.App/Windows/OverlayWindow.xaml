@@ -250,6 +250,8 @@
                         <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}" />
                     </MultiBinding></c:AnimatedBar.TargetWidth>
                 </c:AnimatedBar>
+                <Border Width="{DynamicResource RowAccentWidth}" HorizontalAlignment="Left" CornerRadius="2,0,0,2"
+                        Background="{Binding AccentBrush}" Opacity="0.92" IsHitTestVisible="False" />
                 <Border x:Name="SelfFrame" BorderBrush="Transparent" BorderThickness="1" CornerRadius="3" IsHitTestVisible="False" />
                 <Grid Margin="{DynamicResource RowPadding}" Effect="{StaticResource TextShadow}">
                     <Grid.ColumnDefinitions>
