@@ -1,0 +1,11 @@
+{
+  "name": "@ludra/raid-helper",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": { "dev": "vite --host 0.0.0.0", "typecheck": "tsc --noEmit", "build": "vite build", "desktop:dev": "concurrently -k -n web,electron \"vite\" \"wait-on http://localhost:5173 && electron electron/main.cjs --dev\"", "desktop:package": "vite build && electron-builder --win portable nsis" },
+  "dependencies": { "@vitejs/plugin-react": "^5.1.1", "react": "^19.2.0", "react-dom": "^19.2.0", "tesseract.js": "^6.0.1" },
+  "devDependencies": { "@types/react": "^19.2.2", "@types/react-dom": "^19.2.2", "concurrently": "^9.2.1", "electron": "^39.1.2", "electron-builder": "^26.0.12", "typescript": "^5.9.3", "vite": "^7.1.12", "wait-on": "^9.0.1" },
+  "build": { "appId": "com.ludra.raidhelper", "productName": "Ludra Raid Helper", "files": ["dist/**/*", "electron/**/*"], "win": { "target": ["portable", "nsis"] }, "portable": { "artifactName": "Ludra-Raid-Helper-${version}-portable.exe" }, "nsis": { "artifactName": "Ludra-Raid-Helper-${version}-Setup.exe", "oneClick": false, "perMachine": false } }
+}
