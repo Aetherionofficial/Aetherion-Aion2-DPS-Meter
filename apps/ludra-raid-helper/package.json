@@ -1,7 +1,7 @@
 {
   "name": "@ludra/raid-helper",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": { "dev": "vite --host 0.0.0.0", "typecheck": "tsc --noEmit", "build": "vite build", "desktop:dev": "concurrently -k -n web,electron \"vite\" \"wait-on http://localhost:5173 && electron electron/main.cjs --dev\"", "desktop:package": "vite build && electron-builder --win portable nsis" },
